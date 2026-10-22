@@ -6,12 +6,12 @@ Todo-приложение уровня production: монорепо, сквоз�
 
 ## Стек (_migration in progress_)
 
-| Слой | Технология |
-| --- | --- |
+| Слой     | Технология                                                                      |
+| -------- | ------------------------------------------------------------------------------- |
 | Frontend | React 19, Vite 8, TypeScript 7, TanStack Router/Query, Effector, Tailwind CSS 4 |
-| Backend | Node.js 22, Fastify 5, oRPC, Drizzle ORM, PostgreSQL 17 |
-| Auth | better-auth (httpOnly cookie) |
-| Качество | Vitest, Playwright, ESLint, Prettier, GitHub Actions, Renovate |
+| Backend  | Node.js 22, Fastify 5, oRPC, Drizzle ORM, PostgreSQL 17                         |
+| Auth     | better-auth (httpOnly cookie)                                                   |
+| Качество | Vitest, Playwright, ESLint, Prettier, GitHub Actions, Renovate                  |
 
 ## Roadmap
 

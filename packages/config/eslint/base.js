@@ -1,0 +1,14 @@
+import js from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import prettier from 'eslint-config-prettier';
+
+/**
+ * Базовый flat-config: js/ts рекомендации + отключение конфликтующих с prettier правил.
+ * Прикладные пакеты расширяют его своими плагинами и globals.
+ */
+export default [
+  { languageOptions: { ecmaVersion: 'latest', sourceType: 'module' } },
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  prettier,
+];
