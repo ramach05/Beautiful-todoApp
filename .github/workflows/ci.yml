@@ -23,4 +23,4 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec prettier --check .
-      - run: pnpm turbo run lint typecheck build
+      - run: pnpm turbo run lint typecheck test build

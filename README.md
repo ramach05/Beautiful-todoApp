@@ -16,9 +16,9 @@ Todo-приложение уровня production: монорепо, сквоз�
 ## Roadmap
 
 - [x] PR-1: baseline + гигиена репозитория
-- [ ] PR-2: scaffold монорепо (pnpm + Turborepo, CI)
-- [ ] PR-3: apps/web — Vite + React 19 + TS
-- [ ] PR-4: состояние и данные (TanStack Query + Effector, общий zod-контракт)
+- [x] PR-2: scaffold монорепо (pnpm + Turborepo, CI)
+- [x] PR-3: apps/web — Vite + React 19 + TS
+- [x] PR-4: состояние и данные (TanStack Query + Effector, общий zod-контракт)
 - [ ] PR-5: apps/api — Fastify + oRPC + Drizzle
 - [ ] PR-6: auth (better-auth)
 - [ ] PR-7: E2E + наблюдаемость

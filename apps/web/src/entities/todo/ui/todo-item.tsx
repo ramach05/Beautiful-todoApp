@@ -1,14 +1,14 @@
 import importantActiveIcon from '../../../assets/images/svg/warning-active_amber_orange_24dp.svg';
 import importantIcon from '../../../assets/images/svg/warning_amber_white_24dp.svg';
 import trashIcon from '../../../assets/images/svg/delete_forever_white_24dp.svg';
-import type { Todo } from '../model';
+import type { Todo } from '@bt/shared';
 import { cn } from '../../../shared/ui/cn';
 
 interface TodoItemProps {
   todo: Todo;
-  onToggleDone: (id: number) => void;
-  onToggleImportant: (id: number) => void;
-  onDelete: (id: number) => void;
+  onToggleDone: (todo: Todo) => void;
+  onToggleImportant: (todo: Todo) => void;
+  onDelete: (id: string) => void;
 }
 
 /** Строка списка: клик по строке переключает done, кнопка important активна только для незавершенных */
@@ -19,7 +19,7 @@ export function TodoItem({ todo, onToggleDone, onToggleImportant, onDelete }: To
         'flex cursor-pointer items-center justify-between gap-3 rounded-[10px] bg-card-strong px-3 py-2',
         'ring-1 ring-ring-soft transition-colors duration-500 hover:bg-ring-soft hover:ring-white',
       )}
-      onClick={() => onToggleDone(todo.id)}
+      onClick={() => onToggleDone(todo)}
     >
       <p
         className={cn(
@@ -39,7 +39,7 @@ export function TodoItem({ todo, onToggleDone, onToggleImportant, onDelete }: To
           disabled={todo.done}
           onClick={(event) => {
             event.stopPropagation();
-            onToggleImportant(todo.id);
+            onToggleImportant(todo);
           }}
         >
           <img
