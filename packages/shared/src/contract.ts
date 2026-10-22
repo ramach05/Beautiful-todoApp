@@ -9,15 +9,18 @@ import {
   updateTodoInputSchema,
 } from './todo.js';
 
+/** Базовая процедура: все доменные процедуры требуют сессию, ошибка типизирована в контракте */
+const authed = oc.errors({ UNAUTHORIZED: { message: 'Требуется авторизация' } });
+
 /**
  * oRPC-контракт - единая точка истины для api и web (ADR-003):
  * сервер реализует его через implement(), клиент вызывает типизированно без кодогенерации
  */
 export const todoContract = {
-  list: oc.output(todoListSchema),
-  create: oc.input(createTodoInputSchema).output(todoSchema),
-  update: oc.input(z.object({ id: z.uuid(), patch: updateTodoInputSchema })).output(todoSchema),
-  remove: oc.input(z.uuid()),
+  list: authed.output(todoListSchema),
+  create: authed.input(createTodoInputSchema).output(todoSchema),
+  update: authed.input(z.object({ id: z.uuid(), patch: updateTodoInputSchema })).output(todoSchema),
+  remove: authed.input(z.uuid()),
 };
 
 /** Корневой контракт приложения: добавление доменов = новая ветка здесь */

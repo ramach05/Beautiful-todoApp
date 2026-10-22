@@ -1,16 +1,20 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 
+import { buildApp } from './app.js';
+import { betterAuthResolver, buildAuth } from './auth.js';
 import { env } from './config.js';
 import * as schema from './db/schema.js';
 import { PostgresTodosRepository } from './db/todos-repo.js';
-import { buildApp } from './app.js';
 
 const pool = new Pool({ connectionString: env.DATABASE_URL });
 const db = drizzle(pool, { schema });
+const auth = buildAuth(db);
 
 const app = await buildApp({
-  context: { todos: new PostgresTodosRepository(db) },
+  todos: new PostgresTodosRepository(db),
+  session: betterAuthResolver(auth),
+  auth,
   corsOrigin: env.CORS_ORIGIN.split(','),
   logger: true,
 });
