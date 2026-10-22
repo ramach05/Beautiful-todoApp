@@ -1,9 +1,0 @@
-.counter-todos {
-  font-family: Caveat, sans-serif;
-  font-weight: normal;
-  font-size: calc(20px + (26 - 20) * ((100vw - 320px) / (1280 - 320)));
-
-  margin: 0 0 calc(10px + (20 - 10) * ((100vw - 320px) / (1280 - 320))) 0;
-  padding: 0;
-  text-align: center;
-}
