@@ -1,0 +1,8 @@
+@font-face {
+  font-family: 'Caveat';
+  src:
+    url('../assets/fonts/caveat-variablefont_wght.woff2') format('woff2'),
+    url('../assets/fonts/caveat-variablefont_wght.woff') format('woff');
+  font-weight: 400 700;
+  font-display: swap;
+}
