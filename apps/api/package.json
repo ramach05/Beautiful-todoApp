@@ -23,6 +23,7 @@
     "@fastify/cors": "^11.3.1",
     "@orpc/contract": "^1.16.1",
     "@orpc/server": "^1.16.1",
+    "@sentry/node": "^11.8.0",
     "better-auth": "^1.7.12",
     "drizzle-orm": "^0.45.4",
     "fastify": "^5.12.7",

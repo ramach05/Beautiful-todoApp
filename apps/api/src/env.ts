@@ -11,6 +11,7 @@ export const envSchema = z
     // В dev/test допустимо не задавать (используется dev-секрет), в production обязателен
     BETTER_AUTH_SECRET: z.string().min(32).optional(),
     BETTER_AUTH_URL: z.url().default('http://localhost:3001'),
+    SENTRY_DSN: z.url().optional(),
   })
   .refine((env) => env.NODE_ENV !== 'production' || env.BETTER_AUTH_SECRET !== undefined, {
     message: 'BETTER_AUTH_SECRET обязателен в production',

@@ -86,6 +86,18 @@ describe('api', () => {
     expect(await response.json()).toEqual({ status: 'ok' });
   });
 
+  it('заголовочный x-request-id клиента возвращается в ответе', async () => {
+    const response = await fetch(`${httpUrl}/health`, {
+      headers: { 'x-request-id': 'req-test-1' },
+    });
+    expect(response.headers.get('x-request-id')).toBe('req-test-1');
+  });
+
+  it('без x-request-id генерируется uuid запроса', async () => {
+    const response = await fetch(`${httpUrl}/health`);
+    expect(response.headers.get('x-request-id')).toMatch(/[\da-f-]{36}/);
+  });
+
   it('без сессии процедуры отдают UNAUTHORIZED', async () => {
     const error = await createTestClient()
       .todos.list()

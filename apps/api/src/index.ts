@@ -6,6 +6,9 @@ import { betterAuthResolver, buildAuth } from './auth.js';
 import { env } from './config.js';
 import * as schema from './db/schema.js';
 import { PostgresTodosRepository } from './db/todos-repo.js';
+import { attachSentry, initSentry } from './observability.js';
+
+initSentry();
 
 const pool = new Pool({ connectionString: env.DATABASE_URL });
 const db = drizzle(pool, { schema });
@@ -18,6 +21,7 @@ const app = await buildApp({
   corsOrigin: env.CORS_ORIGIN.split(','),
   logger: true,
 });
+attachSentry(app);
 
 try {
   await app.listen({ host: env.HOST, port: env.PORT });
