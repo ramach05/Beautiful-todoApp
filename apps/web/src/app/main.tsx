@@ -3,6 +3,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { routeTree } from '../routeTree.gen';
+import { initObservability } from './observability';
 import { AppProviders } from './providers';
 import '../styles/index.css';
 
@@ -19,10 +20,13 @@ if (!rootElement) {
   throw new Error('Не найден корневой элемент #root');
 }
 
-createRoot(rootElement).render(
-  <StrictMode>
-    <AppProviders>
-      <RouterProvider router={router} />
-    </AppProviders>
-  </StrictMode>,
-);
+// Sentry инициализируется до монтирования: ошибки стартового рендера уже будут видны
+void initObservability().then(() => {
+  createRoot(rootElement).render(
+    <StrictMode>
+      <AppProviders>
+        <RouterProvider router={router} />
+      </AppProviders>
+    </StrictMode>,
+  );
+});

@@ -12,6 +12,8 @@ const RPC_PREFIX = (new URL(RPC_URL, window.location.origin).pathname.replace(/\
 
 /** Сессионная cookie better-auth должна уходить с каждым RPC-запросом (в т.ч. cross-origin в dev) */
 async function credentialedTransport(request: Request): Promise<Response> {
+  // x-request-id для корреляции логов FE->BE (genReqId на fastify подхватывает его)
+  request.headers.set('x-request-id', crypto.randomUUID());
   return fetch(request, { credentials: 'include' });
 }
 

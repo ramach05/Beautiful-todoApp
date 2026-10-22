@@ -1,6 +1,7 @@
 import cors from '@fastify/cors';
 import { fromNodeHeaders } from 'better-auth/node';
 import { RPCHandler } from '@orpc/server/fastify';
+import { randomUUID } from 'node:crypto';
 import Fastify, { type FastifyInstance } from 'fastify';
 
 import type { Auth } from './auth.js';
@@ -18,7 +19,20 @@ export interface AppOptions {
 
 /** Сборка Fastify-приложения: RPC-эндпоинт oRPC, auth better-auth, healthcheck и CORS */
 export async function buildApp(options: AppOptions): Promise<FastifyInstance> {
-  const app = Fastify({ logger: options.logger ?? false });
+  const app = Fastify({
+    logger: options.logger ?? false,
+    // x-request-id от клиента (FE) связывает логи фронта и бэка
+    genReqId: (request) => {
+      const incoming = request.headers['x-request-id'];
+      return typeof incoming === 'string' && incoming !== '' ? incoming : randomUUID();
+    },
+  });
+
+  // id попадает в ответ: клиент может его залогировать при разборе сбоя
+  app.addHook('onSend', (request, reply, payload, done) => {
+    void reply.header('x-request-id', request.id);
+    done(null, payload);
+  });
 
   await app.register(cors, { origin: options.corsOrigin ?? true, credentials: true });
 
