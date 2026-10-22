@@ -7,6 +7,7 @@ import prettier from 'eslint-config-prettier';
  * Прикладные пакеты расширяют его своими плагинами и globals.
  */
 export default [
+  { ignores: ['dist/**'] },
   { languageOptions: { ecmaVersion: 'latest', sourceType: 'module' } },
   js.configs.recommended,
   ...tseslint.configs.recommended,

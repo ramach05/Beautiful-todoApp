@@ -8,5 +8,7 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
+    // Тесты ходят в in-process oRPC-мок вместо реального api
+    env: { VITE_USE_MOCKS: '1' },
   },
 });
