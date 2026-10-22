@@ -1,0 +1,7 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+# typescript-eslint 8.x не поддерживает TS 7 (см. issue #10940), TS 6.0.3 - максимальная поддерживаемая версия
+overrides:
+  typescript: '^6.0.3'
