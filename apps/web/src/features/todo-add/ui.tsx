@@ -1,53 +1,67 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
-
+import { useForm } from 'react-hook-form';
+import { createTodoInputSchema, type CreateTodoInput } from '@bt/shared';
 import addIcon from '../../assets/images/svg/task_add_24dp.svg';
 
-interface TodoAddProps {
-  onAdd: (title: string) => void;
-}
+import { useAddTodo } from '../todo/model/queries';
 
-/** Форма добавления: пустой заголовок не отправляется, input очищается после добавления */
-export function TodoAdd({ onAdd }: TodoAddProps) {
-  const [title, setTitle] = useState('');
+/** Форма добавления: валидация общим zod-контрактом, мутация с инвалидацией кэша */
+export function TodoAdd() {
+  const addTodo = useAddTodo();
+  const [added, setAdded] = useState(false);
 
-  function handleSubmit() {
-    const trimmed = title.trim();
-    if (trimmed === '') return;
-    onAdd(trimmed);
-    setTitle('');
-  }
+  const { register, handleSubmit, reset, formState } = useForm<CreateTodoInput>({
+    resolver: zodResolver(createTodoInputSchema),
+    defaultValues: { title: '' },
+  });
+
+  const onSubmit = handleSubmit((values) => {
+    addTodo.mutate(values, {
+      onSuccess: () => {
+        reset({ title: '' });
+        setAdded(true);
+      },
+    });
+  });
 
   return (
-    <form
-      className="flex items-center gap-2"
-      onSubmit={(event) => {
-        event.preventDefault();
-        handleSubmit();
-      }}
-    >
-      <input
-        type="text"
-        className={
-          'min-w-0 flex-1 rounded-[10px] bg-card-strong px-3 py-2 text-xl ' +
-          'ring-1 ring-ring-soft placeholder:text-gray-400 focus:ring-white focus:outline-none'
-        }
-        placeholder="Новая задача"
-        autoComplete="off"
-        aria-label="Заголовок новой задачи"
-        value={title}
-        onChange={(event) => setTitle(event.target.value)}
-      />
-      <button
-        type="submit"
-        className={
-          'flex items-center gap-2 rounded-[10px] bg-card-strong px-3 py-2 text-xl ' +
-          'ring-1 ring-accent-soft transition-colors hover:bg-ring-soft disabled:opacity-40'
-        }
-        disabled={title.trim() === ''}
-      >
-        <img src={addIcon} alt="" className="size-6" />
-        Add Todo
-      </button>
+    <form className="flex flex-col gap-1" onSubmit={(event) => void onSubmit(event)}>
+      <div className="flex items-center gap-2">
+        <input
+          type="text"
+          className={
+            'min-w-0 flex-1 rounded-[10px] bg-card-strong px-3 py-2 text-xl ' +
+            'ring-1 ring-ring-soft placeholder:text-gray-400 focus:ring-white focus:outline-none'
+          }
+          placeholder="Новая задача"
+          autoComplete="off"
+          aria-label="Заголовок новой задачи"
+          aria-invalid={formState.errors.title !== undefined}
+          {...register('title')}
+        />
+        <button
+          type="submit"
+          className={
+            'flex items-center gap-2 rounded-[10px] bg-card-strong px-3 py-2 text-xl ' +
+            'ring-1 ring-accent-soft transition-colors hover:bg-ring-soft disabled:opacity-40'
+          }
+          disabled={addTodo.isPending}
+        >
+          <img src={addIcon} alt="" className="size-6" />
+          Add Todo
+        </button>
+      </div>
+      {formState.errors.title && (
+        <p role="alert" className="pl-1 text-base text-accent">
+          {formState.errors.title.message}
+        </p>
+      )}
+      {added && !addTodo.isPending && (
+        <p className="pl-1 text-base text-gray-300" aria-live="polite">
+          Задача добавлена
+        </p>
+      )}
     </form>
   );
 }
