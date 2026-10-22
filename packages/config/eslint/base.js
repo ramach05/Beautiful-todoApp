@@ -11,5 +11,11 @@ export default [
   { languageOptions: { ecmaVersion: 'latest', sourceType: 'module' } },
   js.configs.recommended,
   ...tseslint.configs.recommended,
+  {
+    rules: {
+      // Вытеснение служебных полей через rest-деструктуризацию — идиоматичный прием
+      '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
+    },
+  },
   prettier,
 ];

@@ -8,6 +8,13 @@
       "when": 1792690371906,
       "tag": "0000_handy_exodus",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792691350006,
+      "tag": "0001_shiny_mandrill",
+      "breakpoints": true
     }
   ]
 }

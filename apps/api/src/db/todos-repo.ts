@@ -1,5 +1,5 @@
 import type { CreateTodoInput, Todo, UpdateTodoInput } from '@bt/shared';
-import { asc, eq } from 'drizzle-orm';
+import { asc, and, eq } from 'drizzle-orm';
 import type { PgDatabase, PgQueryResultHKT } from 'drizzle-orm/pg-core';
 
 import * as schema from './schema.js';
@@ -8,14 +8,15 @@ import type { TodosRepository } from '../repo.js';
 
 type TodosDb = PgDatabase<PgQueryResultHKT, typeof schema>;
 
-/** Проекция без created_at: наружу отдаем только контрактные поля Todo */
-type TodoProjection = Pick<Todo, 'id' | 'title' | 'important' | 'done'>;
+/** Проекция без служебных колонок: наружу отдаем только контрактные поля Todo */
+type TodoProjection = Pick<Todo, 'id' | 'title' | 'important' | 'done'> & { userId: string };
 
 const todoColumns = {
   id: todos.id,
   title: todos.title,
   important: todos.important,
   done: todos.done,
+  userId: todos.userId,
 };
 
 const toTodo = (row: TodoProjection): Todo => ({
@@ -25,37 +26,44 @@ const toTodo = (row: TodoProjection): Todo => ({
   done: row.done,
 });
 
-/** Репозиторий поверх Drizzle (Postgres или PGlite в тестах) */
+/** Репозиторий задач на Postgres; все операции ограничены владельцем (user_id) */
 export class PostgresTodosRepository implements TodosRepository {
   constructor(private readonly db: TodosDb) {}
 
-  async list(): Promise<Todo[]> {
+  async list(userId: string): Promise<Todo[]> {
     const rows = await this.db
       .select(todoColumns)
       .from(todos)
+      .where(eq(todos.userId, userId))
       .orderBy(asc(todos.createdAt), asc(todos.id));
     return rows.map(toTodo);
   }
 
-  async create(input: CreateTodoInput): Promise<Todo> {
-    const [row] = await this.db.insert(todos).values({ title: input.title }).returning(todoColumns);
+  async create(input: CreateTodoInput, userId: string): Promise<Todo> {
+    const [row] = await this.db
+      .insert(todos)
+      .values({ title: input.title, userId })
+      .returning(todoColumns);
     if (!row) {
       throw new Error('INSERT не вернул строку');
     }
     return toTodo(row);
   }
 
-  async update(id: string, patch: UpdateTodoInput): Promise<Todo | null> {
+  async update(id: string, patch: UpdateTodoInput, userId: string): Promise<Todo | null> {
     const [row] = await this.db
       .update(todos)
       .set(patch)
-      .where(eq(todos.id, id))
+      .where(and(eq(todos.id, id), eq(todos.userId, userId)))
       .returning(todoColumns);
     return row ? toTodo(row) : null;
   }
 
-  async remove(id: string): Promise<boolean> {
-    const rows = await this.db.delete(todos).where(eq(todos.id, id)).returning({ id: todos.id });
-    return rows.length > 0;
+  async remove(id: string, userId: string): Promise<boolean> {
+    const deleted = await this.db
+      .delete(todos)
+      .where(and(eq(todos.id, id), eq(todos.userId, userId)))
+      .returning({ id: todos.id });
+    return deleted.length > 0;
   }
 }
