@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { filterTodos, todoSchema, updateTodoInputSchema, type Todo } from './todo';
+import { filterTodos, todoSchema, updateTodoInputSchema, type Todo } from './todo.js';
 
 const todo = (overrides: Partial<Todo> = {}): Todo => ({
   id: crypto.randomUUID(),

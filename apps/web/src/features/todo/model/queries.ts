@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { Todo, UpdateTodoInput } from '@bt/shared';
+import type { CreateTodoInput, Todo, UpdateTodoInput } from '@bt/shared';
 
-import { createTodo, deleteTodo, fetchTodos, updateTodo } from './api';
+import { api } from './api';
 
 /** Серверные данные живут только в кэше Query; Effector их не дублирует (ADR-002) */
 export const todoKeys = {
@@ -11,14 +11,14 @@ export const todoKeys = {
 export function useTodos() {
   return useQuery({
     queryKey: todoKeys.all,
-    queryFn: fetchTodos,
+    queryFn: () => api.todos.list(),
   });
 }
 
 export function useAddTodo() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: createTodo,
+    mutationFn: (input: CreateTodoInput) => api.todos.create(input),
     onSettled: () => queryClient.invalidateQueries({ queryKey: todoKeys.all }),
   });
 }
@@ -27,7 +27,8 @@ export function useAddTodo() {
 export function useUpdateTodo() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, patch }: { id: string; patch: UpdateTodoInput }) => updateTodo(id, patch),
+    mutationFn: ({ id, patch }: { id: string; patch: UpdateTodoInput }) =>
+      api.todos.update({ id, patch }),
     onMutate: async ({ id, patch }) => {
       await queryClient.cancelQueries({ queryKey: todoKeys.all });
       const previous = queryClient.getQueryData<Todo[]>(todoKeys.all);
@@ -48,7 +49,7 @@ export function useUpdateTodo() {
 export function useDeleteTodo() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: deleteTodo,
+    mutationFn: (id: string) => api.todos.remove(id),
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: todoKeys.all });
       const previous = queryClient.getQueryData<Todo[]>(todoKeys.all);
