@@ -15,6 +15,13 @@
       "when": 1792691350006,
       "tag": "0001_shiny_mandrill",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792770772052,
+      "tag": "0002_thick_doctor_spectrum",
+      "breakpoints": true
     }
   ]
 }

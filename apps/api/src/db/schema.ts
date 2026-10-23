@@ -54,13 +54,14 @@ export const verifications = pgTable('verification', {
   updatedAt: timestamp('updatedAt', { withTimezone: true }).defaultNow(),
 });
 
-/** Таблица задач; created_at нужен для стабильного порядка списка */
+/** Таблица задач; created_at нужен для стабильного порядка списка, completed_at — для графика выполнения */
 export const todos = pgTable('todos', {
   id: uuid('id').primaryKey().defaultRandom(),
   title: text('title').notNull(),
   important: boolean('important').notNull().default(false),
   done: boolean('done').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
   userId: text('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),

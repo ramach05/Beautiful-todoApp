@@ -1,11 +1,17 @@
 import { z } from 'zod';
 
-/** Задача: id генерирует сервер (uuid), остальные поля приходят из форм и API */
+/**
+ * Задача: id и даты формирует сервер (uuid + ISO). createdAt — момент создания,
+ * completedAt — момент выполнения либо null, если задача еще не выполнена.
+ * Даты опциональны в контракте для обратной совместимости, но api отдает их всегда.
+ */
 export const todoSchema = z.object({
   id: z.uuid(),
   title: z.string().trim().min(1).max(200),
   important: z.boolean(),
   done: z.boolean(),
+  createdAt: z.iso.datetime().optional(),
+  completedAt: z.iso.datetime().nullable().optional(),
 });
 export type Todo = z.infer<typeof todoSchema>;
 

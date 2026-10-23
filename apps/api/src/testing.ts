@@ -23,11 +23,14 @@ export class InMemoryTodosRepository implements TodosRepository {
   }
 
   reset(): void {
+    const now = new Date().toISOString();
     this.items = SEED_TITLES.map((title) => ({
       id: crypto.randomUUID(),
       title,
       important: false,
       done: false,
+      createdAt: now,
+      completedAt: null,
       userId: DEMO_USER.id,
     }));
   }
@@ -44,6 +47,8 @@ export class InMemoryTodosRepository implements TodosRepository {
       title: input.title,
       important: false,
       done: false,
+      createdAt: new Date().toISOString(),
+      completedAt: null,
       userId,
     };
     this.items = [...this.items, item];
@@ -54,7 +59,14 @@ export class InMemoryTodosRepository implements TodosRepository {
   async update(id: string, patch: UpdateTodoInput, userId: string): Promise<Todo | null> {
     const current = this.items.find((item) => item.id === id && item.userId === userId);
     if (!current) return null;
-    const updated: OwnedTodo = { ...current, ...patch };
+    // completedAt живет по переходу done: ставим при выполнении, сбрасываем при возврате в активные
+    const completedAt =
+      patch.done === true
+        ? new Date().toISOString()
+        : patch.done === false
+          ? null
+          : current.completedAt;
+    const updated: OwnedTodo = { ...current, ...patch, completedAt };
     this.items = this.items.map((item) =>
       item.id === id && item.userId === userId ? updated : item,
     );
