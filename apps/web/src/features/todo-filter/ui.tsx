@@ -32,12 +32,12 @@ export function TodoFilterBar({ filter, search, onFilterChange, onSearchChange }
         )}
         placeholder="Search Todos"
         autoComplete="off"
-        aria-label="Поиск задач"
+        aria-label="Search todos"
         value={search}
         onChange={(event) => onSearchChange(event.target.value)}
       />
 
-      <div role="group" aria-label="Фильтр по статусу" className="flex gap-1">
+      <div role="group" aria-label="Status filter" className="flex gap-1">
         {options.map((option) => (
           <button
             key={option.value}

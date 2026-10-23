@@ -10,7 +10,7 @@ import {
 } from './todo.js';
 
 /** Базовая процедура: все доменные процедуры требуют сессию, ошибка типизирована в контракте */
-const authed = oc.errors({ UNAUTHORIZED: { message: 'Требуется авторизация' } });
+const authed = oc.errors({ UNAUTHORIZED: { message: 'Unauthorized' } });
 
 /**
  * oRPC-контракт - единая точка истины для api и web (ADR-003):

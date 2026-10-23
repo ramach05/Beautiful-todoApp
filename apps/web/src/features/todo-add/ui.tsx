@@ -34,9 +34,9 @@ export function TodoAdd() {
             'min-w-0 flex-1 rounded-[10px] bg-card-strong px-3 py-2 text-xl ' +
             'ring-1 ring-ring-soft placeholder:text-gray-400 focus:ring-white focus:outline-none'
           }
-          placeholder="Новая задача"
+          placeholder="New todo"
           autoComplete="off"
-          aria-label="Заголовок новой задачи"
+          aria-label="New todo title"
           aria-invalid={formState.errors.title !== undefined}
           {...register('title')}
         />
@@ -59,7 +59,7 @@ export function TodoAdd() {
       )}
       {added && !addTodo.isPending && (
         <p className="pl-1 text-base text-gray-300" aria-live="polite">
-          Задача добавлена
+          Todo added
         </p>
       )}
     </form>

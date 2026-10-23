@@ -44,19 +44,19 @@ export function TodoPage() {
   }
 
   if (todosQuery.isPending) {
-    return <p className="py-10 text-center text-xl text-gray-300">Загрузка…</p>;
+    return <p className="py-10 text-center text-xl text-gray-300">Loading…</p>;
   }
 
   if (todosQuery.isError) {
     return (
       <div className="py-10 text-center" role="alert">
-        <p className="text-xl text-accent">Не удалось загрузить задачи</p>
+        <p className="text-xl text-accent">Failed to load todos</p>
         <button
           type="button"
           className="mt-3 rounded bg-card-strong px-4 py-2 ring-1 ring-ring-soft hover:bg-ring-soft"
           onClick={() => void todosQuery.refetch()}
         >
-          Повторить
+          Retry
         </button>
       </div>
     );
@@ -75,7 +75,7 @@ export function TodoPage() {
         {remaining} more to do, {(todosQuery.data?.length ?? 0) - remaining} done
       </p>
 
-      <ul className="flex flex-col gap-2" aria-label="Список задач">
+      <ul className="flex flex-col gap-2" aria-label="Todo list">
         {todos.map((todo) => (
           <TodoItem
             key={todo.id}
@@ -87,7 +87,7 @@ export function TodoPage() {
         ))}
         {todos.length === 0 && (
           <li className="rounded-[10px] bg-card px-3 py-6 text-center text-xl text-gray-300">
-            Задач нет - добавьте первую
+            No todos — add your first one
           </li>
         )}
       </ul>

@@ -45,7 +45,7 @@ export async function signIn(email: string, password: string): Promise<string | 
   }
   const { data, error } = await authClient.signIn.email({ email, password });
   if (error) {
-    return error.message ?? 'Не удалось войти';
+    return error.message ?? 'Sign-in failed';
   }
   sessionFetched(toSession(data?.user));
   return null;
@@ -63,7 +63,7 @@ export async function signUp(email: string, password: string): Promise<string | 
     name: email.split('@')[0] ?? email,
   });
   if (error) {
-    return error.message ?? 'Не удалось зарегистрироваться';
+    return error.message ?? 'Sign-up failed';
   }
   sessionFetched(toSession(data?.user));
   return null;

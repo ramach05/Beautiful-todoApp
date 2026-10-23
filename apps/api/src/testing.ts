@@ -2,7 +2,7 @@ import type { CreateTodoInput, Todo, UpdateTodoInput } from '@bt/shared';
 
 import type { AppUser, TodosRepository } from './repo.js';
 
-const SEED_TITLES = ['Сходить в магазин', 'Позвонить маме', 'Сделать ДЗ', 'Погладить рубашку'];
+const SEED_TITLES = ['Buy groceries', 'Call mom', 'Do homework', 'Iron the shirt'];
 
 /** Фиксированный пользователь in-process мока (dev и тесты web) */
 export const DEMO_USER: AppUser = {

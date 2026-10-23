@@ -22,35 +22,35 @@ function renderPage() {
 describe('TodoPage', () => {
   it('показывает задачи, загруженные с сервера', async () => {
     renderPage();
-    expect(await screen.findByText('Позвонить маме')).toBeInTheDocument();
-    expect(screen.getByText('Сходить в магазин')).toBeInTheDocument();
+    expect(await screen.findByText('Call mom')).toBeInTheDocument();
+    expect(screen.getByText('Buy groceries')).toBeInTheDocument();
   });
 
   it('добавляет новую задачу через форму', async () => {
     const user = userEvent.setup();
     renderPage();
-    await screen.findByText('Позвонить маме');
+    await screen.findByText('Call mom');
 
-    await user.type(screen.getByLabelText('Заголовок новой задачи'), 'Купить кофе');
+    await user.type(screen.getByLabelText('New todo title'), 'Buy coffee');
     await user.click(screen.getByRole('button', { name: /Add Todo/i }));
 
-    expect(await screen.findByText('Купить кофе')).toBeInTheDocument();
+    expect(await screen.findByText('Buy coffee')).toBeInTheDocument();
   });
 
   it('не отправляет пустой заголовок и показывает ошибку валидации', async () => {
     const user = userEvent.setup();
     renderPage();
-    await screen.findByText('Позвонить маме');
+    await screen.findByText('Call mom');
 
     await user.click(screen.getByRole('button', { name: /Add Todo/i }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Заголовок обязателен');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Title is required');
   });
 
   it('переключает done по клику на заголовок', async () => {
     const user = userEvent.setup();
     renderPage();
-    const title = await screen.findByText('Сходить в магазин');
+    const title = await screen.findByText('Buy groceries');
 
     await user.click(title);
 
@@ -60,32 +60,32 @@ describe('TodoPage', () => {
   it('фильтрует список поиском', async () => {
     const user = userEvent.setup();
     renderPage();
-    await screen.findByText('Позвонить маме');
+    await screen.findByText('Call mom');
 
-    await user.type(screen.getByLabelText('Поиск задач'), 'маме');
+    await user.type(screen.getByLabelText('Search todos'), 'mom');
 
-    await waitFor(() => expect(screen.queryByText('Сделать ДЗ')).not.toBeInTheDocument());
-    expect(screen.getByText('Позвонить маме')).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByText('Do homework')).not.toBeInTheDocument());
+    expect(screen.getByText('Call mom')).toBeInTheDocument();
   });
 
   it('фильтр Done скрывает незавершенные задачи', async () => {
     const user = userEvent.setup();
     renderPage();
-    await screen.findByText('Позвонить маме');
+    await screen.findByText('Call mom');
 
     await user.click(screen.getByRole('button', { name: 'Done' }));
 
     await waitFor(() =>
-      expect(screen.getByText('Задач нет - добавьте первую')).toBeInTheDocument(),
+      expect(screen.getByText('No todos — add your first one')).toBeInTheDocument(),
     );
   });
 
   it('удаляет задачу кнопкой удаления', async () => {
     const user = userEvent.setup();
     renderPage();
-    const title = await screen.findByText('Сделать ДЗ');
+    const title = await screen.findByText('Do homework');
 
-    await user.click(title.parentElement!.querySelector("button[title='Удалить']")!);
+    await user.click(title.parentElement!.querySelector("button[title='Delete']")!);
 
     await waitFor(() => expect(title).not.toBeInTheDocument());
   });

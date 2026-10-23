@@ -6,8 +6,8 @@ import { z } from 'zod';
 import { signIn } from '../features/auth/model/session';
 
 const loginSchema = z.object({
-  email: z.email('Укажите email'),
-  password: z.string().min(8, 'Минимум 8 символов'),
+  email: z.email('Enter an email'),
+  password: z.string().min(4, 'At least 4 characters'),
 });
 
 type LoginValues = z.infer<typeof loginSchema>;
@@ -42,7 +42,7 @@ export function LoginPage({ onSuccess, footer }: LoginPageProps) {
       className="mx-auto flex w-full max-w-sm flex-col gap-3 pt-6"
       onSubmit={(event) => void onSubmit(event)}
     >
-      <h2 className="text-center text-3xl">Вход</h2>
+      <h2 className="text-center text-3xl">Sign in</h2>
       <input
         type="email"
         className={inputClass}
@@ -60,8 +60,8 @@ export function LoginPage({ onSuccess, footer }: LoginPageProps) {
       <input
         type="password"
         className={inputClass}
-        placeholder="Пароль"
-        aria-label="Пароль"
+        placeholder="Password"
+        aria-label="Password"
         autoComplete="current-password"
         aria-invalid={formState.errors.password !== undefined}
         {...register('password')}
@@ -81,7 +81,7 @@ export function LoginPage({ onSuccess, footer }: LoginPageProps) {
         className="rounded-[10px] bg-card-strong px-3 py-2 text-lg ring-1 ring-accent-soft transition-colors hover:bg-ring-soft disabled:opacity-40"
         disabled={formState.isSubmitting}
       >
-        Войти
+        Sign in
       </button>
       {footer && <div className="text-center text-sm">{footer}</div>}
     </form>

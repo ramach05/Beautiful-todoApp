@@ -35,7 +35,7 @@ export function TodoItem({ todo, onToggleDone, onToggleImportant, onDelete }: To
         <button
           type="button"
           className="rounded p-1 hover:bg-ring-soft disabled:opacity-40"
-          title="Отметить как важную"
+          title="Mark as important"
           disabled={todo.done}
           onClick={(event) => {
             event.stopPropagation();
@@ -44,20 +44,20 @@ export function TodoItem({ todo, onToggleDone, onToggleImportant, onDelete }: To
         >
           <img
             src={todo.important ? importantActiveIcon : importantIcon}
-            alt="Пометить как важную"
+            alt="Mark as important"
             className="size-6"
           />
         </button>
         <button
           type="button"
           className="rounded p-1 hover:bg-ring-soft"
-          title="Удалить"
+          title="Delete"
           onClick={(event) => {
             event.stopPropagation();
             onDelete(todo.id);
           }}
         >
-          <img src={trashIcon} alt="Удалить задачу" className="size-6" />
+          <img src={trashIcon} alt="Delete todo" className="size-6" />
         </button>
       </div>
     </li>

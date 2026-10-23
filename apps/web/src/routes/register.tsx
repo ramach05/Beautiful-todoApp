@@ -7,12 +7,12 @@ function RegisterComponent() {
   return (
     <RegisterPage
       onSuccess={() => void navigate({ to: '/' })}
-      footer={<Link to="/login">Уже есть аккаунт? Войти</Link>}
+      footer={<Link to="/login">Already have an account? Sign in</Link>}
     />
   );
 }
 
 export const Route = createFileRoute('/register')({
-  head: () => ({ meta: [{ title: 'Beautiful Todo — регистрация' }] }),
+  head: () => ({ meta: [{ title: 'Beautiful Todo — Sign up' }] }),
   component: RegisterComponent,
 });

@@ -9,10 +9,10 @@ describe('LoginPage', () => {
     const onSuccess = vi.fn();
     render(<LoginPage onSuccess={onSuccess} />);
 
-    await userEvent.click(screen.getByRole('button', { name: 'Войти' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Sign in' }));
 
-    expect(await screen.findByText('Укажите email')).toBeInTheDocument();
-    expect(screen.getByText('Минимум 8 символов')).toBeInTheDocument();
+    expect(await screen.findByText('Enter an email')).toBeInTheDocument();
+    expect(screen.getByText('At least 4 characters')).toBeInTheDocument();
     expect(onSuccess).not.toHaveBeenCalled();
   });
 
@@ -21,8 +21,8 @@ describe('LoginPage', () => {
     render(<LoginPage onSuccess={onSuccess} />);
 
     await userEvent.type(screen.getByLabelText('Email'), 'demo@local.test');
-    await userEvent.type(screen.getByLabelText('Пароль'), 'password-123');
-    await userEvent.click(screen.getByRole('button', { name: 'Войти' }));
+    await userEvent.type(screen.getByLabelText('Password'), 'password-123');
+    await userEvent.click(screen.getByRole('button', { name: 'Sign in' }));
 
     await waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1));
   });

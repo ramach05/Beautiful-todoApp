@@ -14,7 +14,7 @@ export const todoListSchema = z.array(todoSchema);
 
 /** Вход создания: id и флаги по умолчанию формирует сервер */
 export const createTodoInputSchema = z.object({
-  title: z.string().trim().min(1, 'Заголовок обязателен').max(200),
+  title: z.string().trim().min(1, 'Title is required').max(200),
 });
 export type CreateTodoInput = z.infer<typeof createTodoInputSchema>;
 
@@ -26,7 +26,7 @@ export const updateTodoInputSchema = z
     done: z.boolean(),
   })
   .partial()
-  .refine((patch) => Object.keys(patch).length > 0, 'Патч не пустой');
+  .refine((patch) => Object.keys(patch).length > 0, 'Patch must not be empty');
 export type UpdateTodoInput = z.infer<typeof updateTodoInputSchema>;
 
 export const todoFilterSchema = z.enum(['all', 'active', 'done']);

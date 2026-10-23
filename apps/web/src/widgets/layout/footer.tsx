@@ -14,7 +14,7 @@ export function Footer() {
   return (
     <footer className="mt-8 flex flex-col items-center gap-2 pb-6 text-lg">
       <div>&copy;{new Date().getFullYear()} Roman Kovalenko</div>
-      <nav aria-label="Ссылки автора">
+      <nav aria-label="Author links">
         <ul className="flex gap-3">
           {links.map((link) => (
             <li key={link.label}>

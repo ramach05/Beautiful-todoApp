@@ -6,9 +6,9 @@ import { z } from 'zod';
 import { signUp } from '../features/auth/model/session';
 
 const registerSchema = z.object({
-  name: z.string().min(2, 'Укажите имя'),
-  email: z.email('Укажите email'),
-  password: z.string().min(8, 'Минимум 8 символов'),
+  name: z.string().min(2, 'Enter a name'),
+  email: z.email('Enter an email'),
+  password: z.string().min(4, 'At least 4 characters'),
 });
 
 type RegisterValues = z.infer<typeof registerSchema>;
@@ -43,12 +43,12 @@ export function RegisterPage({ onSuccess, footer }: RegisterPageProps) {
       className="mx-auto flex w-full max-w-sm flex-col gap-3 pt-6"
       onSubmit={(event) => void onSubmit(event)}
     >
-      <h2 className="text-center text-3xl">Регистрация</h2>
+      <h2 className="text-center text-3xl">Sign up</h2>
       <input
         type="text"
         className={inputClass}
-        placeholder="Имя"
-        aria-label="Имя"
+        placeholder="Name"
+        aria-label="Name"
         autoComplete="name"
         aria-invalid={formState.errors.name !== undefined}
         {...register('name')}
@@ -75,8 +75,8 @@ export function RegisterPage({ onSuccess, footer }: RegisterPageProps) {
       <input
         type="password"
         className={inputClass}
-        placeholder="Пароль"
-        aria-label="Пароль"
+        placeholder="Password"
+        aria-label="Password"
         autoComplete="new-password"
         aria-invalid={formState.errors.password !== undefined}
         {...register('password')}
@@ -96,7 +96,7 @@ export function RegisterPage({ onSuccess, footer }: RegisterPageProps) {
         className="rounded-[10px] bg-card-strong px-3 py-2 text-lg ring-1 ring-accent-soft transition-colors hover:bg-ring-soft disabled:opacity-40"
         disabled={formState.isSubmitting}
       >
-        Создать аккаунт
+        Create account
       </button>
       {footer && <div className="text-center text-sm">{footer}</div>}
     </form>

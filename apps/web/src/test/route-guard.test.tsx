@@ -17,7 +17,7 @@ describe('защита маршрутов', () => {
     });
     render(<RouterProvider router={router} />);
 
-    expect(await screen.findByRole('heading', { name: 'Вход' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument();
     expect(router.state.location.pathname).toBe('/login');
   });
 });
