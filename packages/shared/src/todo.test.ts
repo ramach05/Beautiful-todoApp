@@ -1,5 +1,13 @@
-import { describe, expect, it } from 'vitest';
-import { filterTodos, todoSchema, updateTodoInputSchema, type Todo } from './todo.js';
+import { expect, it } from 'vitest';
+
+import {
+  createTodoInputSchema,
+  filterTodos,
+  todoFilterSchema,
+  todoSchema,
+  updateTodoInputSchema,
+  type Todo,
+} from './todo.js';
 
 const todo = (overrides: Partial<Todo> = {}): Todo => ({
   id: crypto.randomUUID(),
@@ -9,51 +17,81 @@ const todo = (overrides: Partial<Todo> = {}): Todo => ({
   ...overrides,
 });
 
-describe('todoSchema', () => {
-  it('валидирует корректную задачу', () => {
-    expect(todoSchema.safeParse(todo()).success).toBe(true);
-  });
+const items = [
+  todo({ title: 'Позвонить маме' }),
+  todo({ title: 'Магазин', done: true }),
+  todo({ title: 'Позвонить врачу', important: true }),
+];
 
-  it('отклоняет пустой заголовок', () => {
-    expect(todoSchema.safeParse({ ...todo(), title: '   ' }).success).toBe(false);
-  });
+// Тесты мутабельных пакетов держим плоскими (без describe): per-test фильтр Stryker с vitest 5
+// не матчит вложенные тесты, и мутанты остаются живыми при наличии покрытия.
 
-  it('требует uuid в качестве id', () => {
-    expect(todoSchema.safeParse({ ...todo(), id: '1' }).success).toBe(false);
+it('todoSchema валидирует корректную задачу', () => {
+  expect(todoSchema.safeParse(todo()).success).toBe(true);
+});
+
+it('todoSchema отклоняет пустой и слишком длинный заголовок', () => {
+  expect(todoSchema.safeParse({ ...todo(), title: '   ' }).success).toBe(false);
+  expect(todoSchema.safeParse({ ...todo(), title: 'a'.repeat(201) }).success).toBe(false);
+});
+
+it('todoSchema требует uuid в качестве id', () => {
+  expect(todoSchema.safeParse({ ...todo(), id: '1' }).success).toBe(false);
+});
+
+it('createTodoInputSchema принимает заголовок и обрезает его', () => {
+  expect(createTodoInputSchema.parse({ title: '  Купить кофе  ' })).toEqual({
+    title: 'Купить кофе',
   });
 });
 
-describe('updateTodoInputSchema', () => {
-  it('принимает непустой патч', () => {
-    expect(updateTodoInputSchema.safeParse({ done: true }).success).toBe(true);
-  });
-
-  it('отклоняет пустой патч', () => {
-    expect(updateTodoInputSchema.safeParse({}).success).toBe(false);
-  });
+it('createTodoInputSchema отклоняет пустой и слишком длинный заголовок', () => {
+  expect(createTodoInputSchema.safeParse({ title: '   ' }).success).toBe(false);
+  expect(createTodoInputSchema.safeParse({ title: 'a'.repeat(201) }).success).toBe(false);
 });
 
-describe('filterTodos', () => {
-  const items = [
-    todo({ title: 'Позвонить маме' }),
-    todo({ title: 'Магазин', done: true }),
-    todo({ title: 'Позвонить врачу', important: true }),
-  ];
+it('createTodoInputSchema отдает сообщение об ошибке для пустого заголовка', () => {
+  const message = createTodoInputSchema.safeParse({ title: '' }).error?.issues[0]?.message;
+  expect(message).toBe('Title is required');
+});
 
-  it('all без поиска возвращает все', () => {
-    expect(filterTodos(items, 'all', '')).toHaveLength(3);
-  });
+it('updateTodoInputSchema принимает любой непустой патч', () => {
+  expect(updateTodoInputSchema.safeParse({ done: true }).success).toBe(true);
+  expect(updateTodoInputSchema.safeParse({ important: true, title: 'Новая' }).success).toBe(true);
+});
 
-  it('active и done фильтруют по статусу', () => {
-    expect(filterTodos(items, 'done', '')).toEqual([items[1]]);
-    expect(filterTodos(items, 'active', '')).toHaveLength(2);
-  });
+it('updateTodoInputSchema отклоняет пустой патч с текстовой ошибкой', () => {
+  const result = updateTodoInputSchema.safeParse({});
+  expect(result.success).toBe(false);
+  expect(result.error?.issues[0]?.message).toBe('Patch must not be empty');
+});
 
-  it('ищет по подстроке без учета регистра', () => {
-    expect(filterTodos(items, 'all', 'ПОЗВОНИТЬ')).toHaveLength(2);
-  });
+it('updateTodoInputSchema отклоняет некорректный заголовок в патче', () => {
+  expect(updateTodoInputSchema.safeParse({ title: '   ' }).success).toBe(false);
+  expect(updateTodoInputSchema.safeParse({ title: 'a'.repeat(201) }).success).toBe(false);
+});
 
-  it('комбинирует статус и поиск', () => {
-    expect(filterTodos(items, 'active', 'маме')).toHaveLength(1);
-  });
+it('todoFilterSchema принимает все три фильтра и отклоняет посторонние значения', () => {
+  expect(todoFilterSchema.options).toEqual(['all', 'active', 'done']);
+  expect(todoFilterSchema.safeParse('done').success).toBe(true);
+  expect(todoFilterSchema.safeParse('unknown').success).toBe(false);
+});
+
+it('filterTodos: all возвращает все задачи, поиск из пробелов не ограничивает выдачу', () => {
+  expect(filterTodos(items, 'all', '')).toHaveLength(3);
+  expect(filterTodos(items, 'active', '   ')).toHaveLength(2);
+});
+
+it('filterTodos: active и done фильтруют по статусу', () => {
+  expect(filterTodos(items, 'done', '')).toEqual([items[1]]);
+  expect(filterTodos(items, 'active', '')).toHaveLength(2);
+});
+
+it('filterTodos: ищет по подстроке без учета регистра', () => {
+  expect(filterTodos(items, 'all', 'ПОЗВОНИТЬ')).toHaveLength(2);
+});
+
+it('filterTodos: комбинирует статус и поиск', () => {
+  expect(filterTodos(items, 'active', 'маме')).toHaveLength(1);
+  expect(filterTodos(items, 'done', 'маме')).toHaveLength(0);
 });

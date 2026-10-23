@@ -1,13 +1,14 @@
 import { ORPCError, createORPCClient } from '@orpc/client';
 import { RPCLink } from '@orpc/client/fetch';
 import { PGlite } from '@electric-sql/pglite';
+import { eq, inArray } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/pglite';
 import { migrate } from 'drizzle-orm/pglite/migrator';
 import type { FastifyInstance } from 'fastify';
 import { fileURLToPath } from 'node:url';
 
 import type { AppContractClient } from '@bt/shared';
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, expect, it } from 'vitest';
 
 import { buildApp } from './app.js';
 import { betterAuthResolver, buildAuth } from './auth.js';
@@ -79,93 +80,117 @@ beforeEach(async () => {
   await db.delete(todos);
 });
 
-describe('api', () => {
-  it('healthcheck отвечает ok', async () => {
-    const response = await fetch(`${httpUrl}/health`);
-    expect(response.ok).toBe(true);
-    expect(await response.json()).toEqual({ status: 'ok' });
-  });
+// Тесты мутабельных пакетов держим плоскими (без describe): per-test фильтр Stryker с vitest 5
+// не матчит вложенные тесты, и мутанты остаются живыми даже при наличии покрытия.
 
-  it('заголовочный x-request-id клиента возвращается в ответе', async () => {
-    const response = await fetch(`${httpUrl}/health`, {
-      headers: { 'x-request-id': 'req-test-1' },
-    });
-    expect(response.headers.get('x-request-id')).toBe('req-test-1');
-  });
+it('healthcheck отвечает ok и отдает x-request-id клиента либо сгенерированный uuid', async () => {
+  const withId = await fetch(`${httpUrl}/health`, { headers: { 'x-request-id': 'req-test-1' } });
+  expect(withId.ok).toBe(true);
+  expect(await withId.json()).toEqual({ status: 'ok' });
+  expect(withId.headers.get('x-request-id')).toBe('req-test-1');
 
-  it('без x-request-id генерируется uuid запроса', async () => {
-    const response = await fetch(`${httpUrl}/health`);
-    expect(response.headers.get('x-request-id')).toMatch(/[\da-f-]{36}/);
-  });
+  const generated = await fetch(`${httpUrl}/health`);
+  expect(generated.headers.get('x-request-id')).toMatch(/[\da-f-]{36}/);
+});
 
-  it('без сессии процедуры отдают UNAUTHORIZED', async () => {
-    const error = await createTestClient()
-      .todos.list()
-      .then(() => null)
-      .catch((cause: unknown) => cause);
+it('без сессии процедуры отдают UNAUTHORIZED', async () => {
+  const error = await createTestClient()
+    .todos.list()
+    .then(() => null)
+    .catch((cause: unknown) => cause);
 
-    expect(error).toBeInstanceOf(ORPCError);
-    if (error instanceof ORPCError) {
-      expect(error.code).toBe('UNAUTHORIZED');
-    }
-  });
+  expect(error).toBeInstanceOf(ORPCError);
+  if (error instanceof ORPCError) {
+    expect(error.code).toBe('UNAUTHORIZED');
+  }
+});
 
-  it('CRUD-сценарий через oRPC-клиент с сессией', async () => {
-    const api = createTestClient(await signUp('cruser@test.local'));
+it('CRUD-сценарий через oRPC-клиент с сессией', async () => {
+  const api = createTestClient(await signUp('cruser@test.local'));
 
-    const created = await api.todos.create({ title: 'Купить кофе' });
-    expect(created).toMatchObject({ title: 'Купить кофе', important: false, done: false });
+  const created = await api.todos.create({ title: 'Купить кофе' });
+  expect(created).toMatchObject({ title: 'Купить кофе', important: false, done: false });
 
-    expect(await api.todos.list()).toEqual([created]);
+  expect(await api.todos.list()).toEqual([created]);
 
-    const updated = await api.todos.update({ id: created.id, patch: { done: true } });
-    expect(updated.done).toBe(true);
+  const updated = await api.todos.update({ id: created.id, patch: { done: true } });
+  expect(updated.done).toBe(true);
 
-    await api.todos.remove(created.id);
-    expect(await api.todos.list()).toEqual([]);
-  });
+  await api.todos.remove(created.id);
+  expect(await api.todos.list()).toEqual([]);
+});
 
-  it('задачи другого пользователя не видны и не доступны для изменения', async () => {
-    const owner = createTestClient(await signUp('owner@test.local'));
-    const intruder = createTestClient(await signUp('intruder@test.local'));
+it('список отдает задачи в порядке created_at, при равенстве времени - по id', async () => {
+  const api = createTestClient(await signUp('order@test.local'));
+  const oldest = await api.todos.create({ title: 'Старая' });
+  const second = await api.todos.create({ title: 'Вторая B' });
+  const third = await api.todos.create({ title: 'Вторая A' });
 
-    const created = await owner.todos.create({ title: 'Личная задача' });
+  // now() соседних вставок может совпасть с точностью до микросекунды: порядок фиксируем явными метками
+  await db
+    .update(todos)
+    .set({ createdAt: new Date('2026-01-01T00:00:00Z') })
+    .where(eq(todos.id, oldest.id));
+  const same = new Date('2026-02-01T00:00:00Z');
+  await db
+    .update(todos)
+    .set({ createdAt: same })
+    .where(inArray(todos.id, [second.id, third.id]));
 
-    expect(await intruder.todos.list()).toEqual([]);
+  const ids = (await api.todos.list()).map((todo) => todo.id);
+  expect(ids).toEqual([oldest.id, ...[second.id, third.id].sort()]);
+});
 
-    const error = await intruder.todos
-      .update({ id: created.id, patch: { done: true } })
-      .then(() => null)
-      .catch((cause: unknown) => cause);
-    expect(error).toBeInstanceOf(ORPCError);
-    if (error instanceof ORPCError) {
-      expect(error.code).toBe('NOT_FOUND');
-    }
-  });
+it('задачи другого пользователя не видны и не доступны для изменения', async () => {
+  const owner = createTestClient(await signUp('owner@test.local'));
+  const intruder = createTestClient(await signUp('intruder@test.local'));
 
-  it('update несуществующей задачи - NOT_FOUND', async () => {
-    const api = createTestClient(await signUp('nfuser@test.local'));
-    const error = await api.todos
-      .update({ id: crypto.randomUUID(), patch: { done: true } })
-      .then(() => null)
-      .catch((cause: unknown) => cause);
+  const created = await owner.todos.create({ title: 'Личная задача' });
 
-    expect(error).toBeInstanceOf(ORPCError);
-    if (error instanceof ORPCError) {
-      expect(error.code).toBe('NOT_FOUND');
-    }
-  });
+  expect(await intruder.todos.list()).toEqual([]);
 
-  it('пустой заголовок отклоняется валидацией контракта', async () => {
-    const api = createTestClient(await signUp('valuser@test.local'));
-    const error = await api.todos
-      .create({ title: '   ' })
-      .then(() => null)
-      .catch((cause: unknown) => cause);
+  const error = await intruder.todos
+    .update({ id: created.id, patch: { done: true } })
+    .then(() => null)
+    .catch((cause: unknown) => cause);
+  expect(error).toBeInstanceOf(ORPCError);
+  if (error instanceof ORPCError) {
+    expect(error.code).toBe('NOT_FOUND');
+  }
+});
 
-    expect(error).toBeInstanceOf(ORPCError);
-    if (error instanceof ORPCError) {
-      expect(error.code).toBe('BAD_REQUEST');
-    }
-  });
+it('update и remove несуществующей задачи - NOT_FOUND', async () => {
+  const api = createTestClient(await signUp('nfuser@test.local'));
+  const missingId = crypto.randomUUID();
+
+  const updateError = await api.todos
+    .update({ id: missingId, patch: { done: true } })
+    .then(() => null)
+    .catch((cause: unknown) => cause);
+  expect(updateError).toBeInstanceOf(ORPCError);
+  if (updateError instanceof ORPCError) {
+    expect(updateError.code).toBe('NOT_FOUND');
+  }
+
+  const removeError = await api.todos
+    .remove(missingId)
+    .then(() => null)
+    .catch((cause: unknown) => cause);
+  expect(removeError).toBeInstanceOf(ORPCError);
+  if (removeError instanceof ORPCError) {
+    expect(removeError.code).toBe('NOT_FOUND');
+  }
+});
+
+it('пустой заголовок отклоняется валидацией контракта', async () => {
+  const api = createTestClient(await signUp('valuser@test.local'));
+  const error = await api.todos
+    .create({ title: '   ' })
+    .then(() => null)
+    .catch((cause: unknown) => cause);
+
+  expect(error).toBeInstanceOf(ORPCError);
+  if (error instanceof ORPCError) {
+    expect(error.code).toBe('BAD_REQUEST');
+  }
 });
