@@ -24,7 +24,7 @@ export interface AppOptions {
   authRateLimitMax?: number;
   /** HSTS только за HTTPS: на http в dev браузер его все равно игнорирует */
   hsts?: boolean;
-  /** Адреса/CIDR прокси списком через запятую: request.ip берётся из XFF только для peer из этого списка */
+  /** Адреса/CIDR прокси списком через запятую: request.ip берется из XFF только для peer из этого списка */
   trustProxy?: string;
 }
 
