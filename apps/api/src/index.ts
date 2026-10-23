@@ -20,6 +20,10 @@ const app = await buildApp({
   auth,
   corsOrigin: env.CORS_ORIGIN.split(','),
   logger: true,
+  authRateLimitMax: env.AUTH_RATE_LIMIT_MAX,
+  // HSTS работает только за HTTPS, поэтому включается лишь в проде
+  hsts: env.NODE_ENV === 'production',
+  trustProxy: env.TRUST_PROXY,
 });
 attachSentry(app);
 

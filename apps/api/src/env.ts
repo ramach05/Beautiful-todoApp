@@ -8,6 +8,10 @@ export const envSchema = z
     PORT: z.coerce.number().int().positive().default(3001),
     DATABASE_URL: z.string().min(1),
     CORS_ORIGIN: z.string().default('http://localhost:5173'),
+    // POST-запросы к auth-эндпоинтам на IP за минуту: дефолт безопасен для тестов, прод занижает через env
+    AUTH_RATE_LIMIT_MAX: z.coerce.number().int().min(1).default(20),
+    // Адреса/CIDR прокси списком через запятую: XFF учитывается только когда непосредственный peer оттуда
+    TRUST_PROXY: z.string().min(1).optional(),
     // В dev/test допустимо не задавать (используется dev-секрет), в production обязателен
     BETTER_AUTH_SECRET: z.string().min(32).optional(),
     BETTER_AUTH_URL: z.url().default('http://localhost:3001'),

@@ -1,13 +1,18 @@
 import cors from '@fastify/cors';
+import helmet from '@fastify/helmet';
+import rateLimit from '@fastify/rate-limit';
 import { fromNodeHeaders } from 'better-auth/node';
 import { RPCHandler } from '@orpc/server/fastify';
 import { randomUUID } from 'node:crypto';
-import Fastify, { type FastifyInstance } from 'fastify';
+import Fastify, { type FastifyInstance, type RouteHandler } from 'fastify';
 
 import type { Auth } from './auth.js';
 import { registerDocs } from './docs.js';
 import { appRouter, type Context } from './router.js';
 import type { SessionResolver, TodosRepository } from './repo.js';
+
+/** Запасное значение лимита auth, когда max не передан; совпадает с дефолтом AUTH_RATE_LIMIT_MAX в env-схеме */
+const DEFAULT_AUTH_RATE_LIMIT_MAX = 20;
 
 export interface AppOptions {
   todos: TodosRepository;
@@ -16,12 +21,19 @@ export interface AppOptions {
   auth?: Auth;
   corsOrigin?: string | string[];
   logger?: boolean;
+  /** POST-запросы к auth на IP за минуту: защита от подбора пароля */
+  authRateLimitMax?: number;
+  /** HSTS только за HTTPS: на http в dev браузер его все равно игнорирует */
+  hsts?: boolean;
+  /** Адреса/CIDR прокси списком через запятую: request.ip берется из XFF только для peer из этого списка */
+  trustProxy?: string;
 }
 
 /** Сборка Fastify-приложения: RPC-эндпоинт oRPC, auth better-auth, healthcheck и CORS */
 export async function buildApp(options: AppOptions): Promise<FastifyInstance> {
   const app = Fastify({
     logger: options.logger ?? false,
+    trustProxy: options.trustProxy ?? false,
     // x-request-id от клиента (FE) связывает логи фронта и бэка
     genReqId: (request) => {
       const incoming = request.headers['x-request-id'];
@@ -35,6 +47,12 @@ export async function buildApp(options: AppOptions): Promise<FastifyInstance> {
     done(null, payload);
   });
 
+  // CSP off: JSON-API + будущий Swagger UI; frameguard/nosniff/referrer-policy остаются дефолтами helmet
+  await app.register(helmet, {
+    contentSecurityPolicy: false,
+    strictTransportSecurity: options.hsts ?? false,
+  });
+
   await app.register(cors, { origin: options.corsOrigin ?? true, credentials: true });
 
   if (options.auth) {
@@ -46,30 +64,41 @@ export async function buildApp(options: AppOptions): Promise<FastifyInstance> {
         scope.addContentTypeParser('*', { parseAs: 'buffer' }, (_request, body, done) => {
           done(null, body);
         });
+        // Лимит только на маршрутах с config.rateLimit, чтобы GET get-session не тратил бакет подбора
+        await scope.register(rateLimit, { global: false });
+        const proxy: RouteHandler = async (request, reply) => {
+          const url = new URL(request.url, `http://${request.headers.host ?? 'localhost'}`);
+          const init: RequestInit = {
+            method: request.method,
+            headers: fromNodeHeaders(request.headers),
+          };
+          if (request.method !== 'GET' && request.method !== 'HEAD') {
+            init.body = (request.body as Buffer | undefined) ?? null;
+          }
+          const response = await options.auth!.handler(new Request(url, init));
+          reply.status(response.status);
+          for (const [key, value] of response.headers.entries()) {
+            void reply.header(key, value);
+          }
+          const setCookies = response.headers.getSetCookie();
+          if (setCookies.length > 0) {
+            void reply.header('set-cookie', setCookies);
+          }
+          const body = Buffer.from(await response.arrayBuffer());
+          return reply.send(body.length > 0 ? body : undefined);
+        };
+        scope.route({ method: 'GET', url: '/*', handler: proxy });
         scope.route({
-          method: ['GET', 'POST'],
+          method: 'POST',
           url: '/*',
-          async handler(request, reply) {
-            const url = new URL(request.url, `http://${request.headers.host ?? 'localhost'}`);
-            const init: RequestInit = {
-              method: request.method,
-              headers: fromNodeHeaders(request.headers),
-            };
-            if (request.method !== 'GET' && request.method !== 'HEAD') {
-              init.body = (request.body as Buffer | undefined) ?? null;
-            }
-            const response = await options.auth!.handler(new Request(url, init));
-            reply.status(response.status);
-            for (const [key, value] of response.headers.entries()) {
-              void reply.header(key, value);
-            }
-            const setCookies = response.headers.getSetCookie();
-            if (setCookies.length > 0) {
-              void reply.header('set-cookie', setCookies);
-            }
-            const body = Buffer.from(await response.arrayBuffer());
-            return reply.send(body.length > 0 ? body : undefined);
+          // 429 отдает сам Fastify до входа в better-auth: тело JSON, статус ответа не перезаписывается
+          config: {
+            rateLimit: {
+              max: options.authRateLimitMax ?? DEFAULT_AUTH_RATE_LIMIT_MAX,
+              timeWindow: '1 minute',
+            },
           },
+          handler: proxy,
         });
       },
       { prefix: '/api/auth' },

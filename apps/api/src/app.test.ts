@@ -14,6 +14,7 @@ import { betterAuthResolver, buildAuth } from './auth.js';
 import * as schema from './db/schema.js';
 import { todos } from './db/schema.js';
 import { PostgresTodosRepository } from './db/todos-repo.js';
+import { envSchema } from './env.js';
 
 const pglite = new PGlite();
 const db = drizzle(pglite, { schema });
@@ -98,6 +99,14 @@ describe('api', () => {
     expect(response.headers.get('x-request-id')).toMatch(/[\da-f-]{36}/);
   });
 
+  it('helmet отдает nosniff и frameguard, без CSP и HSTS вне прода', async () => {
+    const headers = (await fetch(`${httpUrl}/health`)).headers;
+    expect(headers.get('x-content-type-options')).toBe('nosniff');
+    expect(headers.get('x-frame-options')).toBe('SAMEORIGIN');
+    expect(headers.get('content-security-policy')).toBeNull();
+    expect(headers.get('strict-transport-security')).toBeNull();
+  });
+
   it('без сессии процедуры отдают UNAUTHORIZED', async () => {
     const error = await createTestClient()
       .todos.list()
@@ -167,5 +176,58 @@ describe('api', () => {
     if (error instanceof ORPCError) {
       expect(error.code).toBe('BAD_REQUEST');
     }
+  });
+});
+
+describe('rate limit auth-эндпоинтов', () => {
+  let limitedApp: FastifyInstance;
+  let limitedUrl: string;
+
+  beforeAll(async () => {
+    const auth = buildAuth(db);
+    limitedApp = await buildApp({
+      todos: new PostgresTodosRepository(db),
+      session: betterAuthResolver(auth),
+      auth,
+      // Пониженный лимит: 2 POST на IP за минуту
+      authRateLimitMax: 2,
+    });
+    await limitedApp.listen({ port: 0, host: '127.0.0.1' });
+    const address = limitedApp.server.address();
+    if (typeof address === 'string' || address === null) {
+      throw new Error('Сервер не вернул адрес после listen');
+    }
+    limitedUrl = `http://127.0.0.1:${address.port}`;
+  });
+
+  afterAll(async () => {
+    await limitedApp.close();
+  });
+
+  const signInAttempt = () =>
+    fetch(`${limitedUrl}/api/auth/sign-in/email`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ email: 'brute@test.local', password: 'wrong-password' }),
+    });
+
+  it('сверх лимита POST отвечает 429, а GET сессии и healthcheck не лимитируются', async () => {
+    expect((await signInAttempt()).status).toBe(401);
+    expect((await signInAttempt()).status).toBe(401);
+
+    const blocked = await signInAttempt();
+    expect(blocked.status).toBe(429);
+    expect(blocked.headers.get('retry-after')).not.toBeNull();
+    expect(await blocked.json()).toMatchObject({ statusCode: 429 });
+
+    // GET get-session не тратит бакет: перечитывание сессии не должно блокировать вход
+    expect((await fetch(`${limitedUrl}/api/auth/get-session`)).status).not.toBe(429);
+    expect((await fetch(`${limitedUrl}/health`)).status).toBe(200);
+  });
+
+  it('env-схема держит дефолт и пропускает пониженное AUTH_RATE_LIMIT_MAX', () => {
+    const base = { DATABASE_URL: 'postgres://test:test@localhost:5433/test' };
+    expect(envSchema.parse(base).AUTH_RATE_LIMIT_MAX).toBe(20);
+    expect(envSchema.parse({ ...base, AUTH_RATE_LIMIT_MAX: '3' }).AUTH_RATE_LIMIT_MAX).toBe(3);
   });
 });
