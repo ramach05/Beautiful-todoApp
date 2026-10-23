@@ -16,7 +16,7 @@ export function buildAuth(db: AuthDb) {
     secret: env.BETTER_AUTH_SECRET ?? DEV_AUTH_SECRET,
     baseURL: env.BETTER_AUTH_URL,
     database: drizzleAdapter(db, { provider: 'pg', schema, usePlural: true }),
-    emailAndPassword: { enabled: true },
+    emailAndPassword: { enabled: true, minPasswordLength: 4 },
     trustedOrigins: [env.CORS_ORIGIN],
   });
 }
