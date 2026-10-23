@@ -56,17 +56,24 @@ docs/adr        архитектурные решения (ADR)
 
 ```bash
 pnpm install
+pnpm start            # сам создаст .env, поднимет postgres, применит миграции и сид
+                      # web http://localhost:5173, api http://localhost:3001
+```
+
+Ручной запуск по шагам:
+
+```bash
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
 pnpm db:up                                # postgres:17 на 5433
 pnpm --filter @bt/api db:migrate
 pnpm --filter @bt/api db:seed
-pnpm dev                                  # web http://localhost:5173, api http://localhost:3001
+pnpm dev
 ```
 
 В `apps/web/.env` можно оставить `VITE_USE_MOCKS=1` — тогда web работает совсем без бэкенда и БД (демо-сессия включается автоматически). Для полноценной работы с api выставьте `VITE_USE_MOCKS=0`.
 
-Демо-аккаунт (сид и мок): `demo@local.test` / `demo-pass-123`.
+Демо-аккаунты (сид): `demo@local.test` / `demo-pass-123` и тестовый `test_user@local.test` / `1234`.
 
 ## Проверки
 
