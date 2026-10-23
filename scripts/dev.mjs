@@ -51,6 +51,9 @@ run(
   ['compose', 'up', '-d', '--wait', 'postgres'],
   'Не удалось поднять postgres. Проверьте, что Docker запущен.',
 );
+// Dev-БД каждый запуск приводится к сид-состоянию: данные из volume не переживают перезапуск
+console.log('\nDev-БД будет сброшена к сид-состоянию: все локальные данные будут удалены.');
+run('pnpm', ['--filter', '@bt/api', 'db:reset']);
 run('pnpm', ['--filter', '@bt/api', 'db:migrate']);
 run('pnpm', ['--filter', '@bt/api', 'db:seed']);
 run('pnpm', ['dev']);
