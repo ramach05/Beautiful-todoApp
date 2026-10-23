@@ -12,12 +12,12 @@ const unavailableInDemo: AccountResult = {
   error: 'Account management is unavailable in demo mode.',
 };
 
-/** Смена email: better-auth ведет ее через change-email (update-user email запрещает) */
+/** Смена email: better-auth ведет ее через change-email (update-user email запрещает); без SMTP меняется сразу */
 export async function changeAccountEmail(newEmail: string): Promise<AccountResult> {
   if (useMocks) return unavailableInDemo;
   const { error } = await authClient.changeEmail({ newEmail, callbackURL: '/' });
   if (error) return { ok: false, error: error.message ?? 'Failed to update email' };
-  return { ok: true, message: 'Confirmation link sent to the new address.' };
+  return { ok: true, message: 'Email updated.' };
 }
 
 /** Смена пароля: требуется текущий; успешная смена не рвет текущую сессию */

@@ -17,6 +17,12 @@ export function buildAuth(db: AuthDb) {
     baseURL: env.BETTER_AUTH_URL,
     database: drizzleAdapter(db, { provider: 'pg', schema, usePlural: true }),
     emailAndPassword: { enabled: true, minPasswordLength: 4 },
+    // Управление аккаунтом из /settings: смена email и удаление аккаунта (подтверждение паролем).
+    // Пользователи здесь не верифицируются SMTP, поэтому email меняется сразу (updateEmailWithoutVerification)
+    user: {
+      changeEmail: { enabled: true, updateEmailWithoutVerification: true },
+      deleteUser: { enabled: true },
+    },
     // CORS_ORIGIN списком через запятую: origin-проверки better-auth должны знать каждый web-origin
     trustedOrigins: env.CORS_ORIGIN.split(',').map((origin) => origin.trim()),
     // Прод: web и api на разных сайтах (vercel.app / railway.app) - сессионная cookie должна
