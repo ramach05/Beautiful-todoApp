@@ -1,6 +1,8 @@
 pnpm-lock.yaml
 dist
 coverage
+reports
+.stryker-tmp
 .turbo
 .ai-work/
 .tanstack/

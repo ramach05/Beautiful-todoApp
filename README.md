@@ -101,16 +101,22 @@ pnpm dev
 
 ## Проверки
 
-| Команда          | Что делает                                              |
-| ---------------- | ------------------------------------------------------- |
-| `pnpm lint`      | ESLint по всем пакетам                                  |
-| `pnpm fsd:check` | steiger: структура и импорты FSD в `apps/web`           |
-| `pnpm typecheck` | tsc по всем пакетам                                     |
-| `pnpm test`      | Vitest: web (RTL) и api (PGlite)                        |
-| `pnpm build`     | прод-сборки web и api                                   |
-| `pnpm test:e2e`  | Playwright на прод-сборках; нужен Docker и `pnpm build` |
+| Команда          | Что делает                                                   |
+| ---------------- | ------------------------------------------------------------ |
+| `pnpm lint`      | ESLint по всем пакетам                                       |
+| `pnpm fsd:check` | steiger: структура и импорты FSD в `apps/web`                |
+| `pnpm typecheck` | tsc по всем пакетам                                          |
+| `pnpm test`      | Vitest: web (RTL) и api (PGlite)                             |
+| `pnpm build`     | прод-сборки web и api                                        |
+| `pnpm test:e2e`  | Playwright на прод-сборках; нужен Docker и `pnpm build`      |
+| `pnpm mutation`  | Stryker: мутационное тестирование `shared` и `api` (не в CI) |
 
 CI (`quality` + `e2e`) прогоняет это на каждом PR; обе проверки обязательны для merge в `main`.
+
+Мутационный прогон (`@stryker-mutator/vitest-runner`) добавлен отдельным ночным workflow
+`.github/workflows/mutation.yml`: пороги выставлены без `break`, поэтому он только публикует артефакт-отчет.
+Тесты в мутабельных пакетах (`packages/shared`, `apps/api`) не оборачивают в `describe`: per-test фильтр
+Stryker с vitest 5 такие тесты не находит, и мутанты остаются живыми.
 
 ## Переменные окружения
 

@@ -10,7 +10,8 @@
     "build": "tsc -p tsconfig.build.json",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "mutation": "stryker run"
   },
   "dependencies": {
     "@orpc/contract": "^1.16.1",
