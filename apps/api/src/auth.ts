@@ -17,7 +17,8 @@ export function buildAuth(db: AuthDb) {
     baseURL: env.BETTER_AUTH_URL,
     database: drizzleAdapter(db, { provider: 'pg', schema, usePlural: true }),
     emailAndPassword: { enabled: true, minPasswordLength: 4 },
-    trustedOrigins: [env.CORS_ORIGIN],
+    // CORS_ORIGIN списком через запятую: origin-проверки better-auth должны знать каждый web-origin
+    trustedOrigins: env.CORS_ORIGIN.split(',').map((origin) => origin.trim()),
     // Прод: web и api на разных сайтах (vercel.app / railway.app) - сессионная cookie должна
     // отправляться cross-site, иначе браузер не приложит её к запросам; в dev/e2e оставить lax
     ...(env.NODE_ENV === 'production'
