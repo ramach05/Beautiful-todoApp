@@ -18,6 +18,15 @@ export function buildAuth(db: AuthDb) {
     database: drizzleAdapter(db, { provider: 'pg', schema, usePlural: true }),
     emailAndPassword: { enabled: true, minPasswordLength: 4 },
     trustedOrigins: [env.CORS_ORIGIN],
+    // Прод: web и api на разных сайтах (vercel.app / railway.app) - сессионная cookie должна
+    // отправляться cross-site, иначе браузер не приложит её к запросам; в dev/e2e оставить lax
+    ...(env.NODE_ENV === 'production'
+      ? {
+          advanced: {
+            cookies: { session_token: { attributes: { sameSite: 'none' as const, secure: true } } },
+          },
+        }
+      : {}),
   });
 }
 
