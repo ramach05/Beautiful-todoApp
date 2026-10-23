@@ -1,7 +1,4 @@
-import facebookIcon from '../../assets/images/svg/facebook.svg';
-import githubIcon from '../../assets/images/svg/github.svg';
-import linkedinIcon from '../../assets/images/svg/linkedin.svg';
-import telegramIcon from '../../assets/images/svg/telegram.svg';
+import { facebookIcon, githubIcon, linkedinIcon, telegramIcon } from '@/shared/ui/assets';
 
 const links = [
   { href: 'https://github.com/ramach05', icon: githubIcon, label: 'GitHub' },

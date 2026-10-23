@@ -2,8 +2,8 @@ import { createMemoryHistory, createRouter, RouterProvider } from '@tanstack/rea
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { sessionReady, signOutStarted } from '../features/auth/model/session';
-import { routeTree } from '../routeTree.gen';
+import { sessionReady, signOutStarted } from '@/features/auth';
+import { routeTree } from '@/app/routeTree.gen';
 
 describe('защита маршрутов', () => {
   it('неавторизованный пользователь редиректится на /login', async () => {

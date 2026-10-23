@@ -5,9 +5,6 @@ import { DEMO_USER, InMemoryTodosRepository } from '@bt/api/testing';
 /** Общие данные мока: сбрасываются между тестами через reset() */
 export const mockTodos = new InMemoryTodosRepository();
 
-/** Фиксированная сессия мока: обход авторизации — смысл in-process режима */
-export const DEMO_SESSION = { user: { id: DEMO_USER.id, email: DEMO_USER.email } };
-
 const handler = new RPCHandler(appRouter);
 
 /** Обработка запроса oRPC-клиента in-process (dev и тесты без запущенного api) */

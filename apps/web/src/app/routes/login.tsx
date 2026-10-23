@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 
-import { LoginPage } from '../pages/login-page';
+import { LoginPage } from '@/pages/login-page';
 
 function LoginComponent() {
   const navigate = useNavigate();

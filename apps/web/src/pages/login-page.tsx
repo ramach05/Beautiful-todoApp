@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { signIn } from '../features/auth/model/session';
+import { signIn } from '@/features/auth';
 
 const loginSchema = z.object({
   email: z.email('Enter an email'),

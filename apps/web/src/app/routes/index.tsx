@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
 
-import { $session, sessionReady } from '../features/auth/model/session';
-import { TodoPage } from '../pages/todo-page';
+import { $session, sessionReady } from '@/features/auth';
+import { TodoPage } from '@/pages/todo-page';
 
 export const Route = createFileRoute('/')({
   head: () => ({ meta: [{ title: 'Beautiful Todo' }] }),

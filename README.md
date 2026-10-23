@@ -42,13 +42,37 @@ flowchart LR
 - Без запущенного бэкенда web работает на in-process моке (`VITE_USE_MOCKS=1`) с фиксированной демо-сессией.
 
 ```
-apps/web        SPA: app / pages / features / entities / shared (FSD-слои)
+apps/web        SPA на Feature-Sliced Design (см. ниже)
 apps/api        Fastify: oRPC-роутер, better-auth, Drizzle-миграции и сид
 packages/shared zod-контракты и типы, общие для web и api
 packages/config общие конфиги eslint/typescript/prettier
 e2e             Playwright-сценарии на прод-сборках
 docs/adr        архитектурные решения (ADR)
 ```
+
+### Структура frontend: Feature-Sliced Design
+
+`apps/web` построен по FSD v2; связи и структура проверяются линтером steiger — `pnpm fsd:check` (входит в CI-quality):
+
+| Слой        | Содержимое                                                                           |
+| ----------- | ------------------------------------------------------------------------------------ |
+| `app/`      | composition root: `main.tsx`, провайдеры, observability, `routes/` (TanStack Router) |
+| `widgets/`  | каркасы страниц: `layout` (header/footer/shell)                                      |
+| `features/` | пользовательские действия: `auth`, `todo-add`, `todo-filter`                         |
+| `entities/` | доменные объекты: `todo` (типы, Query-хуки, `TodoItem`)                              |
+| `pages/`    | страницы: todo / login / register                                                    |
+| `shared/`   | фундамент: `api` (oRPC-клиент), `lib`, `ui/assets` (картинки), `styles`              |
+
+Правила, которые соблюдает код и следит за этим steiger:
+
+- импорт направлен только вниз по слоям (`app` → … → `shared`);
+- слайсы одного слоя не импортируют друг друга (cross-imports запрещены);
+- слайс импортируется только через public API — `index.ts` этого слайса;
+- слои в путях видны через алиас `@/*` (→ `apps/web/src/*`), относительные импорты — только внутри слайса;
+- серверное состояние (Query) живёт в `entities/*/model`, клиентское (Effector) — в `features/*/model` — [ADR-002](./docs/adr/0002-state-management.md);
+- dev/test-инфраструктура (`mocks/`, `tests/`) лежит вне `src` и не является кодом продукта.
+
+Исключения из правил — только точечные и мотивированные, зафиксированы в `apps/web/steiger.config.ts`.
 
 ## Быстрый старт
 
@@ -80,6 +104,7 @@ pnpm dev
 | Команда          | Что делает                                              |
 | ---------------- | ------------------------------------------------------- |
 | `pnpm lint`      | ESLint по всем пакетам                                  |
+| `pnpm fsd:check` | steiger: структура и импорты FSD в `apps/web`           |
 | `pnpm typecheck` | tsc по всем пакетам                                     |
 | `pnpm test`      | Vitest: web (RTL) и api (PGlite)                        |
 | `pnpm build`     | прод-сборки web и api                                   |

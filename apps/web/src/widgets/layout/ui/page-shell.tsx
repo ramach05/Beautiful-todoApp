@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import cityBg from '../../assets/images/city.jpg';
+import { cityBg } from '@/shared/ui/assets';
 import { Footer } from './footer';
 import { Header } from './header';
 

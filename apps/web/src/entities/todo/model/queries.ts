@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { CreateTodoInput, Todo, UpdateTodoInput } from '@bt/shared';
 
-import { api } from './api';
+import { api } from '@/shared/api';
 
 /** Серверные данные живут только в кэше Query; Effector их не дублирует (ADR-002) */
 export const todoKeys = {

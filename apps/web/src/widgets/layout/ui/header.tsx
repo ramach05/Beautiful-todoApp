@@ -1,7 +1,7 @@
 import { useNavigate } from '@tanstack/react-router';
 import { useUnit } from 'effector-react';
 
-import { $session, signOut } from '../../features/auth/model/session';
+import { $session, signOut } from '@/features/auth';
 
 export function Header() {
   const session = useUnit($session);

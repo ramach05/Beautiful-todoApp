@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { signUp } from '../features/auth/model/session';
+import { signUp } from '@/features/auth';
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Enter a name'),

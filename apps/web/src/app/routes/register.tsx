@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 
-import { RegisterPage } from '../pages/register-page';
+import { RegisterPage } from '@/pages/register-page';
 
 function RegisterComponent() {
   const navigate = useNavigate();

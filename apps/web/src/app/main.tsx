@@ -2,10 +2,10 @@ import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { routeTree } from '../routeTree.gen';
+import { routeTree } from './routeTree.gen';
 import { initObservability } from './observability';
 import { AppProviders } from './providers';
-import '../styles/index.css';
+import '@/shared/styles/index.css';
 
 const router = createRouter({ routeTree });
 

@@ -1,8 +1,6 @@
-import importantActiveIcon from '../../../assets/images/svg/warning-active_amber_orange_24dp.svg';
-import importantIcon from '../../../assets/images/svg/warning_amber_white_24dp.svg';
-import trashIcon from '../../../assets/images/svg/delete_forever_white_24dp.svg';
 import type { Todo } from '@bt/shared';
-import { cn } from '../../../shared/ui/cn';
+import { deleteIcon, importantActiveIcon, importantIcon } from '@/shared/ui/assets';
+import { cn } from '@/shared/lib';
 
 interface TodoItemProps {
   todo: Todo;
@@ -57,7 +55,7 @@ export function TodoItem({ todo, onToggleDone, onToggleImportant, onDelete }: To
             onDelete(todo.id);
           }}
         >
-          <img src={trashIcon} alt="Delete todo" className="size-6" />
+          <img src={deleteIcon} alt="Delete todo" className="size-6" />
         </button>
       </div>
     </li>

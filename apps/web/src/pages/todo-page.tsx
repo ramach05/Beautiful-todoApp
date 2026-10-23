@@ -1,18 +1,22 @@
 import { useUnit } from 'effector-react';
 import { useMemo } from 'react';
-import type { Todo } from '@bt/shared';
 
-import { TodoAdd } from '../features/todo-add/ui';
-import { TodoFilterBar } from '../features/todo-filter/ui';
+import { TodoAdd } from '@/features/todo-add';
 import {
   $todoFilter,
   $todoSearch,
   filterChanged,
   searchChanged,
-} from '../features/todo-filter/model/filters';
-import { useDeleteTodo, useTodos, useUpdateTodo } from '../features/todo/model/queries';
-import { TodoItem } from '../entities/todo/ui/todo-item';
-import { filterTodos } from '../entities/todo/model';
+  TodoFilterBar,
+} from '@/features/todo-filter';
+import {
+  type Todo,
+  filterTodos,
+  TodoItem,
+  useDeleteTodo,
+  useTodos,
+  useUpdateTodo,
+} from '@/entities/todo';
 
 /**
  * Страница todo: серверные задачи из Query, фильтры из Effector.

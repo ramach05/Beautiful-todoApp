@@ -1,8 +1,6 @@
-import allIcon from '../../assets/images/svg/clear_all_white_24dp.svg';
-import activeIcon from '../../assets/images/svg/check_white_24dp.svg';
-import doneIcon from '../../assets/images/svg/task_alt_white_24dp.svg';
-import type { TodoFilter } from '../../entities/todo/model';
-import { cn } from '../../shared/ui/cn';
+import type { TodoFilter } from '@/entities/todo';
+import { checkIcon, clearAllIcon, doneIcon } from '@/shared/ui/assets';
+import { cn } from '@/shared/lib';
 
 interface TodoFilterProps {
   filter: TodoFilter;
@@ -12,8 +10,8 @@ interface TodoFilterProps {
 }
 
 const options: Array<{ value: TodoFilter; label: string; icon: string }> = [
-  { value: 'all', label: 'All', icon: allIcon },
-  { value: 'active', label: 'Active', icon: activeIcon },
+  { value: 'all', label: 'All', icon: clearAllIcon },
+  { value: 'active', label: 'Active', icon: checkIcon },
   { value: 'done', label: 'Done', icon: doneIcon },
 ];
 

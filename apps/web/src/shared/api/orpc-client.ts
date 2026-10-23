@@ -17,7 +17,7 @@ async function credentialedTransport(request: Request): Promise<Response> {
   return fetch(request, { credentials: 'include' });
 }
 
-/** Ленивая загрузка in-process мока: в прод-бандл не попадает (ветка отсечается define) */
+/** Ленивая загрузка in-process мока: в прод-бандл не попадает (ветка отсечается define); сам мок — dev/test-инфраструктура вне src */
 async function mockTransport(request: Request): Promise<Response> {
   const { handleMockRequest } = await import('../../../mocks/mock-client');
   return handleMockRequest(request, RPC_PREFIX);

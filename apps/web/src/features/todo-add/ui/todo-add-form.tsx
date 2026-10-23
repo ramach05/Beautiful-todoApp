@@ -2,9 +2,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { createTodoInputSchema, type CreateTodoInput } from '@bt/shared';
-import addIcon from '../../assets/images/svg/task_add_24dp.svg';
+import { addTodoIcon } from '@/shared/ui/assets';
 
-import { useAddTodo } from '../todo/model/queries';
+import { useAddTodo } from '@/entities/todo';
 
 /** Форма добавления: валидация общим zod-контрактом, мутация с инвалидацией кэша */
 export function TodoAdd() {
@@ -48,7 +48,7 @@ export function TodoAdd() {
           }
           disabled={addTodo.isPending}
         >
-          <img src={addIcon} alt="" className="size-6" />
+          <img src={addTodoIcon} alt="" className="size-6" />
           Add Todo
         </button>
       </div>

@@ -8,6 +8,7 @@
     "build": "tsc -p tsconfig.app.json --noEmit && vite build",
     "preview": "vite preview",
     "lint": "eslint . --max-warnings=0",
+    "fsd:check": "steiger src",
     "typecheck": "tsc -p tsconfig.app.json --noEmit",
     "test": "vitest run"
   },
@@ -29,6 +30,7 @@
   "devDependencies": {
     "@bt/api": "workspace:*",
     "@bt/config": "workspace:*",
+    "@feature-sliced/steiger-plugin": "^0.8.0",
     "@orpc/server": "^1.16.1",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-query-devtools": "^5.104.5",
@@ -45,6 +47,7 @@
     "eslint-plugin-react-refresh": "^0.5.7",
     "globals": "^17",
     "jsdom": "^30.1.3",
+    "steiger": "^0.8.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
     "vite": "^8.3.5",

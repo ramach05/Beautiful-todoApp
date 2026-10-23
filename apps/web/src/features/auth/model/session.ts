@@ -19,8 +19,8 @@ $session.on(sessionFetched, (_, session) => session);
 $session.reset(signOutStarted);
 
 async function mockSession(): Promise<AppSession> {
-  const { DEMO_SESSION } = await import('../../../mocks/mock-client');
-  return DEMO_SESSION;
+  const { DEMO_USER } = await import('@bt/api/testing');
+  return { user: { id: DEMO_USER.id, email: DEMO_USER.email } };
 }
 
 function toSession(user: { id: string; email: string } | undefined): AppSession | null {
