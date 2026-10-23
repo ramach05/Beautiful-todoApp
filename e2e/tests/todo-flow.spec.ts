@@ -10,12 +10,12 @@ test('аноним попадает на /login', async ({ page }) => {
 test('регистрация, CRUD, фильтры и сессия', async ({ page }) => {
   const email = uniqueEmail();
   await register(page, email);
-  await expect(page.getByText('Задач нет - добавьте первую')).toBeVisible();
+  await expect(page.getByText('No todos')).toBeVisible();
 
   await addTodo(page, 'E2E задача');
   const item = todoRow(page, 'E2E задача');
 
-  await item.getByRole('button', { name: 'Пометить как важную' }).click();
+  await item.getByRole('button', { name: 'Mark as important' }).click();
   await expect(item.locator('p')).toHaveClass(/text-accent-soft/);
 
   await item.click();
@@ -25,14 +25,14 @@ test('регистрация, CRUD, фильтры и сессия', async ({ pa
   await expect(item).toHaveCount(0);
 
   await page.getByRole('button', { name: 'All', exact: true }).click();
-  await page.getByLabel('Поиск задач').fill('нет-такой');
+  await page.getByLabel('Search todos').fill('нет-такой');
   await expect(item).toHaveCount(0);
-  await page.getByLabel('Поиск задач').fill('E2E');
+  await page.getByLabel('Search todos').fill('E2E');
   await expect(item).toBeVisible();
 
-  await page.getByLabel('Поиск задач').fill('');
+  await page.getByLabel('Search todos').fill('');
   await addTodo(page, 'Вторая задача');
-  await todoRow(page, 'Вторая задача').getByRole('button', { name: 'Удалить задачу' }).click();
+  await todoRow(page, 'Вторая задача').getByRole('button', { name: 'Delete todo' }).click();
   await expect(todoRow(page, 'Вторая задача')).toHaveCount(0);
 
   // Прод-сборка + реальный postgres: состояние переживает перезагрузку
@@ -41,11 +41,11 @@ test('регистрация, CRUD, фильтры и сессия', async ({ pa
   await page.getByRole('button', { name: 'Done', exact: true }).click();
   await expect(item).toBeVisible();
 
-  await page.getByRole('button', { name: 'Выйти' }).click();
-  await expect(page.getByRole('heading', { name: 'Вход' })).toBeVisible();
+  await page.getByRole('button', { name: 'Sign out' }).click();
+  await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
   await page.getByLabel('Email').fill(email);
-  await page.getByLabel('Пароль').fill('password-123');
-  await page.getByRole('button', { name: 'Войти' }).click();
+  await page.getByLabel('Password').fill('password-123');
+  await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page).toHaveURL('/');
   await expect(item).toBeVisible();
 });
@@ -59,7 +59,7 @@ test('пользователи не видят чужие задачи', async (
   const contextB = await browser.newContext();
   const pageB = await contextB.newPage();
   await register(pageB);
-  await expect(pageB.getByText('Задач нет - добавьте первую')).toBeVisible();
+  await expect(pageB.getByText('No todos')).toBeVisible();
   await expect(pageB.getByText('Задача пользователя A')).toHaveCount(0);
 
   await contextA.close();

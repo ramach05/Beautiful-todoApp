@@ -10,16 +10,16 @@ export function uniqueEmail(): string {
 
 export async function register(page: Page, email = uniqueEmail()): Promise<void> {
   await page.goto('/login');
-  await page.getByRole('link', { name: 'Нет аккаунта? Зарегистрироваться' }).click();
-  await page.getByLabel('Имя').fill('E2E User');
+  await page.getByRole('link', { name: 'No account? Sign up' }).click();
+  await page.getByLabel('Name').fill('E2E User');
   await page.getByLabel('Email').fill(email);
-  await page.getByLabel('Пароль').fill('password-123');
-  await page.getByRole('button', { name: 'Создать аккаунт' }).click();
+  await page.getByLabel('Password').fill('password-123');
+  await page.getByRole('button', { name: 'Create account' }).click();
   await expect(page).toHaveURL('/');
 }
 
 export async function addTodo(page: Page, title: string): Promise<void> {
-  await page.getByLabel('Заголовок новой задачи').fill(title);
+  await page.getByLabel('New todo title').fill(title);
   await page.getByRole('button', { name: 'Add Todo' }).click();
   await expect(todoRow(page, title)).toBeVisible();
 }
