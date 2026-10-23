@@ -37,6 +37,34 @@ export const sessionReady: Promise<void> = (async () => {
   sessionFetched(error ? null : toSession(data?.user));
 })();
 
+/** Известные коды better-auth и свои тексты: INVALID_EMAIL_OR_PASSWORD не подсвечивает, какое поле неверно */
+const AUTH_ERROR_TEXTS: Record<string, string> = {
+  INVALID_EMAIL: 'Enter a valid email',
+  INVALID_PASSWORD: 'Enter a password',
+  INVALID_EMAIL_OR_PASSWORD: 'Invalid email or password',
+  USER_EMAIL_NOT_FOUND: 'Invalid email or password',
+  EMAIL_NOT_VERIFIED: 'Email is not verified',
+  USER_ALREADY_EXISTS: 'An account with this email already exists',
+  USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: 'An account with this email already exists',
+};
+
+const GENERIC_AUTH_ERROR = 'Something went wrong. Please try again';
+
+/** Форма ошибки better-auth-клиента, достаточная для маппинга: код из тела и HTTP-статус */
+interface AuthClientError {
+  code?: string | null;
+  status?: number;
+}
+
+/** Единственная точка перевода сбоя auth: без внутренних сообщений сервера и без подсказок про конкретное поле */
+function describeAuthError(error: AuthClientError): string {
+  // 429 приходит и от rate-limit Fastify без кода better-auth, поэтому проверяем статус
+  if (error.status === 429) {
+    return 'Too many attempts. Please try again in a minute';
+  }
+  return (error.code ? AUTH_ERROR_TEXTS[error.code] : undefined) ?? GENERIC_AUTH_ERROR;
+}
+
 /** Вход по email+password; возвращает текст ошибки или null при успехе */
 export async function signIn(email: string, password: string): Promise<string | null> {
   if (useMocks) {
@@ -45,7 +73,7 @@ export async function signIn(email: string, password: string): Promise<string | 
   }
   const { data, error } = await authClient.signIn.email({ email, password });
   if (error) {
-    return error.message ?? 'Sign-in failed';
+    return describeAuthError(error);
   }
   sessionFetched(toSession(data?.user));
   return null;
@@ -63,7 +91,7 @@ export async function signUp(email: string, password: string): Promise<string | 
     name: email.split('@')[0] ?? email,
   });
   if (error) {
-    return error.message ?? 'Sign-up failed';
+    return describeAuthError(error);
   }
   sessionFetched(toSession(data?.user));
   return null;
