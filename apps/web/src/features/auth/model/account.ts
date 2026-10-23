@@ -1,5 +1,5 @@
 import { authClient } from './auth';
-import { signOutStarted } from './session';
+import { sessionFetched, signOutStarted } from './session';
 
 // Условие инлайнится: vite гасит мок-ветку из прод-бандла только при литеральном сравнении
 const useMocks = import.meta.env.VITE_USE_MOCKS === '1';
@@ -12,11 +12,20 @@ const unavailableInDemo: AccountResult = {
   error: 'Account management is unavailable in demo mode.',
 };
 
+/** Перечитывает сессию: после смены email сервер уже отдал cookie с новым пользователем */
+async function refreshSession(): Promise<void> {
+  const { data, error } = await authClient.getSession();
+  sessionFetched(
+    !error && data?.user ? { user: { id: data.user.id, email: data.user.email } } : null,
+  );
+}
+
 /** Смена email: better-auth ведет ее через change-email (update-user email запрещает); без SMTP меняется сразу */
 export async function changeAccountEmail(newEmail: string): Promise<AccountResult> {
   if (useMocks) return unavailableInDemo;
   const { error } = await authClient.changeEmail({ newEmail, callbackURL: '/' });
   if (error) return { ok: false, error: error.message ?? 'Failed to update email' };
+  await refreshSession();
   return { ok: true, message: 'Email updated.' };
 }
 
