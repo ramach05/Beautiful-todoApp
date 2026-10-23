@@ -8,22 +8,32 @@ import type { TodosRepository } from '../repo.js';
 
 type TodosDb = PgDatabase<PgQueryResultHKT, typeof schema>;
 
-/** Проекция без служебных колонок: наружу отдаем только контрактные поля Todo */
-type TodoProjection = Pick<Todo, 'id' | 'title' | 'important' | 'done'> & { userId: string };
+/** Проекция контрактных полей + служебные даты и владелец для ограничений */
+type TodoProjection = Pick<Todo, 'id' | 'title' | 'important' | 'done'> & {
+  createdAt: Date;
+  completedAt: Date | null;
+  userId: string;
+};
+type TodoInsert = typeof todos.$inferInsert;
 
 const todoColumns = {
   id: todos.id,
   title: todos.title,
   important: todos.important,
   done: todos.done,
+  createdAt: todos.createdAt,
+  completedAt: todos.completedAt,
   userId: todos.userId,
 };
 
+// Даты наружу отдаем ISO-строками: контракт валидирует вывод, Date-объект zod не примет
 const toTodo = (row: TodoProjection): Todo => ({
   id: row.id,
   title: row.title,
   important: row.important,
   done: row.done,
+  createdAt: row.createdAt.toISOString(),
+  completedAt: row.completedAt?.toISOString() ?? null,
 });
 
 /** Репозиторий задач на Postgres; все операции ограничены владельцем (user_id) */
@@ -51,9 +61,14 @@ export class PostgresTodosRepository implements TodosRepository {
   }
 
   async update(id: string, patch: UpdateTodoInput, userId: string): Promise<Todo | null> {
+    // completedAt проставляем/сбрасываем по переходу done, чтобы график выполнялся по реальным датам
+    const data: Partial<TodoInsert> = { ...patch };
+    if (patch.done === true) data.completedAt = new Date();
+    else if (patch.done === false) data.completedAt = null;
+
     const [row] = await this.db
       .update(todos)
-      .set(patch)
+      .set(data)
       .where(and(eq(todos.id, id), eq(todos.userId, userId)))
       .returning(todoColumns);
     return row ? toTodo(row) : null;
