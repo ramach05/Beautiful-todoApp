@@ -5,6 +5,7 @@ import { randomUUID } from 'node:crypto';
 import Fastify, { type FastifyInstance } from 'fastify';
 
 import type { Auth } from './auth.js';
+import { registerDocs } from './docs.js';
 import { appRouter, type Context } from './router.js';
 import type { SessionResolver, TodosRepository } from './repo.js';
 
@@ -97,6 +98,8 @@ export async function buildApp(options: AppOptions): Promise<FastifyInstance> {
   });
 
   app.get('/health', async () => ({ status: 'ok' }));
+
+  await registerDocs(app);
 
   return app;
 }
