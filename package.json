@@ -17,6 +17,7 @@
     "test": "turbo run test",
     "mutation": "pnpm -r run mutation",
     "test:e2e": "pnpm --filter @bt/e2e e2e",
+    "lighthouse": "pnpm --filter @bt/web run lhci",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:up": "docker compose up -d postgres",
