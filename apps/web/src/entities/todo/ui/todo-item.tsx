@@ -7,6 +7,8 @@ interface TodoItemProps {
   onToggleDone: (todo: Todo) => void;
   onToggleImportant: (todo: Todo) => void;
   onDelete: (id: string) => void;
+  /** Задержка entrance-анимации в мс; передается только на первичном монтировании списка */
+  entranceDelay?: number;
 }
 
 /**
@@ -14,20 +16,28 @@ interface TodoItemProps {
  * поэтому клик мышью по строке переключает done, а доступ с клавиатуры идет через кнопку.
  * Кнопка important активна только для незавершенных задач.
  */
-export function TodoItem({ todo, onToggleDone, onToggleImportant, onDelete }: TodoItemProps) {
+export function TodoItem({
+  todo,
+  onToggleDone,
+  onToggleImportant,
+  onDelete,
+  entranceDelay,
+}: TodoItemProps) {
   const importantLabel = todo.important ? 'Unmark as important' : 'Mark as important';
 
   return (
     <li
       className={cn(
-        'relative flex items-center justify-between gap-3 rounded-[10px] bg-card-strong px-3 py-2',
-        'ring-1 ring-ring-soft transition-colors duration-500 hover:bg-ring-soft hover:ring-white',
+        'lift relative flex items-center justify-between gap-3 rounded-[10px] bg-card-strong px-3 py-2',
+        'ring-1 ring-ring-soft hover:bg-ring-soft hover:ring-white',
       )}
+      style={entranceDelay !== undefined ? { animationDelay: `${entranceDelay}ms` } : undefined}
     >
       <button
         type="button"
         className={cn(
           'row-toggle min-w-0 break-words rounded-[10px] text-left text-2xl leading-snug',
+          'transition-colors duration-[250ms] motion-reduce:transition-none',
           todo.done && 'text-gray-400 line-through',
           todo.important && !todo.done && 'text-accent-soft',
         )}

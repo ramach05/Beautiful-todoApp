@@ -70,3 +70,89 @@ body {
     animation: none;
   }
 }
+
+/* Пятно света за курсором: координаты пишутся JS-ом в кастомные свойства через rAF */
+.spotlight {
+  background: radial-gradient(
+    30rem at var(--spot-x, 50%) var(--spot-y, 50%),
+    #fff3d914,
+    #fff3d908 45%,
+    transparent 75%
+  );
+}
+
+/* Hover-подъем карточек и кнопок: transform/box-shadow, цвет фона для hover:bg */
+.lift {
+  transition-property: transform, box-shadow, background-color;
+  transition-duration: 0.18s;
+  transition-timing-function: ease;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px #00000059;
+  }
+
+  .lift:active {
+    transform: scale(0.99);
+  }
+}
+
+@keyframes bt-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* Entrance только на первичном монтировании: висячий класс снимается родителем после проигрывания */
+.row-entrance > li:nth-child(-n + 8) {
+  animation: bt-row-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+@keyframes bt-msg-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.msg-in {
+  animation: bt-msg-in 0.25s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row-entrance > li,
+  .msg-in {
+    animation: none;
+  }
+}
+
+/* View transition между роутами: перелистывается только область контента, оболочка стоит */
+#main-content {
+  view-transition-name: main-content;
+}
+
+::view-transition-old(main-content) {
+  animation-duration: 0.18s;
+}
+
+::view-transition-new(main-content) {
+  animation: bt-vt-in 0.24s ease both;
+}
+
+@keyframes bt-vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(main-content),
+  ::view-transition-old(main-content),
+  ::view-transition-new(main-content) {
+    animation: none;
+  }
+}

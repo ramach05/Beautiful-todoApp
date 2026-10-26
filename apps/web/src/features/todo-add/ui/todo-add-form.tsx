@@ -55,8 +55,8 @@ export function TodoAdd() {
         <button
           type="submit"
           className={
-            'focus-ring inline-flex items-center gap-2 rounded-[10px] bg-card-strong px-3 py-2 text-xl ' +
-            'ring-1 ring-accent-soft transition-colors hover:bg-ring-soft disabled:opacity-40'
+            'focus-ring lift inline-flex items-center gap-2 rounded-[10px] bg-card-strong px-3 py-2 text-xl ' +
+            'ring-1 ring-accent-soft hover:bg-ring-soft disabled:opacity-40'
           }
           disabled={addTodo.isPending}
           aria-busy={addTodo.isPending}
@@ -70,12 +70,12 @@ export function TodoAdd() {
         </button>
       </div>
       {formState.errors.title && (
-        <p id="todo-title-error" role="alert" className="pl-1 text-base text-accent">
+        <p id="todo-title-error" role="alert" className="msg-in pl-1 text-base text-accent">
           {formState.errors.title.message}
         </p>
       )}
       {added && !addTodo.isPending && (
-        <p className="pl-1 text-base text-gray-300" aria-live="polite">
+        <p className="msg-in pl-1 text-base text-gray-300" aria-live="polite">
           Todo added
         </p>
       )}
