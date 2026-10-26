@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { signIn } from '@/features/auth';
+import { Spinner } from '@/shared/ui/spinner';
 
 const loginSchema = z.object({
   email: z.email('Enter an email'),
@@ -34,43 +35,56 @@ export function LoginPage({ onSuccess, footer }: LoginPageProps) {
   });
 
   const inputClass =
-    'w-full rounded-[10px] bg-card-strong px-3 py-2 text-lg ring-1 ring-ring-soft ' +
+    'focus-ring w-full min-w-0 rounded-[10px] bg-card-strong px-3 py-2 text-lg ring-1 ring-ring-soft ' +
     'placeholder:text-gray-400 focus:ring-white focus:outline-none';
 
   return (
     <form
       className="mx-auto flex w-full max-w-sm flex-col gap-3 pt-6"
+      noValidate
       onSubmit={(event) => void onSubmit(event)}
     >
       <h2 className="text-center text-3xl">Sign in</h2>
-      <input
-        type="email"
-        className={inputClass}
-        placeholder="Email"
-        aria-label="Email"
-        autoComplete="email"
-        aria-invalid={formState.errors.email !== undefined}
-        {...register('email')}
-      />
-      {formState.errors.email && (
-        <p role="alert" className="-mt-2 pl-1 text-sm text-accent">
-          {formState.errors.email.message}
-        </p>
-      )}
-      <input
-        type="password"
-        className={inputClass}
-        placeholder="Password"
-        aria-label="Password"
-        autoComplete="current-password"
-        aria-invalid={formState.errors.password !== undefined}
-        {...register('password')}
-      />
-      {formState.errors.password && (
-        <p role="alert" className="-mt-2 pl-1 text-sm text-accent">
-          {formState.errors.password.message}
-        </p>
-      )}
+      <div className="flex flex-col gap-1">
+        <label className="sr-only" htmlFor="login-email">
+          Email
+        </label>
+        <input
+          id="login-email"
+          type="email"
+          className={inputClass}
+          placeholder="Email"
+          autoComplete="email"
+          aria-invalid={formState.errors.email !== undefined}
+          aria-describedby={formState.errors.email ? 'login-email-error' : undefined}
+          {...register('email')}
+        />
+        {formState.errors.email && (
+          <p id="login-email-error" role="alert" className="pl-1 text-sm text-accent">
+            {formState.errors.email.message}
+          </p>
+        )}
+      </div>
+      <div className="flex flex-col gap-1">
+        <label className="sr-only" htmlFor="login-password">
+          Password
+        </label>
+        <input
+          id="login-password"
+          type="password"
+          className={inputClass}
+          placeholder="Password"
+          autoComplete="current-password"
+          aria-invalid={formState.errors.password !== undefined}
+          aria-describedby={formState.errors.password ? 'login-password-error' : undefined}
+          {...register('password')}
+        />
+        {formState.errors.password && (
+          <p id="login-password-error" role="alert" className="pl-1 text-sm text-accent">
+            {formState.errors.password.message}
+          </p>
+        )}
+      </div>
       {formState.errors.root && (
         <p role="alert" className="pl-1 text-sm text-accent">
           {formState.errors.root.message}
@@ -78,9 +92,11 @@ export function LoginPage({ onSuccess, footer }: LoginPageProps) {
       )}
       <button
         type="submit"
-        className="rounded-[10px] bg-card-strong px-3 py-2 text-lg ring-1 ring-accent-soft transition-colors hover:bg-ring-soft disabled:opacity-40"
+        className="focus-ring inline-flex items-center justify-center gap-2 rounded-[10px] bg-card-strong px-3 py-2 text-lg ring-1 ring-accent-soft transition-colors hover:bg-ring-soft disabled:opacity-40"
         disabled={formState.isSubmitting}
+        aria-busy={formState.isSubmitting}
       >
+        {formState.isSubmitting && <Spinner />}
         Sign in
       </button>
       {footer && <div className="text-center text-sm">{footer}</div>}

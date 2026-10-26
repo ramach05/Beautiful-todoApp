@@ -19,7 +19,7 @@ function StatsContentSkeleton() {
   return (
     <div className="flex flex-col gap-4">
       <SkeletonBlock className="h-8 w-40" />
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 xs:grid-cols-2 sm:grid-cols-4">
         {Array.from({ length: 4 }, (_, index) => (
           <div key={index} className={cardClass}>
             <SkeletonBlock className="mx-auto h-7 w-12" />
@@ -70,7 +70,10 @@ export function StatsPage() {
     <div className="flex flex-col gap-5">
       <h2 className="text-3xl">Statistics</h2>
 
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-label="Aggregates">
+      <section
+        className="grid grid-cols-1 gap-3 xs:grid-cols-2 sm:grid-cols-4"
+        aria-label="Aggregates"
+      >
         <StatCard label="Total" value={stats.total} />
         <StatCard label="Active" value={stats.active} />
         <StatCard label="Completed" value={stats.completed} />
@@ -78,16 +81,23 @@ export function StatsPage() {
       </section>
 
       <section
-        className="rounded-[10px] bg-card-strong p-4 ring-1 ring-ring-soft"
-        aria-label="Completions per day"
+        className="min-w-0 rounded-[10px] bg-card-strong p-3 ring-1 ring-ring-soft xs:p-4"
+        aria-labelledby="stats-chart-heading"
       >
-        <h3 className="mb-3 text-xl">Completed per day (last 7 days)</h3>
+        <h3 id="stats-chart-heading" className="mb-3 text-xl">
+          Completed per day (last 7 days)
+        </h3>
         <StatsChart data={stats.daily} />
       </section>
 
-      <section className="rounded-[10px] bg-card-strong p-4 ring-1 ring-ring-soft">
-        <h3 className="mb-1 text-xl">Oldest unfinished</h3>
-        <p className="text-lg text-gray-300">
+      <section
+        className="min-w-0 rounded-[10px] bg-card-strong p-3 ring-1 ring-ring-soft xs:p-4"
+        aria-labelledby="stats-oldest-heading"
+      >
+        <h3 id="stats-oldest-heading" className="mb-1 text-xl">
+          Oldest unfinished
+        </h3>
+        <p className="break-words text-lg text-gray-300">
           {stats.oldestIncomplete?.title ?? 'No unfinished todos'}
         </p>
       </section>

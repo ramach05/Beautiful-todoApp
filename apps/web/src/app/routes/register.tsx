@@ -7,7 +7,11 @@ function RegisterComponent() {
   return (
     <RegisterPage
       onSuccess={() => void navigate({ to: '/' })}
-      footer={<Link to="/login">Already have an account? Sign in</Link>}
+      footer={
+        <Link className="focus-ring rounded" to="/login">
+          Already have an account? Sign in
+        </Link>
+      }
     />
   );
 }

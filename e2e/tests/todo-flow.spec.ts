@@ -16,7 +16,7 @@ test('регистрация, CRUD, фильтры и сессия', async ({ pa
   const item = todoRow(page, 'E2E задача');
 
   await item.getByRole('button', { name: 'Mark as important' }).click();
-  await expect(item.locator('p')).toHaveClass(/text-accent-soft/);
+  await expect(item.getByRole('button', { name: 'E2E задача' })).toHaveClass(/text-accent-soft/);
 
   await item.click();
   await page.getByRole('button', { name: 'Done', exact: true }).click();
