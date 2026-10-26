@@ -10,29 +10,20 @@ import {
   deleteAccount,
   signOutEverywhere,
 } from '@/features/auth';
+import { Spinner } from '@/shared/ui/spinner';
 
 const inputClass =
-  'w-full rounded-[10px] bg-card-strong px-3 py-2 text-lg ring-1 ring-ring-soft ' +
+  'focus-ring w-full rounded-[10px] bg-card-strong px-3 py-2 text-lg ring-1 ring-ring-soft ' +
   'placeholder:text-gray-400 focus:ring-white focus:outline-none';
 const buttonClass =
-  'inline-flex items-center gap-2 rounded-[10px] bg-card-strong px-4 py-2 text-lg ' +
+  'focus-ring inline-flex items-center gap-2 rounded-[10px] bg-card-strong px-4 py-2 text-lg ' +
   'ring-1 ring-accent-soft transition-colors hover:bg-ring-soft disabled:opacity-40';
 const dangerButtonClass =
-  'inline-flex items-center gap-2 rounded-[10px] bg-card-strong px-4 py-2 text-lg ' +
+  'focus-ring inline-flex items-center gap-2 rounded-[10px] bg-card-strong px-4 py-2 text-lg ' +
   'ring-1 ring-accent transition-colors hover:bg-accent/20 disabled:opacity-40';
 
 type ActionKey = 'email' | 'password' | 'revoke' | 'delete';
 type Feedback = { tone: 'ok' | 'err'; text: string };
-
-/** Крутилка для pending-состояния кнопки (декорация, состояние отдано через aria-busy) */
-function Spinner() {
-  return (
-    <span
-      aria-hidden
-      className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white"
-    />
-  );
-}
 
 /**
  * Настройки аккаунта: смена email/пароля, выход на всех устройствах, удаление аккаунта.
@@ -87,8 +78,10 @@ export function SettingsPage() {
         </p>
       )}
 
-      <section className="flex flex-col gap-2">
-        <h3 className="text-xl">Change email</h3>
+      <section className="flex flex-col gap-2" aria-labelledby="settings-email">
+        <h3 id="settings-email" className="text-xl">
+          Change email
+        </h3>
         <form
           className="flex flex-col gap-2"
           onSubmit={(event) => {
@@ -117,8 +110,10 @@ export function SettingsPage() {
         </form>
       </section>
 
-      <section className="flex flex-col gap-2">
-        <h3 className="text-xl">Change password</h3>
+      <section className="flex flex-col gap-2" aria-labelledby="settings-password">
+        <h3 id="settings-password" className="text-xl">
+          Change password
+        </h3>
         <form
           className="flex flex-col gap-2"
           onSubmit={(event) => {
@@ -156,8 +151,10 @@ export function SettingsPage() {
         </form>
       </section>
 
-      <section className="flex flex-col gap-2">
-        <h3 className="text-xl">Sessions</h3>
+      <section className="flex flex-col gap-2" aria-labelledby="settings-sessions">
+        <h3 id="settings-sessions" className="text-xl">
+          Sessions
+        </h3>
         <button
           type="button"
           className={buttonClass}
@@ -170,8 +167,10 @@ export function SettingsPage() {
         </button>
       </section>
 
-      <section className="flex flex-col gap-2">
-        <h3 className="text-xl">Delete account</h3>
+      <section className="flex flex-col gap-2" aria-labelledby="settings-delete">
+        <h3 id="settings-delete" className="text-xl">
+          Delete account
+        </h3>
         <form
           className="flex flex-col gap-2"
           onSubmit={(event) => {

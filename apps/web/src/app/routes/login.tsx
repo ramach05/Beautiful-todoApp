@@ -7,7 +7,11 @@ function LoginComponent() {
   return (
     <LoginPage
       onSuccess={() => void navigate({ to: '/' })}
-      footer={<Link to="/register">No account? Sign up</Link>}
+      footer={
+        <Link className="focus-ring rounded" to="/register">
+          No account? Sign up
+        </Link>
+      }
     />
   );
 }

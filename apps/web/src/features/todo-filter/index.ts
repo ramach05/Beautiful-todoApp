@@ -1,8 +1,3 @@
 export { TodoFilterBar } from './ui/todo-filter-bar';
-export {
-  $todoFilter,
-  $todoSearch,
-  filterChanged,
-  searchChanged,
-  filtersReset,
-} from './model/filters';
+export { buildTodoSearch, parseTodoSearch } from './model/search';
+export type { TodoSearch } from './model/search';
