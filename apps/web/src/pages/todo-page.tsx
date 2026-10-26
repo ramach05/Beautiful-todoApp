@@ -12,6 +12,24 @@ import {
   useTodos,
   useUpdateTodo,
 } from '@/entities/todo';
+import { Skeleton, SkeletonBlock } from '@/shared/ui/skeleton';
+
+/** Каркас списка на время загрузки задач: строки той же высоты, что реальные задачи */
+function TodoListSkeleton() {
+  return (
+    <Skeleton label="Loading todos" className="flex flex-col gap-2">
+      {Array.from({ length: 4 }, (_, index) => (
+        <div
+          key={index}
+          className="flex items-center justify-between gap-3 rounded-[10px] bg-card-strong px-3 py-2"
+        >
+          <SkeletonBlock className="h-7 w-2/3" />
+          <SkeletonBlock className="h-6 w-14" />
+        </div>
+      ))}
+    </Skeleton>
+  );
+}
 
 /**
  * Страница todo: серверные задачи из Query, фильтр и поиск из URL (ADR-002).
@@ -54,7 +72,7 @@ export function TodoPage() {
   }
 
   if (todosQuery.isPending) {
-    return <p className="py-10 text-center text-xl text-gray-300">Loading…</p>;
+    return <TodoListSkeleton />;
   }
 
   if (todosQuery.isError) {

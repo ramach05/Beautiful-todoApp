@@ -15,8 +15,12 @@ async function prepareSession(): Promise<void> {
 /**
  * Рендер приложения настоящим роутером в памяти: фильтр и поиск читаются из URL,
  * поэтому тесты проверяют и адрес, и выдачу. Возвращает роутер ради проверок адреса.
+ * offline=true имитирует отсутствие сети: запрос Query не стартует и остается pending-состояние.
  */
-function mountApp(initialEntry = '/') {
+function mountApp(initialEntry = '/', options: { offline?: boolean } = {}) {
+  if (options.offline) {
+    Object.defineProperty(window.navigator, 'onLine', { configurable: true, get: () => false });
+  }
   const client = new QueryClient({
     defaultOptions: {
       queries: { retry: false, gcTime: 0 },
@@ -44,6 +48,20 @@ async function renderPage(initialEntry = '/') {
 }
 
 describe('TodoPage', () => {
+  it('до прихода задач отдает доступный каркас вместо текста загрузки', async () => {
+    await prepareSession();
+    // Offline: запрос Query не стартует, поэтому pending-состояние стабильно до самого конца теста
+    const app = mountApp('/', { offline: true });
+    try {
+      const status = await app.findByRole('status');
+      expect(status).toHaveAttribute('aria-busy', 'true');
+      expect(status).toHaveTextContent('Loading todos');
+      expect(screen.queryByText('Call mom')).not.toBeInTheDocument();
+    } finally {
+      Reflect.deleteProperty(window.navigator, 'onLine');
+    }
+  });
+
   it('показывает задачи и счетчики статусов без параметров в URL', async () => {
     const { router } = await renderPage();
 
