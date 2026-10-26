@@ -1,0 +1,25 @@
+name: Release please
+
+on:
+  push:
+    branches: [main]
+
+# GITHUB_TOKEN: action создает релизный PR, теги и GitHub Releases; внешних секретов нет
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-please-${{ github.ref }}
+
+jobs:
+  release:
+    name: release PR and GitHub releases
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: .github/release-please-config.json
+          manifest-file: .github/release-please-manifest.json

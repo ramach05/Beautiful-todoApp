@@ -13,3 +13,4 @@ reports/
 .eslintcache
 .pnpm-store/
 .tanstack/
+.lighthouseci/
