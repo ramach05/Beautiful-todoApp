@@ -1,5 +1,5 @@
 import { useNavigate, useSearch } from '@tanstack/react-router';
-import { useMemo } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { TodoAdd } from '@/features/todo-add';
 import { buildTodoSearch, TodoFilterBar } from '@/features/todo-filter';
@@ -12,7 +12,12 @@ import {
   useTodos,
   useUpdateTodo,
 } from '@/entities/todo';
+import { cn } from '@/shared/lib';
 import { Skeleton, SkeletonBlock } from '@/shared/ui/skeleton';
+
+/** Сколько первых строк списка получают stagger-entrance и шаг задержки между ними, мс */
+const ENTRANCE_LIMIT = 8;
+const ENTRANCE_STEP = 55;
 
 /** Каркас списка на время загрузки задач: строки той же высоты, что реальные задачи */
 function TodoListSkeleton() {
@@ -53,6 +58,19 @@ export function TodoPage() {
     [todosQuery.data],
   );
 
+  const [entrance, setEntrance] = useState(false);
+  const entranceStarted = useRef(false);
+
+  // Entrance только на первичном приходе данных: класс висит до конца stagger и снимается,
+  // поэтому апдейты, поиск и последующие добавления анимацию не перетриггерят
+  useLayoutEffect(() => {
+    if (todosQuery.data === undefined || entranceStarted.current) return;
+    entranceStarted.current = true;
+    setEntrance(true);
+    const timer = setTimeout(() => setEntrance(false), ENTRANCE_LIMIT * ENTRANCE_STEP + 450);
+    return () => clearTimeout(timer);
+  }, [todosQuery.data]);
+
   // Фильтр пишется в историю (кнопка «назад» откатывает фильтр), поиск — replace: набор текста не плодит записи
   function changeFilter(next: TodoFilter) {
     void navigate({ search: buildTodoSearch({ filter: next, q: query }) });
@@ -77,7 +95,7 @@ export function TodoPage() {
 
   if (todosQuery.isError) {
     return (
-      <div className="py-10 text-center" role="alert">
+      <div className="msg-in py-10 text-center" role="alert">
         <p className="text-xl text-accent">Failed to load todos</p>
         <button
           type="button"
@@ -103,11 +121,16 @@ export function TodoPage() {
         {remaining} more to do, {(todosQuery.data?.length ?? 0) - remaining} done
       </p>
 
-      <ul id="todo-list" className="flex flex-col gap-2" aria-label="Todo list">
-        {todos.map((todo) => (
+      <ul
+        id="todo-list"
+        className={cn('flex flex-col gap-2', entrance && 'row-entrance')}
+        aria-label="Todo list"
+      >
+        {todos.map((todo, index) => (
           <TodoItem
             key={todo.id}
             todo={todo}
+            entranceDelay={entrance && index < ENTRANCE_LIMIT ? index * ENTRANCE_STEP : undefined}
             onToggleDone={toggleDone}
             onToggleImportant={toggleImportant}
             onDelete={(id) => deleteTodo.mutate(id)}
