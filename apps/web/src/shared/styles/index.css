@@ -128,3 +128,31 @@ body {
     animation: none;
   }
 }
+
+/* View transition между роутами: перелистывается только область контента, оболочка стоит */
+#main-content {
+  view-transition-name: main-content;
+}
+
+::view-transition-old(main-content) {
+  animation-duration: 0.18s;
+}
+
+::view-transition-new(main-content) {
+  animation: bt-vt-in 0.24s ease both;
+}
+
+@keyframes bt-vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(main-content),
+  ::view-transition-old(main-content),
+  ::view-transition-new(main-content) {
+    animation: none;
+  }
+}

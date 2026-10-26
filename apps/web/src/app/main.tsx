@@ -9,7 +9,12 @@ import { initObservability } from './observability';
 import { AppProviders } from './providers';
 import '@/shared/styles/index.css';
 
-const router = createRouter({ routeTree });
+const router = createRouter({
+  routeTree,
+  // View transition только при смене пути: набор текста в поиске (replace) ее не триггерит;
+  // без поддержки startViewTransition браузером опция игнорируется
+  defaultViewTransition: { types: ({ pathChanged }) => (pathChanged ? ['bt-route'] : false) },
+});
 
 declare module '@tanstack/react-router' {
   interface Register {
