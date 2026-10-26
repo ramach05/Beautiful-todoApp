@@ -70,3 +70,13 @@ body {
     animation: none;
   }
 }
+
+/* Пятно света за курсором: координаты пишутся JS-ом в кастомные свойства через rAF */
+.spotlight {
+  background: radial-gradient(
+    30rem at var(--spot-x, 50%) var(--spot-y, 50%),
+    #fff3d914,
+    #fff3d908 45%,
+    transparent 75%
+  );
+}
