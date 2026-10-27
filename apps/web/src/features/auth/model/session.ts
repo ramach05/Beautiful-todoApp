@@ -33,8 +33,13 @@ export const sessionReady: Promise<void> = (async () => {
     sessionFetched(await mockSession());
     return;
   }
-  const { data, error } = await authClient.getSession();
-  sessionFetched(error ? null : toSession(data?.user));
+  try {
+    const { data, error } = await authClient.getSession();
+    sessionFetched(error ? null : toSession(data?.user));
+  } catch {
+    // Сбой сети/CORS недоступного api — это «нет сессии», а не зависший монтаж приложения
+    sessionFetched(null);
+  }
 })();
 
 /** Известные коды better-auth и свои тексты: INVALID_EMAIL_OR_PASSWORD не подсвечивает, какое поле неверно */
