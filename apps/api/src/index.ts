@@ -19,6 +19,8 @@ const app = await buildApp({
   session: betterAuthResolver(auth),
   auth,
   corsOrigin: env.CORS_ORIGIN.split(','),
+  // В dev web может подняться на любой localhost-порт (5173 занят) — не требовать правки CORS_ORIGIN
+  devLocalhostAnyPort: env.NODE_ENV !== 'production',
   logger: true,
   authRateLimitMax: env.AUTH_RATE_LIMIT_MAX,
   // HSTS работает только за HTTPS, поэтому включается лишь в проде

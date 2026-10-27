@@ -23,8 +23,12 @@ export function buildAuth(db: AuthDb) {
       changeEmail: { enabled: true, updateEmailWithoutVerification: true },
       deleteUser: { enabled: true },
     },
-    // CORS_ORIGIN списком через запятую: origin-проверки better-auth должны знать каждый web-origin
-    trustedOrigins: env.CORS_ORIGIN.split(',').map((origin) => origin.trim()),
+    // CORS_ORIGIN списком через запятую: origin-проверки better-auth должны знать каждый web-origin.
+    // В dev дополнительно любые localhost-порты: Vite занимает следующий порт, если 5173 занят
+    trustedOrigins: [
+      ...env.CORS_ORIGIN.split(',').map((origin) => origin.trim()),
+      ...(env.NODE_ENV === 'production' ? [] : ['http://localhost:*', 'http://127.0.0.1:*']),
+    ],
     // Прод: web и api на разных сайтах (vercel.app / railway.app) - сессионная cookie должна
     // отправляться cross-site, иначе браузер не приложит её к запросам; в dev/e2e оставить lax
     ...(env.NODE_ENV === 'production'

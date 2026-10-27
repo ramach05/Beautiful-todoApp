@@ -1,4 +1,5 @@
 import cors from '@fastify/cors';
+import type { OriginFunction } from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import { fromNodeHeaders } from 'better-auth/node';
@@ -27,6 +28,25 @@ export interface AppOptions {
   hsts?: boolean;
   /** Адреса/CIDR прокси списком через запятую: request.ip берется из XFF только для peer из этого списка */
   trustProxy?: string;
+  /** Dev-режим: к списку corsOrigin добавляются любые localhost/127.0.0.1 порты (Vite уходит на свободный порт) */
+  devLocalhostAnyPort?: boolean;
+}
+
+/** Локальный origin на любом порту: в dev порт web-сервера может сдвинуться с 5173 */
+const DEV_LOCALHOST_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+
+/** Dev CORS: явный whitelist CORS_ORIGIN плюс любые localhost-порты; внешний origin отклоняется */
+function devLocalhostCors(corsOrigins: string | string[] | true): OriginFunction {
+  return (origin, callback) => {
+    if (corsOrigins === true) return callback(null, true);
+    // Без Origin (curl, same-origin) зеркалить нечего
+    if (origin === undefined) return callback(null, false);
+    if (DEV_LOCALHOST_ORIGIN.test(origin)) return callback(null, origin);
+    const listed = Array.isArray(corsOrigins)
+      ? corsOrigins.includes(origin)
+      : corsOrigins === origin;
+    callback(null, listed ? origin : false);
+  };
 }
 
 /** Сборка Fastify-приложения: RPC-эндпоинт oRPC, auth better-auth, healthcheck и CORS */
@@ -53,7 +73,11 @@ export async function buildApp(options: AppOptions): Promise<FastifyInstance> {
     strictTransportSecurity: options.hsts ?? false,
   });
 
-  await app.register(cors, { origin: options.corsOrigin ?? true, credentials: true });
+  const corsOrigins = options.corsOrigin ?? true;
+  await app.register(cors, {
+    origin: options.devLocalhostAnyPort ? devLocalhostCors(corsOrigins) : corsOrigins,
+    credentials: true,
+  });
 
   if (options.auth) {
     await app.register(

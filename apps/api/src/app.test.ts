@@ -16,6 +16,7 @@ import * as schema from './db/schema.js';
 import { todos } from './db/schema.js';
 import { PostgresTodosRepository } from './db/todos-repo.js';
 import { envSchema } from './env.js';
+import { InMemoryTodosRepository } from './testing.js';
 
 const pglite = new PGlite();
 const db = drizzle(pglite, { schema });
@@ -257,4 +258,33 @@ it('env-схема держит дефолт и пропускает пониж�
   const base = { DATABASE_URL: 'postgres://test:test@localhost:5433/test' };
   expect(envSchema.parse(base).AUTH_RATE_LIMIT_MAX).toBe(20);
   expect(envSchema.parse({ ...base, AUTH_RATE_LIMIT_MAX: '3' }).AUTH_RATE_LIMIT_MAX).toBe(3);
+});
+
+it('devLocalhostAnyPort: CORS пропускает любой localhost-порт, внешний origin — нет', async () => {
+  const devApp = await buildApp({
+    todos: new InMemoryTodosRepository(false),
+    session: { resolve: async () => null },
+    corsOrigin: ['http://localhost:5173'],
+    devLocalhostAnyPort: true,
+  });
+  await devApp.listen({ port: 0, host: '127.0.0.1' });
+  try {
+    const address = devApp.server.address();
+    if (typeof address === 'string' || address === null) {
+      throw new Error('Сервер не вернул адрес после listen');
+    }
+    const url = `http://127.0.0.1:${address.port}`;
+
+    // Vite не застал 5173 и уехал на 5175: origin обязан получить echo
+    const moved = await fetch(`${url}/health`, { headers: { origin: 'http://localhost:5175' } });
+    expect(moved.headers.get('access-control-allow-origin')).toBe('http://localhost:5175');
+
+    const listed = await fetch(`${url}/health`, { headers: { origin: 'http://localhost:5173' } });
+    expect(listed.headers.get('access-control-allow-origin')).toBe('http://localhost:5173');
+
+    const foreign = await fetch(`${url}/health`, { headers: { origin: 'http://evil.example' } });
+    expect(foreign.headers.get('access-control-allow-origin')).toBeNull();
+  } finally {
+    await devApp.close();
+  }
 });
