@@ -111,6 +111,8 @@ pnpm dev                                  # web 5173, api 3001, без сбро�
 
 В `apps/web/.env` можно оставить `VITE_USE_MOCKS=1` — тогда web работает совсем без бэкенда и БД (демо-сессия включается автоматически). Для полноценной работы с api выставьте `VITE_USE_MOCKS=0`.
 
+Если `http://localhost:5173` занят другим приложением, Vite сам возьмёт следующий свободный порт (`5174`, `5175`, …). В dev api принимает любой `localhost`-порт — править `CORS_ORIGIN` не нужно; строгий whitelist из `CORS_ORIGIN` действует только в production.
+
 Документация API после запуска: `http://localhost:3001/docs` (Scalar) и `http://localhost:3001/openapi.json`.
 
 Демо-аккаунты (сид): `demo@local.test` / `demo-pass-123` и тестовый `test_user@local.test` / `1234`.
