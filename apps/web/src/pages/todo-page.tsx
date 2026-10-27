@@ -1,5 +1,6 @@
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { TodoAdd } from '@/features/todo-add';
 import { buildTodoSearch, TodoFilterBar } from '@/features/todo-filter';
@@ -22,8 +23,9 @@ const ENTRANCE_STEP = 55;
 
 /** Каркас списка на время загрузки задач: строки той же высоты, что реальные задачи */
 function TodoListSkeleton() {
+  const { t } = useTranslation();
   return (
-    <Skeleton label="Loading todos" className="flex flex-col gap-2">
+    <Skeleton label={t('todos.loading')} className="flex flex-col gap-2">
       {Array.from({ length: 4 }, (_, index) => (
         <div
           key={index}
@@ -41,6 +43,7 @@ function TodoListSkeleton() {
  * Страница todo: серверные задачи из Query, фильтр и поиск из URL (ADR-002).
  */
 export function TodoPage() {
+  const { t } = useTranslation();
   const search = useSearch({ from: '/' });
   const navigate = useNavigate({ from: '/' });
   const todosQuery = useTodos();
@@ -97,9 +100,9 @@ export function TodoPage() {
   if (todosQuery.isError) {
     return (
       <div className="msg-in py-10 text-center" role="alert">
-        <p className="text-xl text-accent">Failed to load todos</p>
+        <p className="text-xl text-accent">{t('todos.load_failed')}</p>
         <Button variant="ghost" className="mt-3" onClick={() => void todosQuery.refetch()}>
-          Retry
+          {t('common.retry')}
         </Button>
       </div>
     );
@@ -115,13 +118,16 @@ export function TodoPage() {
       />
 
       <p className="text-lg text-gray-300" aria-live="polite">
-        {remaining} more to do, {(todosQuery.data?.length ?? 0) - remaining} done
+        {t('todos.count', {
+          count: remaining,
+          done: (todosQuery.data?.length ?? 0) - remaining,
+        })}
       </p>
 
       <ul
         id="todo-list"
         className={cn('flex flex-col gap-2', entrance && 'row-entrance')}
-        aria-label="Todo list"
+        aria-label={t('todos.list_aria')}
       >
         {todos.map((todo, index) => (
           <TodoItem
@@ -135,7 +141,7 @@ export function TodoPage() {
         ))}
         {todos.length === 0 && (
           <li className="rounded-[10px] bg-card px-3 py-6 text-center text-xl text-gray-300">
-            No todos — add your first one
+            {t('todos.empty')}
           </li>
         )}
       </ul>

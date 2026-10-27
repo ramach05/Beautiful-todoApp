@@ -1,4 +1,6 @@
 import type { Todo } from '@bt/shared';
+import { useTranslation } from 'react-i18next';
+
 import { deleteIcon, importantActiveIcon, importantIcon } from '@/shared/ui/assets';
 import { cn } from '@/shared/lib';
 import { Button } from '@/shared/ui/button';
@@ -24,7 +26,10 @@ export function TodoItem({
   onDelete,
   entranceDelay,
 }: TodoItemProps) {
-  const importantLabel = todo.important ? 'Unmark as important' : 'Mark as important';
+  const { t } = useTranslation();
+  const importantLabel = t(
+    todo.important ? 'todos.item.unmark_important' : 'todos.item.mark_important',
+  );
 
   return (
     <li
@@ -70,8 +75,8 @@ export function TodoItem({
         <Button
           variant="icon"
           className="icon-btn-danger"
-          title="Delete"
-          aria-label="Delete todo"
+          title={t('todos.item.delete_title')}
+          aria-label={t('todos.item.delete_aria')}
           onClick={(event) => {
             event.stopPropagation();
             onDelete(todo.id);

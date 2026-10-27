@@ -1,10 +1,12 @@
+import { DEFAULT_LOCALE, type AppLocale } from '@bt/shared';
+
 import type { Todo } from '@/entities/todo';
 
 /** Точка графика: выполнено задач в конкретный день */
 export interface DailyPoint {
   /** Ключ дня в формате YYYY-MM-DD по локальной таймзоне */
   key: string;
-  /** Короткое имя дня недели (Mon) */
+  /** Короткое имя дня недели для локали (Mon / пн) */
   label: string;
   completed: number;
 }
@@ -19,8 +21,12 @@ export interface TodoStats {
   oldestIncomplete: Todo | null;
 }
 
-const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
 const WINDOW_DAYS = 7;
+
+/** Короткое имя дня недели через Intl: подписи графика следуют языку интерфейса */
+function formatWeekday(date: Date, locale: AppLocale): string {
+  return new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(date);
+}
 
 /** Ключ дня YYYY-MM-DD по локальной таймзоне из ISO-строки или Date */
 function dayKey(value: string | Date): string {
@@ -51,10 +57,15 @@ function findOldestIncomplete(todos: readonly Todo[]): Todo | null {
 }
 
 /**
- * Чистая агрегация для /stats. now — опорная дата конца окна (по умолчанию текущая).
- * daily — WINDOW_DAYS последних дней включая now; completed считается по completedAt задачи.
+ * Чистая агрегация для /stats. now — опорная дата конца окна (по умолчанию текущая),
+ * locale — язык подписей дней. daily — WINDOW_DAYS последних дней включая now;
+ * completed считается по completedAt задачи.
  */
-export function computeStats(todos: readonly Todo[], now: Date = new Date()): TodoStats {
+export function computeStats(
+  todos: readonly Todo[],
+  now: Date = new Date(),
+  locale: AppLocale = DEFAULT_LOCALE,
+): TodoStats {
   let active = 0;
   let completed = 0;
   let important = 0;
@@ -73,7 +84,7 @@ export function computeStats(todos: readonly Todo[], now: Date = new Date()): To
       (acc, todo) => (todo.completedAt && dayKey(todo.completedAt) === key ? acc + 1 : acc),
       0,
     );
-    daily.push({ key, label: WEEKDAY_LABELS[day.getDay()] ?? '', completed: count });
+    daily.push({ key, label: formatWeekday(day, locale), completed: count });
   }
 
   return {

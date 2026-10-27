@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import type { DailyPoint } from '../model/stats';
 
 const WIDTH = 320;
@@ -12,6 +14,7 @@ const GAP = 8;
  * Высота столбца масштабируется относительно максимума окна.
  */
 export function StatsChart({ data }: { data: DailyPoint[] }) {
+  const { t } = useTranslation();
   const max = Math.max(1, ...data.map((point) => point.completed));
   const innerWidth = WIDTH - PAD_X * 2;
   const barWidth = (innerWidth - GAP * (data.length - 1)) / data.length;
@@ -23,7 +26,7 @@ export function StatsChart({ data }: { data: DailyPoint[] }) {
       viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
       className="h-auto w-full"
       role="img"
-      aria-label={`Completed per day over the last ${data.length} days, ${total} total`}
+      aria-label={t('stats.chart_aria', { days: data.length, total })}
     >
       {data.map((point, index) => {
         const barHeight = (point.completed / max) * trackHeight;

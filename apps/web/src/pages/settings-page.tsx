@@ -1,6 +1,7 @@
 import { useNavigate } from '@tanstack/react-router';
 import { useUnit } from 'effector-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
   type AccountResult,
@@ -22,6 +23,7 @@ type Feedback = { tone: 'ok' | 'err'; text: string };
  * В демо-режиме действия честно возвращают недоступность вместо падения.
  */
 export function SettingsPage() {
+  const { t } = useTranslation();
   const session = useUnit($session);
   const navigate = useNavigate();
 
@@ -39,10 +41,10 @@ export function SettingsPage() {
     const result = await action();
     setPending(null);
     if (result.ok) {
-      setFeedback({ tone: 'ok', text: result.message ?? 'Done.' });
+      setFeedback({ tone: 'ok', text: t(result.message ?? 'settings.done') });
       if (leaveApp) await navigate({ to: '/login' });
     } else {
-      setFeedback({ tone: 'err', text: result.error });
+      setFeedback({ tone: 'err', text: t(result.error) });
     }
   }
 
@@ -51,10 +53,11 @@ export function SettingsPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-6">
-      <h2 className="text-3xl">Settings</h2>
+      <h2 className="text-3xl">{t('settings.title')}</h2>
 
       <p className="text-lg text-gray-300">
-        Signed in as <span className="text-white">{session?.user.email ?? '—'}</span>
+        {t('settings.signed_in_as')}{' '}
+        <span className="text-white">{session?.user.email ?? '—'}</span>
       </p>
 
       {feedback && (
@@ -72,7 +75,7 @@ export function SettingsPage() {
 
       <section className="flex flex-col gap-2" aria-labelledby="settings-email">
         <h3 id="settings-email" className="text-xl">
-          Change email
+          {t('settings.change_email')}
         </h3>
         <form
           className="flex flex-col gap-2"
@@ -84,22 +87,22 @@ export function SettingsPage() {
           <TextField
             type="email"
             className="w-full"
-            placeholder="New email"
-            aria-label="New email"
+            placeholder={t('settings.new_email')}
+            aria-label={t('settings.new_email')}
             autoComplete="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
           />
           <Button type="submit" disabled={disabled} aria-busy={busy('email')}>
             {busy('email') && <Spinner />}
-            Update email
+            {t('settings.update_email')}
           </Button>
         </form>
       </section>
 
       <section className="flex flex-col gap-2" aria-labelledby="settings-password">
         <h3 id="settings-password" className="text-xl">
-          Change password
+          {t('settings.change_password')}
         </h3>
         <form
           className="flex flex-col gap-2"
@@ -111,8 +114,8 @@ export function SettingsPage() {
           <TextField
             type="password"
             className="w-full"
-            placeholder="Current password"
-            aria-label="Current password"
+            placeholder={t('settings.current_password')}
+            aria-label={t('settings.current_password')}
             autoComplete="current-password"
             value={currentPassword}
             onChange={(event) => setCurrentPassword(event.target.value)}
@@ -120,22 +123,22 @@ export function SettingsPage() {
           <TextField
             type="password"
             className="w-full"
-            placeholder="New password"
-            aria-label="New password"
+            placeholder={t('settings.new_password')}
+            aria-label={t('settings.new_password')}
             autoComplete="new-password"
             value={newPassword}
             onChange={(event) => setNewPassword(event.target.value)}
           />
           <Button type="submit" disabled={disabled} aria-busy={busy('password')}>
             {busy('password') && <Spinner />}
-            Change password
+            {t('settings.change_password')}
           </Button>
         </form>
       </section>
 
       <section className="flex flex-col gap-2" aria-labelledby="settings-sessions">
         <h3 id="settings-sessions" className="text-xl">
-          Sessions
+          {t('settings.sessions')}
         </h3>
         <Button
           variant="ghost"
@@ -144,13 +147,13 @@ export function SettingsPage() {
           onClick={() => void run('revoke', signOutEverywhere, true)}
         >
           {busy('revoke') && <Spinner />}
-          Sign out everywhere
+          {t('settings.sign_out_everywhere')}
         </Button>
       </section>
 
       <section className="flex flex-col gap-2" aria-labelledby="settings-delete">
         <h3 id="settings-delete" className="text-xl">
-          Delete account
+          {t('settings.delete_account')}
         </h3>
         <form
           className="flex flex-col gap-2"
@@ -162,15 +165,15 @@ export function SettingsPage() {
           <TextField
             type="password"
             className="w-full"
-            placeholder="Confirm with your password"
-            aria-label="Confirm password"
+            placeholder={t('settings.confirm_placeholder')}
+            aria-label={t('settings.confirm_aria')}
             autoComplete="current-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
           />
           <Button variant="danger" type="submit" disabled={disabled} aria-busy={busy('delete')}>
             {busy('delete') && <Spinner />}
-            Delete account
+            {t('settings.delete_account')}
           </Button>
         </form>
       </section>

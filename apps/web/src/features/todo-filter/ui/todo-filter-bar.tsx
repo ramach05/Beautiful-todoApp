@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import type { TodoFilter } from '@/entities/todo';
 import { checkIcon, clearAllIcon, doneIcon } from '@/shared/ui/assets';
 import { Button } from '@/shared/ui/button';
@@ -10,14 +12,15 @@ interface TodoFilterProps {
   onSearchChange: (search: string) => void;
 }
 
-const options: Array<{ value: TodoFilter; label: string; icon: string }> = [
-  { value: 'all', label: 'All', icon: clearAllIcon },
-  { value: 'active', label: 'Active', icon: checkIcon },
-  { value: 'done', label: 'Done', icon: doneIcon },
+const options: Array<{ value: TodoFilter; icon: string }> = [
+  { value: 'all', icon: clearAllIcon },
+  { value: 'active', icon: checkIcon },
+  { value: 'done', icon: doneIcon },
 ];
 
 /** Поиск и сегментированный переключатель статуса; значения приходят из URL, изменения отдаются наверх */
 export function TodoFilterBar({ filter, search, onFilterChange, onSearchChange }: TodoFilterProps) {
+  const { t } = useTranslation();
   return (
     <form
       role="search"
@@ -25,20 +28,20 @@ export function TodoFilterBar({ filter, search, onFilterChange, onSearchChange }
       onSubmit={(event) => event.preventDefault()}
     >
       <label className="sr-only" htmlFor="todo-search">
-        Search todos
+        {t('todos.search_label')}
       </label>
       <TextField
         id="todo-search"
         type="search"
         variant="search"
         className="min-w-40 flex-1"
-        placeholder="Search Todos"
+        placeholder={t('todos.search_placeholder')}
         autoComplete="off"
         value={search}
         onChange={(event) => onSearchChange(event.target.value)}
       />
 
-      <div role="group" aria-label="Status filter" className="flex flex-wrap gap-1">
+      <div role="group" aria-label={t('todos.filter_aria')} className="flex flex-wrap gap-1">
         {options.map((option) => (
           <Button
             key={option.value}
@@ -48,7 +51,7 @@ export function TodoFilterBar({ filter, search, onFilterChange, onSearchChange }
             onClick={() => onFilterChange(option.value)}
           >
             <img src={option.icon} alt="" className="size-5" />
-            {option.label}
+            {t(`todos.filters.${option.value}`)}
           </Button>
         ))}
       </div>

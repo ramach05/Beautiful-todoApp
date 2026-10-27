@@ -8,6 +8,7 @@ const SEED_TITLES = ['Buy groceries', 'Call mom', 'Do homework', 'Iron the shirt
 export const DEMO_USER: AppUser = {
   id: '00000000-0000-4000-8000-000000000001',
   email: 'demo@local.test',
+  locale: 'en',
 };
 
 type OwnedTodo = Todo & { userId: string };

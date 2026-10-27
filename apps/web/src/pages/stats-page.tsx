@@ -1,4 +1,7 @@
 import { Button } from '@/shared/ui/button';
+import { DEFAULT_LOCALE, parseLocale } from '@bt/shared';
+import { useTranslation } from 'react-i18next';
+
 import { StatsChart, computeStats } from '@/features/todo-stats';
 import { useTodos } from '@/entities/todo';
 
@@ -21,6 +24,7 @@ function StatCard({ label, value }: { label: string; value: number }) {
  * агрегация вынесена в чистую функцию computeStats.
  */
 export function StatsPage() {
+  const { t, i18n } = useTranslation();
   const todosQuery = useTodos();
 
   if (todosQuery.isPending) {
@@ -30,28 +34,32 @@ export function StatsPage() {
   if (todosQuery.isError) {
     return (
       <div className="py-10 text-center" role="alert">
-        <p className="text-xl text-accent">Failed to load stats</p>
+        <p className="text-xl text-accent">{t('stats.load_failed')}</p>
         <Button variant="ghost" className="mt-3" onClick={() => void todosQuery.refetch()}>
-          Retry
+          {t('common.retry')}
         </Button>
       </div>
     );
   }
 
-  const stats = computeStats(todosQuery.data ?? []);
+  const stats = computeStats(
+    todosQuery.data ?? [],
+    new Date(),
+    parseLocale(i18n.language) ?? DEFAULT_LOCALE,
+  );
 
   return (
     <div className="flex flex-col gap-5">
-      <h2 className="text-3xl">Statistics</h2>
+      <h2 className="text-3xl">{t('stats.title')}</h2>
 
       <section
         className="grid grid-cols-1 gap-3 xs:grid-cols-2 sm:grid-cols-4"
-        aria-label="Aggregates"
+        aria-label={t('stats.aggregates_aria')}
       >
-        <StatCard label="Total" value={stats.total} />
-        <StatCard label="Active" value={stats.active} />
-        <StatCard label="Completed" value={stats.completed} />
-        <StatCard label="Important" value={stats.important} />
+        <StatCard label={t('stats.total')} value={stats.total} />
+        <StatCard label={t('stats.active')} value={stats.active} />
+        <StatCard label={t('stats.completed')} value={stats.completed} />
+        <StatCard label={t('stats.important')} value={stats.important} />
       </section>
 
       <section
@@ -59,7 +67,7 @@ export function StatsPage() {
         aria-labelledby="stats-chart-heading"
       >
         <h3 id="stats-chart-heading" className="mb-3 text-xl">
-          Completed per day (last 7 days)
+          {t('stats.chart_heading')}
         </h3>
         <StatsChart data={stats.daily} />
       </section>
@@ -69,10 +77,10 @@ export function StatsPage() {
         aria-labelledby="stats-oldest-heading"
       >
         <h3 id="stats-oldest-heading" className="mb-1 text-xl">
-          Oldest unfinished
+          {t('stats.oldest_heading')}
         </h3>
         <p className="break-words text-lg text-gray-300">
-          {stats.oldestIncomplete?.title ?? 'No unfinished todos'}
+          {stats.oldestIncomplete?.title ?? t('stats.oldest_empty')}
         </p>
       </section>
     </div>

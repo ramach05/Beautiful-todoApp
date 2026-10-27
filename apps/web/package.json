@@ -23,9 +23,11 @@
     "better-auth": "^1.7.12",
     "effector": "^23.4.4",
     "effector-react": "^23.3.0",
+    "i18next": "^26.5.11",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-hook-form": "^7.90.0",
+    "react-i18next": "^17.1.9",
     "zod": "^4.6.7"
   },
   "devDependencies": {

@@ -1,9 +1,10 @@
-import type { CreateTodoInput, Todo, UpdateTodoInput } from '@bt/shared';
+import type { AppLocale, CreateTodoInput, Todo, UpdateTodoInput } from '@bt/shared';
 
 /** Минимальный профиль аутентифицированного пользователя для слоя данных */
 export interface AppUser {
   id: string;
   email: string;
+  locale: AppLocale;
 }
 
 /** Источник пользователя запроса: better-auth в проде, фиксированная сессия в моках */

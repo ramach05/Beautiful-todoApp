@@ -37,14 +37,14 @@ describe('LoginPage', () => {
 
   it('показывает ошибку отказа авторизации и не пускает дальше', async () => {
     const onSuccess = vi.fn();
-    vi.mocked(signIn).mockResolvedValueOnce('Invalid credentials');
+    vi.mocked(signIn).mockResolvedValueOnce('auth.errors.invalid_credentials');
     render(<LoginPage onSuccess={onSuccess} />);
 
     await userEvent.type(screen.getByLabelText('Email'), 'demo@local.test');
     await userEvent.type(screen.getByLabelText('Password'), 'wrong-password');
     await userEvent.click(screen.getByRole('button', { name: 'Sign in' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Invalid credentials');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Invalid email or password');
     expect(onSuccess).not.toHaveBeenCalled();
   });
 });

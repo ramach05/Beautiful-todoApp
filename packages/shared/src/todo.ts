@@ -18,9 +18,9 @@ export type Todo = z.infer<typeof todoSchema>;
 /** Ответ списка задач */
 export const todoListSchema = z.array(todoSchema);
 
-/** Вход создания: id и флаги по умолчанию формирует сервер */
+/** Вход создания: id и флаги по умолчанию формирует сервер; тексты ошибок переводит UI по коду issues */
 export const createTodoInputSchema = z.object({
-  title: z.string().trim().min(1, 'Title is required').max(200),
+  title: z.string().trim().min(1).max(200),
 });
 export type CreateTodoInput = z.infer<typeof createTodoInputSchema>;
 

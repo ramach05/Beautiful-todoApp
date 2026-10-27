@@ -50,9 +50,9 @@ it('createTodoInputSchema отклоняет пустой и слишком дл
   expect(createTodoInputSchema.safeParse({ title: 'a'.repeat(201) }).success).toBe(false);
 });
 
-it('createTodoInputSchema отдает сообщение об ошибке для пустого заголовка', () => {
-  const message = createTodoInputSchema.safeParse({ title: '' }).error?.issues[0]?.message;
-  expect(message).toBe('Title is required');
+it('createTodoInputSchema отдает код too_small для пустого заголовка: текст переводит UI', () => {
+  const issue = createTodoInputSchema.safeParse({ title: '' }).error?.issues[0];
+  expect(issue?.code).toBe('too_small');
 });
 
 it('updateTodoInputSchema принимает любой непустой патч', () => {

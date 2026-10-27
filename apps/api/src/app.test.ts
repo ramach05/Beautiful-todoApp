@@ -208,9 +208,35 @@ it('пустой заголовок отклоняется валидацией 
   }
 });
 
+it('locale хранится в профиле: дефолт en, запись update-user, произвольное значение отклоняется', async () => {
+  const cookie = await signUp('locale@test.local');
+  const headers = { cookie, 'content-type': 'application/json' };
+  // Минимальная форма ответа get-session для проверок теста
+  type SessionResponse = { user?: { locale?: string } };
+
+  const getResponse = () => fetch(`${httpUrl}/api/auth/get-session`, { headers });
+  const sessionBody = (await (await getResponse()).json()) as SessionResponse;
+  expect(sessionBody.user?.locale).toBe('en');
+
+  const updated = await fetch(`${httpUrl}/api/auth/update-user`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ locale: 'ru' }),
+  });
+  expect(updated.status).toBe(200);
+  const afterUpdate = (await (await getResponse()).json()) as SessionResponse;
+  expect(afterUpdate.user?.locale).toBe('ru');
+
+  const rejected = await fetch(`${httpUrl}/api/auth/update-user`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ locale: 'de' }),
+  });
+  expect(rejected.status).toBe(400);
+});
+
 // Приложение с пониженным лимитом auth POST поднимается лениво: отдельный порт вне основного app
 let limitedAppPromise: Promise<FastifyInstance> | undefined;
-
 async function limitedUrl(): Promise<string> {
   limitedAppPromise ??= (async () => {
     const auth = buildAuth(db);

@@ -1,6 +1,7 @@
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import type { PgDatabase, PgQueryResultHKT } from 'drizzle-orm/pg-core';
+import { appLocaleSchema, DEFAULT_LOCALE, parseLocale } from '@bt/shared';
 
 import { env } from './config.js';
 import { DEV_AUTH_SECRET } from './env.js';
@@ -22,6 +23,17 @@ export function buildAuth(db: AuthDb) {
     user: {
       changeEmail: { enabled: true, updateEmailWithoutVerification: true },
       deleteUser: { enabled: true },
+      // Язык интерфейса: колонка user.locale, приезжает в getSession, пишется через updateUser/signUp.
+      // validator не пускает в БД произвольные строки из публичного update-user
+      additionalFields: {
+        locale: {
+          type: 'string',
+          required: false,
+          defaultValue: DEFAULT_LOCALE,
+          input: true,
+          validator: { input: appLocaleSchema },
+        },
+      },
     },
     // CORS_ORIGIN списком через запятую: origin-проверки better-auth должны знать каждый web-origin.
     // В dev дополнительно любые localhost-порты: Vite занимает следующий порт, если 5173 занят
@@ -51,7 +63,11 @@ export function betterAuthResolver(auth: Auth): SessionResolver {
       if (!session) {
         return null;
       }
-      return { id: session.user.id, email: session.user.email };
+      return {
+        id: session.user.id,
+        email: session.user.email,
+        locale: parseLocale(session.user.locale) ?? DEFAULT_LOCALE,
+      };
     },
   };
 }

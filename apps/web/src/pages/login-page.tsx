@@ -1,16 +1,20 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { ReactNode } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import { signIn } from '@/features/auth';
+import { type AuthErrorKey, signIn } from '@/features/auth';
 import { Button } from '@/shared/ui/button';
+import { fieldErrorKey } from '@/shared/i18n';
 import { Spinner } from '@/shared/ui/spinner';
 import { TextField } from '@/shared/ui/text-field';
 
+// Сообщения не переводим: UI маппит code ошибки zod на ключ словаря через fieldErrorKey
 const loginSchema = z.object({
-  email: z.email('Enter an email'),
-  password: z.string().min(4, 'At least 4 characters'),
+  email: z.email(),
+  password: z.string().min(4),
 });
 
 type LoginValues = z.infer<typeof loginSchema>;
@@ -22,15 +26,17 @@ export interface LoginPageProps {
 }
 
 export function LoginPage({ onSuccess, footer }: LoginPageProps) {
-  const { register, handleSubmit, setError, formState } = useForm<LoginValues>({
+  const { t } = useTranslation();
+  const { register, handleSubmit, formState } = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
   });
+  const [rootError, setRootError] = useState<AuthErrorKey | null>(null);
 
   const onSubmit = handleSubmit(async (values) => {
     const failure = await signIn(values.email, values.password);
     if (failure) {
-      setError('root', { message: failure });
+      setRootError(failure);
       return;
     }
     onSuccess();
@@ -42,16 +48,16 @@ export function LoginPage({ onSuccess, footer }: LoginPageProps) {
       noValidate
       onSubmit={(event) => void onSubmit(event)}
     >
-      <h2 className="text-center text-3xl">Sign in</h2>
+      <h2 className="text-center text-3xl">{t('auth.sign_in')}</h2>
       <div className="flex flex-col gap-1">
         <label className="sr-only" htmlFor="login-email">
-          Email
+          {t('auth.email')}
         </label>
         <TextField
           id="login-email"
           type="email"
           className="w-full"
-          placeholder="Email"
+          placeholder={t('auth.email')}
           autoComplete="email"
           aria-invalid={formState.errors.email !== undefined}
           aria-describedby={formState.errors.email ? 'login-email-error' : undefined}
@@ -59,19 +65,19 @@ export function LoginPage({ onSuccess, footer }: LoginPageProps) {
         />
         {formState.errors.email && (
           <p id="login-email-error" role="alert" className="pl-1 text-sm text-accent">
-            {formState.errors.email.message}
+            {t(fieldErrorKey('email', formState.errors.email.type))}
           </p>
         )}
       </div>
       <div className="flex flex-col gap-1">
         <label className="sr-only" htmlFor="login-password">
-          Password
+          {t('auth.password')}
         </label>
         <TextField
           id="login-password"
           type="password"
           className="w-full"
-          placeholder="Password"
+          placeholder={t('auth.password')}
           autoComplete="current-password"
           aria-invalid={formState.errors.password !== undefined}
           aria-describedby={formState.errors.password ? 'login-password-error' : undefined}
@@ -79,18 +85,18 @@ export function LoginPage({ onSuccess, footer }: LoginPageProps) {
         />
         {formState.errors.password && (
           <p id="login-password-error" role="alert" className="pl-1 text-sm text-accent">
-            {formState.errors.password.message}
+            {t(fieldErrorKey('password', formState.errors.password.type))}
           </p>
         )}
       </div>
-      {formState.errors.root && (
+      {rootError && (
         <p role="alert" className="pl-1 text-sm text-accent">
-          {formState.errors.root.message}
+          {t(rootError)}
         </p>
       )}
       <Button type="submit" disabled={formState.isSubmitting} aria-busy={formState.isSubmitting}>
         {formState.isSubmitting && <Spinner />}
-        Sign in
+        {t('auth.sign_in')}
       </Button>
       {footer && <div className="text-center text-sm">{footer}</div>}
     </form>

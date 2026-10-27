@@ -40,6 +40,9 @@ describe('computeStats', () => {
     const { daily } = computeStats(todos, now);
     expect(daily).toHaveLength(7);
     expect(daily.at(-1)).toMatchObject({ key: '2026-10-23', completed: 1 });
+    // Подписи дней — Intl по локали: en short-формат без точки
+    expect(daily.at(-1)?.label).toBe('Fri');
+    expect(computeStats(todos, now, 'ru').daily.at(-1)?.label).toBe('пт');
     expect(daily.find((point) => point.key === '2026-10-21')?.completed).toBe(1);
     // выполненные вне окна (2026-09-01) не попадают ни в один из 7 дней
     expect(daily.reduce((sum, point) => sum + point.completed, 0)).toBe(2);

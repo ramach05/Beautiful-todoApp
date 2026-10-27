@@ -5,12 +5,13 @@ import { requireSession } from '../guards';
 import { todoKeys } from '@/entities/todo';
 import { StatsPageSuspense } from '@/pages/stats-skeleton';
 import { api, queryClient } from '@/shared/api';
+import { i18n } from '@/shared/i18n';
 
 // Ленивый чанк страницы: отдельно грузится только код самой статистики
 const StatsPage = lazy(() => import('@/pages/stats-page').then((m) => ({ default: m.StatsPage })));
 
 export const Route = createFileRoute('/stats')({
-  head: () => ({ meta: [{ title: 'Beautiful Todo — Stats' }] }),
+  head: () => ({ meta: [{ title: i18n.t('doc_title.stats') }] }),
   beforeLoad: requireSession,
   component: () => (
     <StatsPageSuspense>

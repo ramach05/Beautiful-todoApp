@@ -1,4 +1,5 @@
 import { Suspense, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Skeleton, SkeletonBlock } from '@/shared/ui/skeleton';
 
@@ -6,6 +7,7 @@ const cardClass = 'lift rounded-[10px] bg-card-strong px-3 py-4 text-center ring
 
 /** Каркас контента статистики: четыре карточки и область графика */
 export function StatsContentSkeleton() {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-4">
       <SkeletonBlock className="h-8 w-40" />
@@ -18,7 +20,7 @@ export function StatsContentSkeleton() {
         ))}
       </div>
       <Skeleton
-        label="Loading chart"
+        label={t('stats.loading_chart')}
         className="rounded-[10px] bg-card-strong p-4 ring-1 ring-ring-soft"
       >
         <SkeletonBlock className="h-5 w-52" />

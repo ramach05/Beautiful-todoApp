@@ -1,9 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { createTodoInputSchema, type CreateTodoInput } from '@bt/shared';
+
 import { addTodoIcon } from '@/shared/ui/assets';
 import { Button } from '@/shared/ui/button';
+import { fieldErrorKey } from '@/shared/i18n';
 import { Spinner } from '@/shared/ui/spinner';
 import { TextField } from '@/shared/ui/text-field';
 
@@ -11,6 +14,7 @@ import { useAddTodo } from '@/entities/todo';
 
 /** Форма добавления: валидация общим zod-контрактом, мутация с инвалидацией кэша */
 export function TodoAdd() {
+  const { t } = useTranslation();
   const addTodo = useAddTodo();
   const [added, setAdded] = useState(false);
 
@@ -35,17 +39,17 @@ export function TodoAdd() {
       onSubmit={(event) => void onSubmit(event)}
     >
       <h2 id="todo-add-heading" className="sr-only">
-        Add a todo
+        {t('todos.add_heading')}
       </h2>
       <div className="flex flex-wrap items-center gap-2">
         <label className="sr-only" htmlFor="todo-title">
-          New todo title
+          {t('todos.title_label')}
         </label>
         <TextField
           id="todo-title"
           type="text"
           className="min-w-40 flex-1 text-xl"
-          placeholder="New todo"
+          placeholder={t('todos.title_placeholder')}
           autoComplete="off"
           aria-invalid={formState.errors.title !== undefined}
           aria-describedby={formState.errors.title ? 'todo-title-error' : undefined}
@@ -57,17 +61,17 @@ export function TodoAdd() {
           ) : (
             <img src={addTodoIcon} alt="" aria-hidden className="size-6" />
           )}
-          Add Todo
+          {t('todos.add_button')}
         </Button>
       </div>
       {formState.errors.title && (
         <p id="todo-title-error" role="alert" className="msg-in pl-1 text-base text-accent">
-          {formState.errors.title.message}
+          {t(fieldErrorKey('title', formState.errors.title.type))}
         </p>
       )}
       {added && !addTodo.isPending && (
         <p className="msg-in pl-1 text-base text-gray-300" aria-live="polite">
-          Todo added
+          {t('todos.added')}
         </p>
       )}
     </form>

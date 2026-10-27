@@ -1,0 +1,139 @@
+{
+  "common": {
+    "retry": "Повторить"
+  },
+  "header": {
+    "skip": "Перейти к содержимому",
+    "title": "Красивый список задач",
+    "nav_aria": "Основная навигация",
+    "nav": {
+      "todo": "Задачи",
+      "stats": "Статистика",
+      "settings": "Настройки"
+    },
+    "sign_out": "Выйти"
+  },
+  "footer": {
+    "links_aria": "Ссылки автора"
+  },
+  "not_found": {
+    "title": "Страница не найдена",
+    "body": "Запрошенной страницы не существует.",
+    "back": "На главную"
+  },
+  "doc_title": {
+    "app": "Beautiful Todo",
+    "sign_in": "Beautiful Todo — Вход",
+    "sign_up": "Beautiful Todo — Регистрация",
+    "stats": "Beautiful Todo — Статистика",
+    "settings": "Beautiful Todo — Настройки"
+  },
+  "auth": {
+    "sign_in": "Войти",
+    "sign_up": "Регистрация",
+    "create_account": "Создать аккаунт",
+    "email": "Эл. почта",
+    "password": "Пароль",
+    "name": "Имя",
+    "no_account": "Нет аккаунта? Зарегистрируйтесь",
+    "have_account": "Уже есть аккаунт? Войдите",
+    "errors": {
+      "invalid_email": "Введите корректный адрес почты",
+      "invalid_password": "Введите пароль",
+      "invalid_credentials": "Неверная почта или пароль",
+      "email_not_verified": "Почта не подтверждена",
+      "email_exists": "Аккаунт с такой почтой уже существует",
+      "too_many": "Слишком много попыток. Повторите через минуту",
+      "generic": "Что-то пошло не так. Попробуйте ещё раз"
+    },
+    "account": {
+      "demo_unavailable": "Управление аккаунтом недоступно в демо-режиме.",
+      "email_updated": "Адрес почты обновлён.",
+      "password_updated": "Пароль обновлён.",
+      "sessions_revoked": "Все сессии завершены.",
+      "email_failed": "Не удалось обновить почту",
+      "password_failed": "Не удалось изменить пароль",
+      "revoke_failed": "Не удалось завершить сессии",
+      "delete_failed": "Не удалось удалить аккаунт"
+    }
+  },
+  "settings": {
+    "title": "Настройки",
+    "signed_in_as": "Вы вошли как",
+    "done": "Готово.",
+    "change_email": "Смена почты",
+    "new_email": "Новая почта",
+    "update_email": "Обновить почту",
+    "change_password": "Смена пароля",
+    "current_password": "Текущий пароль",
+    "new_password": "Новый пароль",
+    "sessions": "Сессии",
+    "sign_out_everywhere": "Выйти на всех устройствах",
+    "delete_account": "Удаление аккаунта",
+    "confirm_placeholder": "Подтвердите паролем",
+    "confirm_aria": "Пароль для подтверждения"
+  },
+  "todos": {
+    "add_heading": "Добавление задачи",
+    "title_label": "Заголовок новой задачи",
+    "title_placeholder": "Новая задача",
+    "add_button": "Добавить",
+    "added": "Задача добавлена",
+    "search_label": "Поиск задач",
+    "search_placeholder": "Поиск по задачам",
+    "filter_aria": "Фильтр по статусу",
+    "filters": {
+      "all": "Все",
+      "active": "Активные",
+      "done": "Выполненные"
+    },
+    "count": "Осталось {{count}} задачи, выполнено {{done}}",
+    "count_one": "Осталась {{count}} задача, выполнено {{done}}",
+    "count_few": "Осталось {{count}} задачи, выполнено {{done}}",
+    "count_many": "Осталось {{count}} задач, выполнено {{done}}",
+    "list_aria": "Список задач",
+    "empty": "Задач нет — добавьте первую",
+    "load_failed": "Не удалось загрузить задачи",
+    "loading": "Загрузка задач",
+    "item": {
+      "unmark_important": "Снять отметку важности",
+      "mark_important": "Отметить как важную",
+      "delete_title": "Удалить",
+      "delete_aria": "Удалить задачу"
+    }
+  },
+  "stats": {
+    "title": "Статистика",
+    "aggregates_aria": "Агрегаты",
+    "total": "Всего",
+    "active": "Активные",
+    "completed": "Выполнено",
+    "important": "Важные",
+    "chart_heading": "Выполнено по дням (последние 7 дней)",
+    "chart_aria": "Выполнено по дням за последние {{days}} дней, всего {{total}}",
+    "oldest_heading": "Самая старая незавершённая",
+    "oldest_empty": "Незавершённых задач нет",
+    "load_failed": "Не удалось загрузить статистику",
+    "loading_chart": "Загрузка графика"
+  },
+  "locale": {
+    "en": "English",
+    "ru": "Русский"
+  },
+  "validation": {
+    "fallback": "Проверьте введённое значение",
+    "title": {
+      "required": "Укажите заголовок",
+      "too_long": "Заголовок слишком длинный (максимум 200 символов)"
+    },
+    "email": {
+      "invalid": "Введите адрес почты"
+    },
+    "password": {
+      "short": "Минимум 4 символа"
+    },
+    "name": {
+      "short": "Введите имя"
+    }
+  }
+}
