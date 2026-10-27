@@ -4,7 +4,7 @@ import { afterEach, beforeEach } from 'vitest';
 
 import { signOutStarted } from '@/features/auth';
 
-import { mockTodos } from '../mocks/mock-client';
+import { mockTodos } from '@/shared/mocks';
 
 // Модульные singleton-состояния (данные мока) сбрасываются между тестами; фильтры живут в URL роута
 beforeEach(() => mockTodos.reset());

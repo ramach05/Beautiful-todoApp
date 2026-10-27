@@ -2,7 +2,7 @@ import { createMemoryHistory, createRouter, RouterProvider } from '@tanstack/rea
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { routeTree } from './routeTree.gen';
+import { routeTree } from '@/app/routeTree.gen';
 
 describe('404', () => {
   it('показывает страницу Not found со ссылкой на главную для неизвестного маршрута', async () => {

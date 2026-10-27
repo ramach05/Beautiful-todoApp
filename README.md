@@ -66,14 +66,14 @@ scripts         dev-запуск одной командой, оптимизац
 
 `apps/web` построен по FSD v2; связи и структура проверяются линтером steiger — `pnpm fsd:check` (входит в CI-quality):
 
-| Слой        | Содержимое                                                                                                                                             |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `app/`      | composition root: `main.tsx`, провайдеры, observability, `routes/` — `/`, `/login`, `/register`, `/stats`, `/settings`, 404                            |
-| `widgets/`  | каркасы страниц: `layout` (header с навигацией, footer, shell, city-background)                                                                        |
-| `features/` | пользовательские действия: `auth` (сессия и действия аккаунта), `todo-add`, `todo-filter` (схема search-параметров), `todo-stats` (агрегация и график) |
-| `entities/` | доменные объекты: `todo` (типы, Query-хуки, `TodoItem`)                                                                                                |
-| `pages/`    | страницы: todo / login / register / stats / settings                                                                                                   |
-| `shared/`   | фундамент: `api` (oRPC-клиент и QueryClient), `lib` (`cn`, `pointer-ambient`), `ui` (`assets`, `spinner`, `skeleton`), `styles`                        |
+| Слой        | Содержимое                                                                                                                                                                    |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/`      | composition root: `main.tsx`, провайдеры, observability, `routes/` — `/`, `/login`, `/register`, `/stats`, `/settings`, 404                                                   |
+| `widgets/`  | каркасы страниц: `layout` (header с навигацией, footer, shell, city-background)                                                                                               |
+| `features/` | пользовательские действия: `auth` (сессия и действия аккаунта), `todo-add`, `todo-filter` (схема search-параметров), `todo-stats` (агрегация и график)                        |
+| `entities/` | доменные объекты: `todo` (типы, Query-хуки, `TodoItem`)                                                                                                                       |
+| `pages/`    | страницы: todo / login / register / stats / settings                                                                                                                          |
+| `shared/`   | фундамент: `api` (oRPC-клиент и QueryClient), `lib` (`cn`, `pointer-ambient`), `mocks` (in-process oRPC-мок для dev/тестов), `ui` (`assets`, `spinner`, `skeleton`), `styles` |
 
 Правила, которые соблюдает код и за которыми следит steiger:
 
@@ -82,7 +82,7 @@ scripts         dev-запуск одной командой, оптимизац
 - слайс импортируется только через public API — `index.ts` этого слайса;
 - слои в путях видны через алиас `@/*` (→ `apps/web/src/*`), относительные импорты — только внутри слайса;
 - серверное состояние (Query) живёт в `entities/*/model`, клиентское (Effector) — в `features/*/model`, фильтры и поиск — в URL роута — [ADR-002](./docs/adr/0002-state-management.md);
-- dev/test-инфраструктура (`mocks/`, `tests/`) лежит вне `src` и не является кодом продукта.
+- dev-мок oRPC лежит в `shared/mocks` и подгружается лениво — в прод-бандл не попадает; интеграционные тесты (`tests/`) живут вне `src` и не являются кодом продукта.
 
 Исключения из правил — только точечные и мотивированные, зафиксированы в `apps/web/steiger.config.ts`.
 

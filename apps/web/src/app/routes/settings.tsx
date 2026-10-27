@@ -1,15 +1,11 @@
-import { createFileRoute, redirect } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 
-import { $session, sessionReady } from '@/features/auth';
 import { SettingsPage } from '@/pages/settings-page';
+
+import { requireSession } from '../guards';
 
 export const Route = createFileRoute('/settings')({
   head: () => ({ meta: [{ title: 'Beautiful Todo — Settings' }] }),
-  beforeLoad: async () => {
-    await sessionReady;
-    if (!$session.getState()) {
-      throw redirect({ to: '/login' });
-    }
-  },
+  beforeLoad: requireSession,
   component: SettingsPage,
 });

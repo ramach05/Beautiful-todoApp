@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 
 import { sessionReady, signIn } from '@/features/auth';
 
-import { routeTree } from './routeTree.gen';
+import { routeTree } from '@/app/routeTree.gen';
 
 describe('навигация в header', () => {
   it('показывает Todo/Stats/Settings и помечает активный маршрут', async () => {
