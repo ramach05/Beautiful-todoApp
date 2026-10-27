@@ -8,7 +8,7 @@ function RegisterComponent() {
     <RegisterPage
       onSuccess={() => void navigate({ to: '/' })}
       footer={
-        <Link className="focus-ring rounded" to="/login">
+        <Link className="nav-link focus-ring rounded" to="/login">
           Already have an account? Sign in
         </Link>
       }

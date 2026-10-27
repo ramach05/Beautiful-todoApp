@@ -14,6 +14,7 @@ import {
 } from '@/entities/todo';
 import { cn } from '@/shared/lib';
 import { Skeleton, SkeletonBlock } from '@/shared/ui/skeleton';
+import { Button } from '@/shared/ui/button';
 
 /** Сколько первых строк списка получают stagger-entrance и шаг задержки между ними, мс */
 const ENTRANCE_LIMIT = 8;
@@ -97,13 +98,9 @@ export function TodoPage() {
     return (
       <div className="msg-in py-10 text-center" role="alert">
         <p className="text-xl text-accent">Failed to load todos</p>
-        <button
-          type="button"
-          className="focus-ring mt-3 rounded bg-card-strong px-4 py-2 ring-1 ring-ring-soft hover:bg-ring-soft"
-          onClick={() => void todosQuery.refetch()}
-        >
+        <Button variant="ghost" className="mt-3" onClick={() => void todosQuery.refetch()}>
           Retry
-        </button>
+        </Button>
       </div>
     );
   }

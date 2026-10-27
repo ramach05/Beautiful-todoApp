@@ -24,6 +24,12 @@ body {
   outline-offset: 2px;
 }
 
+/* Tailwind v4 preflight обнуляет курсор кнопок: возвращаем указатель на кликабельных */
+button:not(:disabled),
+[role='button']:not(:disabled) {
+  cursor: pointer;
+}
+
 .row-toggle {
   cursor: pointer;
 }
@@ -71,14 +77,54 @@ body {
   }
 }
 
-/* Пятно света за курсором: координаты пишутся JS-ом в кастомные свойства через rAF */
+/* Пятно света за курсором: координаты пишутся JS-ом в --spot-x/--spot-y на корне через rAF */
 .spotlight {
   background: radial-gradient(
-    30rem at var(--spot-x, 50%) var(--spot-y, 50%),
-    #fff3d914,
-    #fff3d908 45%,
-    transparent 75%
+    44rem at var(--spot-x, 50%) var(--spot-y, 50%),
+    #fff3d947,
+    #ffd9a029 40%,
+    #ffb06612 62%,
+    transparent 78%
   );
+}
+
+/* Горячее ядро пятна: разгорается по скорости курсора (--spot-boost от 0 до 1) */
+.spotlight-hot {
+  background: radial-gradient(
+    16rem at var(--spot-x, 50%) var(--spot-y, 50%),
+    #ffe6c4a6,
+    #ffbf7a3d 45%,
+    transparent 72%
+  );
+  opacity: calc(0.1 + 0.55 * var(--spot-boost, 0));
+  transition: opacity 0.3s ease-out;
+}
+
+/* Обводка карточки: теплый градиент подсвечивает рамку со стороны курсора.
+   background-attachment: fixed оставляет градиент в координатах вьюпорта под --spot-x/--spot-y */
+.edge-glow::after {
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: radial-gradient(
+      26rem at var(--spot-x, 50%) var(--spot-y, 50%),
+      var(--color-accent),
+      #ffbf7a4d 40%,
+      transparent 65%
+    )
+    fixed;
+  pointer-events: none;
+  content: '';
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: calc(0.35 + 0.5 * var(--spot-boost, 0));
 }
 
 /* Hover-подъем карточек и кнопок: transform/box-shadow, цвет фона для hover:bg */
@@ -96,6 +142,170 @@ body {
 
   .lift:active {
     transform: scale(0.99);
+  }
+}
+
+/* Диагональный блик, пробегающий по кнопке при наведении */
+.sheen {
+  position: relative;
+  overflow: hidden;
+}
+
+.sheen::after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -45%;
+  width: 45%;
+  background: linear-gradient(105deg, transparent, #ffffff33, transparent);
+  transform: skewX(-20deg);
+  transition: transform 0.5s ease;
+  pointer-events: none;
+  content: '';
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .sheen:hover::after {
+    transform: translateX(320%) skewX(-20deg);
+  }
+}
+
+/* Подчёркивание ссылок навигации: рисуется слева направо на hover и активном пункте */
+.nav-link {
+  position: relative;
+}
+
+.nav-link::after {
+  position: absolute;
+  right: 0.35rem;
+  bottom: 0.05rem;
+  left: 0.35rem;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.22s ease;
+  content: '';
+}
+
+.nav-link:hover::after,
+.nav-link[aria-current='page']::after {
+  transform: scaleX(1);
+}
+
+/* Подчеркивание поиска: акцентная линия выезжает слева направо на фокусе */
+.field-underline {
+  background-image: linear-gradient(var(--color-accent), var(--color-accent));
+  background-position: left bottom;
+  background-size: 0% 2px;
+  background-repeat: no-repeat;
+  transition:
+    background-size 0.25s ease,
+    box-shadow 0.2s ease;
+}
+
+.field-underline:focus {
+  background-size: 100% 2px;
+}
+
+/* Иконки действий: подрастание и лёгкий поворот на hover */
+.icon-btn img {
+  transition: transform 0.18s ease;
+}
+
+/* Иконки действий притенены, пока строка не активна (только на устройствах с hover) */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .icon-btn:hover:not(:disabled) img {
+    transform: scale(1.18) rotate(-8deg);
+  }
+
+  .icon-btn-danger:hover:not(:disabled) img {
+    transform: scale(1.18) rotate(8deg);
+  }
+
+  .row-actions {
+    opacity: 0.6;
+    transition: opacity 0.18s ease;
+  }
+
+  .lift:hover .row-actions,
+  .row-actions:focus-within {
+    opacity: 1;
+  }
+}
+
+/* Зачеркивание выполненной задачи: линия рисуется слева направо */
+.todo-title {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: left 68%;
+  background-size: 0% 2px;
+  background-repeat: no-repeat;
+  transition:
+    background-size 0.28s ease,
+    color 0.28s ease;
+}
+
+.todo-title[data-done='true'] {
+  background-size: 100% 2px;
+}
+
+/* Мерцание окон города: точки-спаны с индивидуальными длительностью и задержкой */
+@keyframes bt-window {
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  46%,
+  54% {
+    opacity: var(--peak, 0.85);
+  }
+}
+
+.city-window {
+  position: absolute;
+  border-radius: 9999px;
+  opacity: 0;
+  animation: bt-window 6s ease-in-out infinite;
+}
+
+/* Медленное дыхание теплого свечения за линией skyline */
+@keyframes bt-breathe {
+  from {
+    opacity: 0.35;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.city-breathe {
+  background: radial-gradient(140% 46% at 50% 34%, #ffb45e1f, transparent 70%);
+  animation: bt-breathe 14s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-link::after,
+  .field-underline,
+  .sheen::after,
+  .icon-btn img,
+  .todo-title {
+    transition: none;
+  }
+
+  .city-window {
+    animation: none;
+  }
+
+  .stats-bar {
+    transition: none;
+  }
+
+  .city-breathe {
+    animation: none;
+    opacity: 0.55;
   }
 }
 
@@ -126,6 +336,17 @@ body {
   .row-entrance > li,
   .msg-in {
     animation: none;
+  }
+}
+
+/* Столбцы графика: подсвечиваются при наведении */
+.stats-bar {
+  transition: filter 0.18s ease;
+}
+
+@media (hover: hover) {
+  .stats-bar:hover {
+    filter: brightness(1.35);
   }
 }
 

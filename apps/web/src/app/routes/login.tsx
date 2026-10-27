@@ -8,7 +8,7 @@ function LoginComponent() {
     <LoginPage
       onSuccess={() => void navigate({ to: '/' })}
       footer={
-        <Link className="focus-ring rounded" to="/register">
+        <Link className="nav-link focus-ring rounded" to="/register">
           No account? Sign up
         </Link>
       }

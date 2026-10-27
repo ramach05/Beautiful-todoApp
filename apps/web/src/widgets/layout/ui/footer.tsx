@@ -19,7 +19,8 @@ export function Footer() {
                 href={link.href}
                 target="_blank"
                 rel="noreferrer"
-                className="focus-ring block rounded p-1 hover:bg-ring-soft"
+                aria-label={link.label}
+                className="lift focus-ring block rounded-full p-1.5 hover:bg-ring-soft"
               >
                 <img src={link.icon} alt={link.label} className="size-6" />
               </a>

@@ -31,7 +31,15 @@ export function StatsChart({ data }: { data: DailyPoint[] }) {
         const y = TOP_H + trackHeight - barHeight;
         return (
           <g key={point.key}>
-            <rect x={x} y={y} width={barWidth} height={barHeight} rx={3} fill="#ff7f00" />
+            <rect
+              x={x}
+              y={y}
+              width={barWidth}
+              height={barHeight}
+              rx={3}
+              fill="#ff7f00"
+              className="stats-bar"
+            />
             {point.completed > 0 && (
               <text
                 x={x + barWidth / 2}

@@ -4,7 +4,9 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { signIn } from '@/features/auth';
+import { Button } from '@/shared/ui/button';
 import { Spinner } from '@/shared/ui/spinner';
+import { TextField } from '@/shared/ui/text-field';
 
 const loginSchema = z.object({
   email: z.email('Enter an email'),
@@ -34,10 +36,6 @@ export function LoginPage({ onSuccess, footer }: LoginPageProps) {
     onSuccess();
   });
 
-  const inputClass =
-    'focus-ring w-full min-w-0 rounded-[10px] bg-card-strong px-3 py-2 text-lg ring-1 ring-ring-soft ' +
-    'placeholder:text-gray-400 focus:ring-white focus:outline-none';
-
   return (
     <form
       className="mx-auto flex w-full max-w-sm flex-col gap-3 pt-6"
@@ -49,10 +47,10 @@ export function LoginPage({ onSuccess, footer }: LoginPageProps) {
         <label className="sr-only" htmlFor="login-email">
           Email
         </label>
-        <input
+        <TextField
           id="login-email"
           type="email"
-          className={inputClass}
+          className="w-full"
           placeholder="Email"
           autoComplete="email"
           aria-invalid={formState.errors.email !== undefined}
@@ -69,10 +67,10 @@ export function LoginPage({ onSuccess, footer }: LoginPageProps) {
         <label className="sr-only" htmlFor="login-password">
           Password
         </label>
-        <input
+        <TextField
           id="login-password"
           type="password"
-          className={inputClass}
+          className="w-full"
           placeholder="Password"
           autoComplete="current-password"
           aria-invalid={formState.errors.password !== undefined}
@@ -90,15 +88,10 @@ export function LoginPage({ onSuccess, footer }: LoginPageProps) {
           {formState.errors.root.message}
         </p>
       )}
-      <button
-        type="submit"
-        className="focus-ring inline-flex items-center justify-center gap-2 rounded-[10px] bg-card-strong px-3 py-2 text-lg ring-1 ring-accent-soft transition-colors hover:bg-ring-soft disabled:opacity-40"
-        disabled={formState.isSubmitting}
-        aria-busy={formState.isSubmitting}
-      >
+      <Button type="submit" disabled={formState.isSubmitting} aria-busy={formState.isSubmitting}>
         {formState.isSubmitting && <Spinner />}
         Sign in
-      </button>
+      </Button>
       {footer && <div className="text-center text-sm">{footer}</div>}
     </form>
   );

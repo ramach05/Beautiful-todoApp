@@ -1,6 +1,7 @@
 import type { Todo } from '@bt/shared';
 import { deleteIcon, importantActiveIcon, importantIcon } from '@/shared/ui/assets';
 import { cn } from '@/shared/lib';
+import { Button } from '@/shared/ui/button';
 
 interface TodoItemProps {
   todo: Todo;
@@ -36,11 +37,11 @@ export function TodoItem({
       <button
         type="button"
         className={cn(
-          'row-toggle min-w-0 break-words rounded-[10px] text-left text-2xl leading-snug',
-          'transition-colors duration-[250ms] motion-reduce:transition-none',
-          todo.done && 'text-gray-400 line-through',
+          'row-toggle todo-title min-w-0 break-words rounded-[10px] text-left text-2xl leading-snug',
+          todo.done && 'text-gray-400',
           todo.important && !todo.done && 'text-accent-soft',
         )}
+        data-done={todo.done}
         aria-pressed={todo.done}
         onClick={() => onToggleDone(todo)}
       >
@@ -48,10 +49,9 @@ export function TodoItem({
       </button>
 
       {/* Слой выше перекрытия строки, иначе его псевдоэлемент перехватывал бы клики действий */}
-      <div className="relative z-10 flex shrink-0 items-center gap-1">
-        <button
-          type="button"
-          className="focus-ring rounded p-1 hover:bg-ring-soft disabled:opacity-40"
+      <div className="row-actions relative z-10 flex shrink-0 items-center gap-1">
+        <Button
+          variant="icon"
           title={importantLabel}
           aria-label={importantLabel}
           disabled={todo.done}
@@ -66,10 +66,10 @@ export function TodoItem({
             aria-hidden
             className="size-6"
           />
-        </button>
-        <button
-          type="button"
-          className="focus-ring rounded p-1 hover:bg-ring-soft"
+        </Button>
+        <Button
+          variant="icon"
+          className="icon-btn-danger"
           title="Delete"
           aria-label="Delete todo"
           onClick={(event) => {
@@ -78,7 +78,7 @@ export function TodoItem({
           }}
         >
           <img src={deleteIcon} alt="" aria-hidden className="size-6" />
-        </button>
+        </Button>
       </div>
     </li>
   );

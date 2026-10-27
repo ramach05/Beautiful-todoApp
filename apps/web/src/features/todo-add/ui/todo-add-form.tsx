@@ -3,7 +3,9 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { createTodoInputSchema, type CreateTodoInput } from '@bt/shared';
 import { addTodoIcon } from '@/shared/ui/assets';
+import { Button } from '@/shared/ui/button';
 import { Spinner } from '@/shared/ui/spinner';
+import { TextField } from '@/shared/ui/text-field';
 
 import { useAddTodo } from '@/entities/todo';
 
@@ -39,35 +41,24 @@ export function TodoAdd() {
         <label className="sr-only" htmlFor="todo-title">
           New todo title
         </label>
-        <input
+        <TextField
           id="todo-title"
           type="text"
-          className={
-            'focus-ring min-w-40 flex-1 rounded-[10px] bg-card-strong px-3 py-2 text-xl ' +
-            'ring-1 ring-ring-soft placeholder:text-gray-400 focus:ring-white focus:outline-none'
-          }
+          className="min-w-40 flex-1 text-xl"
           placeholder="New todo"
           autoComplete="off"
           aria-invalid={formState.errors.title !== undefined}
           aria-describedby={formState.errors.title ? 'todo-title-error' : undefined}
           {...register('title')}
         />
-        <button
-          type="submit"
-          className={
-            'focus-ring lift inline-flex items-center gap-2 rounded-[10px] bg-card-strong px-3 py-2 text-xl ' +
-            'ring-1 ring-accent-soft hover:bg-ring-soft disabled:opacity-40'
-          }
-          disabled={addTodo.isPending}
-          aria-busy={addTodo.isPending}
-        >
+        <Button type="submit" size="lg" disabled={addTodo.isPending} aria-busy={addTodo.isPending}>
           {addTodo.isPending ? (
             <Spinner />
           ) : (
             <img src={addTodoIcon} alt="" aria-hidden className="size-6" />
           )}
           Add Todo
-        </button>
+        </Button>
       </div>
       {formState.errors.title && (
         <p id="todo-title-error" role="alert" className="msg-in pl-1 text-base text-accent">

@@ -3,6 +3,7 @@ import { useUnit } from 'effector-react';
 
 import { $session, signOut } from '@/features/auth';
 import { cn } from '@/shared/lib';
+import { Button } from '@/shared/ui/button';
 
 const navItems = [
   { to: '/', label: 'Todo' },
@@ -11,7 +12,7 @@ const navItems = [
 ] as const;
 
 const navLinkClass =
-  'focus-ring rounded-md px-2 py-1 text-gray-300 transition-colors hover:bg-ring-soft hover:text-white sm:px-3';
+  'nav-link focus-ring rounded-md px-2 py-1 text-gray-300 transition-colors hover:bg-ring-soft hover:text-white sm:px-3';
 
 /** Обходной ярлык: виден только при фокусе с клавиатуры и уводит сразу к содержимому страницы */
 function SkipLink() {
@@ -40,13 +41,14 @@ export function Header() {
           <span className="min-w-0 truncate text-gray-300" title={session.user.email}>
             {session.user.email}
           </span>
-          <button
-            type="button"
-            className="focus-ring shrink-0 rounded-md px-2 py-1 ring-1 ring-ring-soft transition-colors hover:bg-ring-soft"
+          <Button
+            variant="ghost"
+            size="sm"
+            className="shrink-0"
             onClick={() => void signOut().then(() => navigate({ to: '/login' }))}
           >
             Sign out
-          </button>
+          </Button>
         </div>
       )}
       <h1 className="text-center text-4xl font-bold tracking-wide sm:text-5xl">

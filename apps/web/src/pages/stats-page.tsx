@@ -1,8 +1,9 @@
 import { Skeleton, SkeletonBlock } from '@/shared/ui/skeleton';
+import { Button } from '@/shared/ui/button';
 import { StatsChart, computeStats } from '@/features/todo-stats';
 import { useTodos } from '@/entities/todo';
 
-const cardClass = 'rounded-[10px] bg-card-strong px-3 py-4 text-center ring-1 ring-ring-soft';
+const cardClass = 'lift rounded-[10px] bg-card-strong px-3 py-4 text-center ring-1 ring-ring-soft';
 
 /** Карточка одного агрегата */
 function StatCard({ label, value }: { label: string; value: number }) {
@@ -53,13 +54,9 @@ export function StatsPage() {
     return (
       <div className="py-10 text-center" role="alert">
         <p className="text-xl text-accent">Failed to load stats</p>
-        <button
-          type="button"
-          className="mt-3 rounded bg-card-strong px-4 py-2 ring-1 ring-ring-soft hover:bg-ring-soft"
-          onClick={() => void todosQuery.refetch()}
-        >
+        <Button variant="ghost" className="mt-3" onClick={() => void todosQuery.refetch()}>
           Retry
-        </button>
+        </Button>
       </div>
     );
   }

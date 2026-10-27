@@ -10,17 +10,9 @@ import {
   deleteAccount,
   signOutEverywhere,
 } from '@/features/auth';
+import { Button } from '@/shared/ui/button';
 import { Spinner } from '@/shared/ui/spinner';
-
-const inputClass =
-  'focus-ring w-full rounded-[10px] bg-card-strong px-3 py-2 text-lg ring-1 ring-ring-soft ' +
-  'placeholder:text-gray-400 focus:ring-white focus:outline-none';
-const buttonClass =
-  'focus-ring lift inline-flex items-center gap-2 rounded-[10px] bg-card-strong px-4 py-2 text-lg ' +
-  'ring-1 ring-accent-soft hover:bg-ring-soft disabled:opacity-40';
-const dangerButtonClass =
-  'focus-ring lift inline-flex items-center gap-2 rounded-[10px] bg-card-strong px-4 py-2 text-lg ' +
-  'ring-1 ring-accent hover:bg-accent/20 disabled:opacity-40';
+import { TextField } from '@/shared/ui/text-field';
 
 type ActionKey = 'email' | 'password' | 'revoke' | 'delete';
 type Feedback = { tone: 'ok' | 'err'; text: string };
@@ -89,24 +81,19 @@ export function SettingsPage() {
             void run('email', () => changeAccountEmail(email));
           }}
         >
-          <input
+          <TextField
             type="email"
-            className={inputClass}
+            className="w-full"
             placeholder="New email"
             aria-label="New email"
             autoComplete="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
           />
-          <button
-            type="submit"
-            className={buttonClass}
-            disabled={disabled}
-            aria-busy={busy('email')}
-          >
+          <Button type="submit" disabled={disabled} aria-busy={busy('email')}>
             {busy('email') && <Spinner />}
             Update email
-          </button>
+          </Button>
         </form>
       </section>
 
@@ -121,33 +108,28 @@ export function SettingsPage() {
             void run('password', () => changeAccountPassword(currentPassword, newPassword));
           }}
         >
-          <input
+          <TextField
             type="password"
-            className={inputClass}
+            className="w-full"
             placeholder="Current password"
             aria-label="Current password"
             autoComplete="current-password"
             value={currentPassword}
             onChange={(event) => setCurrentPassword(event.target.value)}
           />
-          <input
+          <TextField
             type="password"
-            className={inputClass}
+            className="w-full"
             placeholder="New password"
             aria-label="New password"
             autoComplete="new-password"
             value={newPassword}
             onChange={(event) => setNewPassword(event.target.value)}
           />
-          <button
-            type="submit"
-            className={buttonClass}
-            disabled={disabled}
-            aria-busy={busy('password')}
-          >
+          <Button type="submit" disabled={disabled} aria-busy={busy('password')}>
             {busy('password') && <Spinner />}
             Change password
-          </button>
+          </Button>
         </form>
       </section>
 
@@ -155,16 +137,15 @@ export function SettingsPage() {
         <h3 id="settings-sessions" className="text-xl">
           Sessions
         </h3>
-        <button
-          type="button"
-          className={buttonClass}
+        <Button
+          variant="ghost"
           disabled={disabled}
           aria-busy={busy('revoke')}
           onClick={() => void run('revoke', signOutEverywhere, true)}
         >
           {busy('revoke') && <Spinner />}
           Sign out everywhere
-        </button>
+        </Button>
       </section>
 
       <section className="flex flex-col gap-2" aria-labelledby="settings-delete">
@@ -178,24 +159,19 @@ export function SettingsPage() {
             void run('delete', () => deleteAccount(password), true);
           }}
         >
-          <input
+          <TextField
             type="password"
-            className={inputClass}
+            className="w-full"
             placeholder="Confirm with your password"
             aria-label="Confirm password"
             autoComplete="current-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
           />
-          <button
-            type="submit"
-            className={dangerButtonClass}
-            disabled={disabled}
-            aria-busy={busy('delete')}
-          >
+          <Button variant="danger" type="submit" disabled={disabled} aria-busy={busy('delete')}>
             {busy('delete') && <Spinner />}
             Delete account
-          </button>
+          </Button>
         </form>
       </section>
     </div>

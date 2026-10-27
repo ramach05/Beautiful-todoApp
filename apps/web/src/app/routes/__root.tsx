@@ -13,7 +13,7 @@ function NotFound() {
       <p className="text-gray-300">The page you are looking for does not exist.</p>
       <Link
         to="/"
-        className="focus-ring mt-2 rounded-[10px] bg-card-strong px-4 py-2 text-lg ring-1 ring-accent-soft transition-colors hover:bg-ring-soft"
+        className="focus-ring lift sheen mt-2 rounded-[10px] bg-card-strong px-4 py-2 text-lg ring-1 ring-accent-soft hover:bg-ring-soft"
       >
         Back to home
       </Link>

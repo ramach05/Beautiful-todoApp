@@ -1,6 +1,7 @@
 import type { TodoFilter } from '@/entities/todo';
 import { checkIcon, clearAllIcon, doneIcon } from '@/shared/ui/assets';
-import { cn } from '@/shared/lib';
+import { Button } from '@/shared/ui/button';
+import { TextField } from '@/shared/ui/text-field';
 
 interface TodoFilterProps {
   filter: TodoFilter;
@@ -26,13 +27,11 @@ export function TodoFilterBar({ filter, search, onFilterChange, onSearchChange }
       <label className="sr-only" htmlFor="todo-search">
         Search todos
       </label>
-      <input
+      <TextField
         id="todo-search"
         type="search"
-        className={cn(
-          'focus-ring min-w-40 flex-1 rounded-md border-b-2 border-accent-soft bg-card px-3 py-1.5',
-          'text-xl text-white placeholder:text-gray-400 focus:outline-none',
-        )}
+        variant="search"
+        className="min-w-40 flex-1"
         placeholder="Search Todos"
         autoComplete="off"
         value={search}
@@ -41,21 +40,16 @@ export function TodoFilterBar({ filter, search, onFilterChange, onSearchChange }
 
       <div role="group" aria-label="Status filter" className="flex flex-wrap gap-1">
         {options.map((option) => (
-          <button
+          <Button
             key={option.value}
-            type="button"
+            variant="chip"
             aria-pressed={filter === option.value}
             aria-controls="todo-list"
-            className={cn(
-              'focus-ring flex items-center gap-1.5 rounded px-2.5 py-1 text-lg',
-              'ring-1 ring-ring-soft transition-colors hover:bg-ring-soft',
-              filter === option.value && 'bg-ring-soft ring-white',
-            )}
             onClick={() => onFilterChange(option.value)}
           >
             <img src={option.icon} alt="" className="size-5" />
             {option.label}
-          </button>
+          </Button>
         ))}
       </div>
     </form>
