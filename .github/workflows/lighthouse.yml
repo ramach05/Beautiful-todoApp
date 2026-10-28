@@ -1,0 +1,35 @@
+name: Lighthouse CI
+
+on:
+  pull_request:
+
+concurrency:
+  group: lighthouse-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lighthouse:
+    name: lighthouse perf budgets
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Preview runs standalone without api and DB: in-process mock, so the budget measures the UI, not prod data
+      VITE_USE_MOCKS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm turbo run build --filter=@bt/web
+      # Chrome is preinstalled on ubuntu-latest, chrome-launcher finds it on its own
+      - name: Lighthouse budgets
+        run: pnpm --filter @bt/web run lhci
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-report
+          path: apps/web/.lighthouseci/
+          retention-days: 7

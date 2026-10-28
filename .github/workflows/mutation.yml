@@ -1,0 +1,44 @@
+name: Mutation testing
+
+on:
+  schedule:
+    # Nightly mutation testing run
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: mutation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mutation:
+    name: mutation score (shared + api)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # api tests spin up PGlite in-process, and web/shared types are taken from dist — no postgres service needed
+      - run: pnpm turbo run build
+
+      # Thresholds in stryker.config.json are set without break: the report is informational only
+      - name: Mutation testing @bt/shared
+        run: pnpm --filter @bt/shared mutation
+        continue-on-error: true
+      - name: Mutation testing @bt/api
+        run: pnpm --filter @bt/api mutation
+        continue-on-error: true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mutation-reports
+          path: |
+            packages/shared/reports/mutation/
+            apps/api/reports/mutation/
+          retention-days: 14

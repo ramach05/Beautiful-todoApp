@@ -2,7 +2,7 @@ import { ORPCError, implement } from '@orpc/server';
 
 import { appContract } from '@bt/shared';
 
-import type { SessionResolver, TodosRepository } from './repo.js';
+import type { SessionResolver, TodosRepository } from '@/repo.js';
 
 export interface Context {
   todos: TodosRepository;
@@ -10,7 +10,7 @@ export interface Context {
   headers: Headers;
 }
 
-/** Единая проверка сессии для всех процедур: без нее — типизированная UNAUTHORIZED из контракта */
+/** Single session check for all procedures: without it — a typed UNAUTHORIZED from the contract */
 const appProcedure = implement(appContract)
   .$context<Context>()
   .use(async ({ context, next }) => {
@@ -21,7 +21,7 @@ const appProcedure = implement(appContract)
     return next({ context: { user } });
   });
 
-/** Реализация oRPC-контракта; валидация input/output выполняется самим oRPC по zod-схемам */
+/** oRPC contract implementation; input/output validation is done by oRPC itself via zod schemas */
 export const appRouter = {
   todos: {
     list: appProcedure.todos.list.handler(({ context }) => context.todos.list(context.user.id)),
@@ -44,5 +44,9 @@ export const appRouter = {
         throw new ORPCError('NOT_FOUND');
       }
     }),
+
+    reorder: appProcedure.todos.reorder.handler(({ input, context }) =>
+      context.todos.reorder(input.ids, context.user.id),
+    ),
   },
 };

@@ -3,6 +3,6 @@ packages:
   - 'packages/*'
   - 'e2e'
 
-# typescript-eslint 8.x не поддерживает TS 7 (см. issue #10940), TS 6.0.3 - максимальная поддерживаемая версия
+# typescript-eslint 8.x does not support TS 7 (see issue #10940), TS 6.0.3 is the highest supported version
 overrides:
   typescript: '^6.0.3'

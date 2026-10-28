@@ -1,8 +1,8 @@
-import { boolean, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { boolean, index, integer, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
 /**
- * Таблицы better-auth (user/session/account/verification): имена колонок = имена полей better-auth,
- * потому что drizzle-adapter обращается к таблице по db-имени поля (camelCase по умолчанию).
+ * better-auth tables (user/session/account/verification): column names = better-auth field names,
+ * because the drizzle-adapter addresses the table by the field's db name (camelCase by default).
  */
 export const users = pgTable('user', {
   id: text('id').primaryKey(),
@@ -10,6 +10,8 @@ export const users = pgTable('user', {
   email: text('email').notNull().unique(),
   emailVerified: boolean('emailVerified').notNull().default(false),
   image: text('image'),
+  // locale additionalField from betterAuth: the user's UI language
+  locale: text('locale').notNull().default('en'),
   createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updatedAt', { withTimezone: true }).notNull().defaultNow(),
 });
@@ -54,17 +56,30 @@ export const verifications = pgTable('verification', {
   updatedAt: timestamp('updatedAt', { withTimezone: true }).defaultNow(),
 });
 
-/** Таблица задач; created_at нужен для стабильного порядка списка */
-export const todos = pgTable('todos', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  title: text('title').notNull(),
-  important: boolean('important').notNull().default(false),
-  done: boolean('done').notNull().default(false),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  userId: text('user_id')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
-});
+/**
+ * Todos table; position is the list order set by drag-and-drop,
+ * created_at gives a stable order for equal positions and for old rows,
+ * completed_at is for the completion chart.
+ */
+export const todos = pgTable(
+  'todos',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    title: text('title').notNull(),
+    important: boolean('important').notNull().default(false),
+    done: boolean('done').notNull().default(false),
+    position: integer('position').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+  },
+  (table) => [
+    // the list is fetched by an owner filter and sorted by order
+    index('todos_user_position_idx').on(table.userId, table.position),
+  ],
+);
 
 export type TodoRow = typeof todos.$inferSelect;
 export type UserRow = typeof users.$inferSelect;

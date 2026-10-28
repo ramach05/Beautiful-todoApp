@@ -1,41 +1,94 @@
-import importantActiveIcon from '../../../assets/images/svg/warning-active_amber_orange_24dp.svg';
-import importantIcon from '../../../assets/images/svg/warning_amber_white_24dp.svg';
-import trashIcon from '../../../assets/images/svg/delete_forever_white_24dp.svg';
 import type { Todo } from '@bt/shared';
-import { cn } from '../../../shared/ui/cn';
+import { useTranslation } from 'react-i18next';
+import type { CSSProperties, ReactNode } from 'react';
+
+import { deleteIcon, importantActiveIcon, importantIcon } from '@/shared/ui/assets';
+import { HighlightText } from '@/shared/ui/highlight-text';
+import { cn } from '@/shared/lib';
+import { Button } from '@/shared/ui/button';
+
+/** Passed down from the dnd context: the library attaches ref/transform to the row, activators to the handle */
+interface TodoDragProps {
+  nodeRef: (node: HTMLElement | null) => void;
+  style: CSSProperties;
+  /** Style the row as dragged (shadow above neighbors): set only on the clone in DragOverlay */
+  active?: boolean;
+  /** Drag activator button with listeners */
+  handle: ReactNode;
+}
 
 interface TodoItemProps {
   todo: Todo;
+  /** Search string: matches in the title are highlighted in bold */
+  query?: string;
   onToggleDone: (todo: Todo) => void;
   onToggleImportant: (todo: Todo) => void;
   onDelete: (id: string) => void;
+  /** entrance-animation delay in ms; passed only on the initial list mount */
+  entranceDelay?: number;
+  drag?: TodoDragProps;
 }
 
-/** Строка списка: клик по строке переключает done, кнопка important активна только для незавершенных */
-export function TodoItem({ todo, onToggleDone, onToggleImportant, onDelete }: TodoItemProps) {
+/**
+ * List row: the title is a button whose pseudo-element covers the whole row,
+ * so a mouse click on the row toggles done, while keyboard access goes through the button.
+ * The important button is active only for unfinished todos.
+ */
+export function TodoItem({
+  todo,
+  query,
+  onToggleDone,
+  onToggleImportant,
+  onDelete,
+  entranceDelay,
+  drag,
+}: TodoItemProps) {
+  const { t } = useTranslation();
+  const importantLabel = t(
+    todo.important ? 'todos.item.unmark_important' : 'todos.item.mark_important',
+  );
+
   return (
     <li
+      ref={drag?.nodeRef}
       className={cn(
-        'flex cursor-pointer items-center justify-between gap-3 rounded-[10px] bg-card-strong px-3 py-2',
-        'ring-1 ring-ring-soft transition-colors duration-500 hover:bg-ring-soft hover:ring-white',
+        'lift relative flex items-center justify-between gap-3 rounded-[10px] bg-card-strong px-3 py-2',
+        'ring-1 ring-ring-soft hover:bg-ring-soft hover:ring-white',
+        drag?.active && 'row-dragging',
       )}
-      onClick={() => onToggleDone(todo)}
+      style={{
+        ...(entranceDelay !== undefined ? { animationDelay: `${entranceDelay}ms` } : undefined),
+        ...drag?.style,
+      }}
     >
-      <p
+      {drag && (
+        <div className="row-handle relative z-10 flex shrink-0 items-center">{drag.handle}</div>
+      )}
+
+      <button
+        type="button"
         className={cn(
-          'text-2xl leading-snug',
-          todo.done && 'text-gray-400 line-through',
+          'row-toggle todo-title min-w-0 flex-1 break-words rounded-[10px] text-left text-2xl leading-snug',
+          todo.done && 'text-gray-400',
           todo.important && !todo.done && 'text-accent-soft',
         )}
+        data-done={todo.done}
+        aria-pressed={todo.done}
+        onClick={() => onToggleDone(todo)}
       >
-        {todo.title}
-      </p>
+        {/* inline wrapper: the background breaks per line, a strike on each line of text */}
+        <span className="todo-strike">
+          <HighlightText text={todo.title} query={query ?? ''} />
+        </span>
+      </button>
 
-      <div className="flex shrink-0 items-center gap-1">
-        <button
-          type="button"
-          className="rounded p-1 hover:bg-ring-soft disabled:opacity-40"
-          title="Отметить как важную"
+      {/* Layer above the row overlay, otherwise its pseudo-element would intercept action clicks */}
+      <div className="row-actions relative z-10 flex shrink-0 items-center gap-1">
+        <Button
+          variant="icon"
+          className="tip"
+          data-tip={importantLabel}
+          aria-label={importantLabel}
           disabled={todo.done}
           onClick={(event) => {
             event.stopPropagation();
@@ -44,21 +97,23 @@ export function TodoItem({ todo, onToggleDone, onToggleImportant, onDelete }: To
         >
           <img
             src={todo.important ? importantActiveIcon : importantIcon}
-            alt="Пометить как важную"
+            alt=""
+            aria-hidden
             className="size-6"
           />
-        </button>
-        <button
-          type="button"
-          className="rounded p-1 hover:bg-ring-soft"
-          title="Удалить"
+        </Button>
+        <Button
+          variant="icon"
+          className="icon-btn-danger tip"
+          data-tip={t('todos.item.delete_title')}
+          aria-label={t('todos.item.delete_aria')}
           onClick={(event) => {
             event.stopPropagation();
             onDelete(todo.id);
           }}
         >
-          <img src={trashIcon} alt="Удалить задачу" className="size-6" />
-        </button>
+          <img src={deleteIcon} alt="" aria-hidden className="size-6" />
+        </Button>
       </div>
     </li>
   );

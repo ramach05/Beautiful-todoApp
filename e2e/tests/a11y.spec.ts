@@ -1,0 +1,80 @@
+import { AxeBuilder } from '@axe-core/playwright';
+import { expect, test, type Locator, type Page } from '@playwright/test';
+
+import { register } from './helpers';
+
+interface Screen {
+  path: string;
+  /** Sign that the screen is rendered: without it axe would sample the loading skeleton */
+  ready: (page: Page) => Locator;
+  /** Whether a session is needed: authorized screens are opened after registration */
+  auth: boolean;
+}
+
+const anonymousScreens: Screen[] = [
+  { path: '/login', ready: (p) => p.getByRole('heading', { name: 'Sign in' }), auth: false },
+  { path: '/register', ready: (p) => p.getByRole('heading', { name: 'Sign up' }), auth: false },
+  { path: '/no-such-route', ready: (p) => p.getByText('Page not found'), auth: false },
+];
+
+const authScreens: Screen[] = [
+  { path: '/', ready: (p) => p.getByText(/more to do/), auth: true },
+  { path: '/stats', ready: (p) => p.getByRole('heading', { name: 'Statistics' }), auth: true },
+  { path: '/settings', ready: (p) => p.getByRole('heading', { name: 'Settings' }), auth: true },
+];
+
+/**
+ * Checks the current page with the accessibility engine: critical and serious violations are collected
+ * into a readable list, the rest are returned as a separate list for the log.
+ */
+async function collectViolations(page: Page): Promise<{ blocking: string[]; other: string[] }> {
+  const results = await new AxeBuilder({ page }).analyze();
+  const format = (list: typeof results.violations) =>
+    list.map(
+      (violation) =>
+        `${violation.id} (${violation.impact}): ${violation.help} — ${violation.nodes
+          .map((node) => node.target.join(' '))
+          .join(' | ')}`,
+    );
+  return {
+    blocking: format(
+      results.violations.filter((v) => v.impact === 'critical' || v.impact === 'serious'),
+    ),
+    other: format(
+      results.violations.filter((v) => v.impact !== 'critical' && v.impact !== 'serious'),
+    ),
+  };
+}
+
+/** Iterates the screen list and collects violations per screen: fails at the end, showing all screens at once */
+async function checkScreens(page: Page, screens: Screen[]): Promise<void> {
+  const found: string[] = [];
+  for (const screen of screens) {
+    await page.goto(screen.path);
+    await expect(screen.ready(page)).toBeVisible();
+    const { blocking, other } = await collectViolations(page);
+    if (other.length > 0) {
+      console.log(`[a11y] ${screen.path}: non-blocking — ${other.join('; ')}`);
+    }
+    found.push(...blocking.map((line) => `${screen.path} -> ${line}`));
+  }
+  expect(found).toEqual([]);
+}
+
+for (const viewport of [
+  { name: 'desktop', size: { width: 1280, height: 720 } },
+  { name: 'mobile 390x844', size: { width: 390, height: 844 } },
+]) {
+  test.describe(`a11y: ${viewport.name}`, () => {
+    test.use({ viewport: viewport.size });
+
+    test('public screens without critical violations', async ({ page }) => {
+      await checkScreens(page, anonymousScreens);
+    });
+
+    test('user screens without critical violations', async ({ page }) => {
+      await register(page);
+      await checkScreens(page, authScreens);
+    });
+  });
+}

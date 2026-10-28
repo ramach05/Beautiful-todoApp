@@ -1,10 +1,20 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Beautiful TodoApp - задачи со вкусом" />
+    <meta name="description" content="Beautiful TodoApp - todos with style" />
+    <!-- Background loads before the app: the browser picks a candidate by viewport width (avif), the rest take srcset from <picture> -->
+    <link
+      rel="preload"
+      as="image"
+      type="image/avif"
+      href="/src/shared/ui/assets/images/city-1920.avif"
+      imagesrcset="/src/shared/ui/assets/images/city-1920.avif 1920w, /src/shared/ui/assets/images/city-2560.avif 2560w"
+      imagesizes="100vw"
+    />
     <title>Beautiful Todo</title>
   </head>
   <body>

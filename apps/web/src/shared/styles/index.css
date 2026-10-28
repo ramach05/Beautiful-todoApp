@@ -1,0 +1,457 @@
+@import 'tailwindcss';
+@import './fonts.css';
+
+@theme {
+  --color-canvas: #1a282b;
+  --color-card: #00000080;
+  --color-card-strong: #000000b3;
+  --color-ring-soft: #ffffff26;
+  --color-accent: #ff7f00;
+  --color-accent-soft: #ff7f00cc;
+  --font-hand: 'Caveat', cursive;
+  --breakpoint-xs: 26rem;
+}
+
+body {
+  margin: 0;
+  background: var(--color-canvas);
+  color: #fff;
+  font-family: var(--font-hand);
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+button:not(:disabled),
+[role='button']:not(:disabled) {
+  cursor: pointer;
+}
+
+.row-toggle {
+  cursor: pointer;
+}
+
+.row-toggle::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  content: '';
+}
+
+.row-toggle:focus-visible {
+  outline: none;
+}
+
+.row-toggle:focus-visible::after {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@keyframes bt-skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-ring-soft);
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, #ffffff1f, transparent);
+  animation: bt-skeleton-shimmer 1.5s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    animation: none;
+  }
+}
+
+.spotlight {
+  background: radial-gradient(
+    44rem at var(--spot-x, 50%) var(--spot-y, 50%),
+    #fff3d947,
+    #ffd9a029 40%,
+    #ffb06612 62%,
+    transparent 78%
+  );
+}
+
+.spotlight-hot {
+  background: radial-gradient(
+    16rem at var(--spot-x, 50%) var(--spot-y, 50%),
+    #ffe6c4a6,
+    #ffbf7a3d 45%,
+    transparent 72%
+  );
+  opacity: calc(0.1 + 0.55 * var(--spot-boost, 0));
+  transition: opacity 0.3s ease-out;
+}
+
+.edge-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.edge-ring::after {
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: radial-gradient(
+      26rem at var(--spot-x, 50%) var(--spot-y, 50%),
+      var(--color-accent),
+      #ffbf7a4d 40%,
+      transparent 65%
+    )
+    fixed;
+  pointer-events: none;
+  content: '';
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: calc(0.35 + 0.5 * var(--spot-boost, 0));
+}
+
+.lift {
+  transition-property: transform, box-shadow, background-color;
+  transition-duration: 0.18s;
+  transition-timing-function: ease;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  body:not(.todo-dragging) .lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px #00000059;
+  }
+
+  body:not(.todo-dragging) .lift:active {
+    transform: scale(0.99);
+  }
+}
+
+.sheen {
+  position: relative;
+  overflow: hidden;
+}
+
+.sheen::after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -45%;
+  width: 45%;
+  background: linear-gradient(105deg, transparent, #ffffff33, transparent);
+  transform: skewX(-20deg);
+  transition: transform 0.5s ease;
+  pointer-events: none;
+  content: '';
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .sheen:hover::after {
+    transform: translateX(320%) skewX(-20deg);
+  }
+}
+
+.nav-link {
+  position: relative;
+}
+
+.nav-link::after {
+  position: absolute;
+  right: 0.35rem;
+  bottom: 0.05rem;
+  left: 0.35rem;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.22s ease;
+  content: '';
+}
+
+.nav-link:hover::after,
+.nav-link[aria-current='page']::after {
+  transform: scaleX(1);
+}
+
+input[type='search']::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+input {
+  caret-color: var(--color-accent);
+}
+
+@layer components {
+  .tip {
+    position: relative;
+  }
+
+  .tip::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    z-index: 20;
+    padding: 2px 10px;
+    border-radius: 8px;
+    background: var(--color-canvas);
+    color: #fff;
+    font-size: 1.05rem;
+    line-height: 1.4;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px #00000073;
+    outline: 1px solid var(--color-ring-soft);
+    opacity: 0;
+    translate: -50% 4px;
+    transition:
+      opacity 0.18s ease,
+      translate 0.18s ease;
+    pointer-events: none;
+  }
+
+  .tip:hover::after,
+  .tip:focus-visible::after {
+    opacity: 1;
+    translate: -50% 0;
+  }
+}
+
+.field-underline {
+  background-image: linear-gradient(var(--color-accent), var(--color-accent));
+  background-position: left bottom;
+  background-size: 0% 2px;
+  background-repeat: no-repeat;
+  transition:
+    background-size 0.25s ease,
+    box-shadow 0.2s ease;
+}
+
+.field-underline:focus {
+  background-size: 100% 2px;
+}
+
+.icon-btn img {
+  transition: transform 0.18s ease;
+}
+
+button.drag-handle {
+  cursor: grab;
+  touch-action: none;
+}
+
+.todo-drag-overlay {
+  will-change: transform;
+}
+
+body.todo-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+body.todo-dragging .row-dragging {
+  box-shadow: 0 10px 24px #00000080;
+  transition: none;
+}
+
+body.todo-dragging #todo-list li {
+  pointer-events: none;
+}
+
+body.todo-dragging .row-dragging .row-handle {
+  opacity: 1;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .icon-btn:hover:not(:disabled) img {
+    transform: scale(1.18) rotate(-8deg);
+  }
+
+  .icon-btn-danger:hover:not(:disabled) img {
+    transform: scale(1.18) rotate(8deg);
+  }
+
+  .icon-btn-clear:hover:not(:disabled) img {
+    transform: scale(1.18) rotate(90deg);
+  }
+
+  .row-actions {
+    opacity: 0.6;
+    transition: opacity 0.18s ease;
+  }
+
+  .row-handle {
+    opacity: 0.45;
+    transition: opacity 0.18s ease;
+  }
+
+  .lift:hover .row-handle,
+  .row-handle:focus-within {
+    opacity: 1;
+  }
+
+  .lift:hover .row-actions,
+  .row-actions:focus-within {
+    opacity: 1;
+  }
+}
+
+.todo-title {
+  transition: color 0.28s ease;
+}
+
+.todo-strike {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: left 62%;
+  background-size: 0% 2px;
+  background-repeat: no-repeat;
+  box-decoration-break: clone;
+  transition: background-size 0.28s ease;
+}
+
+.todo-title[data-done='true'] .todo-strike {
+  background-size: 100% 2px;
+}
+
+@keyframes bt-window {
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  46%,
+  54% {
+    opacity: var(--peak, 0.85);
+  }
+}
+
+.city-window {
+  position: absolute;
+  border-radius: 9999px;
+  opacity: 0;
+  animation: bt-window 6s ease-in-out infinite;
+}
+
+@keyframes bt-breathe {
+  from {
+    opacity: 0.35;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.city-breathe {
+  background: radial-gradient(140% 46% at 50% 34%, #ffb45e1f, transparent 70%);
+  animation: bt-breathe 14s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-link::after,
+  .field-underline,
+  .sheen::after,
+  .icon-btn img,
+  .todo-strike,
+  .tip::after {
+    transition: none;
+  }
+
+  .city-window {
+    animation: none;
+  }
+
+  .stats-bar {
+    transition: none;
+  }
+
+  .city-breathe {
+    animation: none;
+    opacity: 0.55;
+  }
+}
+
+@keyframes bt-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.row-entrance > li:nth-child(-n + 8) {
+  animation: bt-row-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+@keyframes bt-msg-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.msg-in {
+  animation: bt-msg-in 0.25s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row-entrance > li,
+  .msg-in {
+    animation: none;
+  }
+}
+
+.stats-bar {
+  transition: filter 0.18s ease;
+}
+
+@media (hover: hover) {
+  .stats-bar:hover {
+    filter: brightness(1.35);
+  }
+}
+
+#main-content {
+  view-transition-name: main-content;
+}
+
+::view-transition-old(main-content) {
+  animation-duration: 0.18s;
+}
+
+::view-transition-new(main-content) {
+  animation: bt-vt-in 0.24s ease both;
+}
+
+@keyframes bt-vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(main-content),
+  ::view-transition-old(main-content),
+  ::view-transition-new(main-content) {
+    animation: none;
+  }
+}

@@ -7,4 +7,9 @@ export default [
     files: ['**/*.ts'],
     languageOptions: { globals: globals.node },
   },
+  {
+    // node scripts: globals for no-undef
+    files: ['scripts/**/*.mjs'],
+    languageOptions: { globals: globals.node },
+  },
 ];

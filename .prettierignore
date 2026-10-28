@@ -1,6 +1,12 @@
 pnpm-lock.yaml
 dist
 coverage
+reports
+.stryker-tmp
 .turbo
-apps/web/src/routeTree.gen.ts
+.ai-work/
+.tanstack/
+test-results/
+playwright-report/
+apps/web/src/app/routeTree.gen.ts
 package-lock.json

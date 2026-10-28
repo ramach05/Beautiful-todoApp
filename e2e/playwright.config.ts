@@ -4,7 +4,7 @@ const API_PORT = 3101;
 const WEB_PORT = 4174;
 const WEB_ORIGIN = `http://127.0.0.1:${WEB_PORT}`;
 const API_ORIGIN = `http://127.0.0.1:${API_PORT}`;
-/** Отдельная база: e2e не трогает dev-данные */
+/** Separate database: e2e does not touch dev data */
 const E2E_DB_URL = 'postgres://todo:todo@localhost:5433/beautiful_todo_e2e';
 
 export default defineConfig({
@@ -19,7 +19,7 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-  // Прод-сборки приложений с e2e-окружением: тот же код, что и в проде
+  // Prod builds of the apps with an e2e environment: the same code as in prod
   webServer: [
     {
       command: 'pnpm --filter @bt/api build && pnpm --filter @bt/api start',

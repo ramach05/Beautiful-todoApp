@@ -9,6 +9,7 @@
       "dependsOn": ["^build"]
     },
     "lint": {},
+    "fsd:check": {},
     "test": {
       "dependsOn": ["^build"]
     },

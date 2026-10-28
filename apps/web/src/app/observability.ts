@@ -1,4 +1,4 @@
-/** Sentry включается только при заданном VITE_SENTRY_DSN: без него чанк Sentry не загружается */
+/** Sentry is enabled only when VITE_SENTRY_DSN is set: without it the Sentry chunk is not loaded */
 export async function initObservability(): Promise<void> {
   const dsn = import.meta.env.VITE_SENTRY_DSN;
   if (!dsn) {

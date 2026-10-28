@@ -15,6 +15,27 @@
       "when": 1792691350006,
       "tag": "0001_shiny_mandrill",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792770772052,
+      "tag": "0002_thick_doctor_spectrum",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793125532737,
+      "tag": "0003_sudden_daimon_hellstrom",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793126776907,
+      "tag": "0004_outgoing_wendell_rand",
+      "breakpoints": true
     }
   ]
 }

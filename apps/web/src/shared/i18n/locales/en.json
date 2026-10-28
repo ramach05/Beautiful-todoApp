@@ -1,0 +1,151 @@
+{
+  "common": {
+    "retry": "Retry"
+  },
+  "header": {
+    "skip": "Skip to content",
+    "title": "Beautiful Todo List",
+    "nav_aria": "Primary",
+    "nav": {
+      "todo": "Todo",
+      "stats": "Stats",
+      "settings": "Settings"
+    },
+    "sign_out": "Sign out"
+  },
+  "footer": {
+    "links_aria": "Author links"
+  },
+  "not_found": {
+    "title": "Page not found",
+    "body": "The page you are looking for does not exist.",
+    "back": "Back to home"
+  },
+  "doc_title": {
+    "app": "Beautiful Todo",
+    "sign_in": "Beautiful Todo — Sign in",
+    "sign_up": "Beautiful Todo — Sign up",
+    "stats": "Beautiful Todo — Stats",
+    "settings": "Beautiful Todo — Settings"
+  },
+  "auth": {
+    "sign_in": "Sign in",
+    "sign_up": "Sign up",
+    "create_account": "Create account",
+    "email": "Email",
+    "password": "Password",
+    "show_password": "Show password",
+    "hide_password": "Hide password",
+    "name": "Name",
+    "no_account": "No account? Sign up",
+    "have_account": "Already have an account? Sign in",
+    "errors": {
+      "invalid_email": "Enter a valid email",
+      "invalid_password": "Enter a password",
+      "invalid_credentials": "Invalid email or password",
+      "email_not_verified": "Email is not verified",
+      "email_exists": "An account with this email already exists",
+      "too_many": "Too many attempts. Please try again in a minute",
+      "generic": "Something went wrong. Please try again"
+    },
+    "account": {
+      "demo_unavailable": "Account management is unavailable in demo mode.",
+      "email_updated": "Email updated.",
+      "password_updated": "Password updated.",
+      "sessions_revoked": "Signed out on all devices.",
+      "email_failed": "Failed to update email",
+      "password_failed": "Failed to change password",
+      "revoke_failed": "Failed to revoke sessions",
+      "delete_failed": "Failed to delete account"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "signed_in_as": "Signed in as",
+    "done": "Done.",
+    "change_email": "Change email",
+    "new_email": "New email",
+    "update_email": "Update email",
+    "change_password": "Change password",
+    "current_password": "Current password",
+    "new_password": "New password",
+    "sessions": "Sessions",
+    "sign_out_everywhere": "Sign out everywhere",
+    "delete_account": "Delete account",
+    "confirm_placeholder": "Confirm with your password",
+    "confirm_aria": "Confirm password",
+    "delete_confirm_title": "Delete account?",
+    "delete_confirm_text": "The account {{email}} and all its todos will be permanently deleted. This action cannot be undone.",
+    "delete_confirm_action": "Delete",
+    "delete_cancel": "Cancel"
+  },
+  "todos": {
+    "add_heading": "Add a todo",
+    "title_label": "New todo title",
+    "title_placeholder": "New todo",
+    "add_button": "Add Todo",
+    "added": "Todo added",
+    "search_label": "Search todos",
+    "search_placeholder": "Search Todos",
+    "search_clear": "Clear search",
+    "filter_aria": "Status filter",
+    "filters": {
+      "all": "All",
+      "active": "Active",
+      "done": "Done"
+    },
+    "count": "{{count}} more to do, {{done}} done",
+    "list_aria": "Todo list",
+    "empty": "No todos — add your first one",
+    "load_failed": "Failed to load todos",
+    "loading": "Loading todos",
+    "item": {
+      "unmark_important": "Unmark as important",
+      "mark_important": "Mark as important",
+      "delete_title": "Delete",
+      "delete_aria": "Delete todo"
+    },
+    "drag": {
+      "handle": "Drag to reorder: {{title}}",
+      "instructions": "Press the space bar to pick up a todo, use the arrow keys to move it, press space again to drop it, or press Escape to cancel.",
+      "started": "Picked up {{title}}. Use the arrow keys to move it.",
+      "over": "{{title}} is now next to {{over}}.",
+      "ended": "Dropped {{title}} next to {{over}}.",
+      "cancelled": "Moving {{title}} was cancelled."
+    }
+  },
+  "stats": {
+    "title": "Statistics",
+    "aggregates_aria": "Aggregates",
+    "total": "Total",
+    "active": "Active",
+    "completed": "Completed",
+    "important": "Important",
+    "chart_heading": "Completed per day (last 7 days)",
+    "chart_aria": "Completed per day over the last {{days}} days, {{total}} total",
+    "oldest_heading": "Oldest unfinished",
+    "oldest_empty": "No unfinished todos",
+    "load_failed": "Failed to load stats",
+    "loading_chart": "Loading chart"
+  },
+  "locale": {
+    "en": "English",
+    "ru": "Русский"
+  },
+  "validation": {
+    "fallback": "Please check the entered value",
+    "title": {
+      "required": "Title is required",
+      "too_long": "Title is too long (max 200 characters)"
+    },
+    "email": {
+      "invalid": "Enter an email"
+    },
+    "password": {
+      "short": "At least 4 characters"
+    },
+    "name": {
+      "short": "Enter a name"
+    }
+  }
+}

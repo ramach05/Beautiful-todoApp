@@ -1,88 +1,105 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { ReactNode } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import { signIn } from '../features/auth/model/session';
+import { type AuthErrorKey, signIn } from '@/features/auth';
+import { Button } from '@/shared/ui/button';
+import { FieldError } from '@/shared/ui/field-error';
+import { fieldErrorKey } from '@/shared/i18n';
+import { PasswordField } from '@/shared/ui/password-field';
+import { Spinner } from '@/shared/ui/spinner';
+import { TextField } from '@/shared/ui/text-field';
 
+// Messages are not translated: the UI maps the zod error code to a dictionary key via fieldErrorKey
 const loginSchema = z.object({
-  email: z.email('Укажите email'),
-  password: z.string().min(8, 'Минимум 8 символов'),
+  email: z.email(),
+  password: z.string().min(4),
 });
 
 type LoginValues = z.infer<typeof loginSchema>;
 
 export interface LoginPageProps {
   onSuccess: () => void;
-  /** Ссылка на регистрацию проводится снаружи, чтобы страница не зависела от роутера в тестах */
+  /** The link to registration is passed from outside so the page does not depend on the router in tests */
   footer?: ReactNode;
 }
 
 export function LoginPage({ onSuccess, footer }: LoginPageProps) {
-  const { register, handleSubmit, setError, formState } = useForm<LoginValues>({
+  const { t } = useTranslation();
+  const { register, handleSubmit, formState } = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
   });
+  const [rootError, setRootError] = useState<AuthErrorKey | null>(null);
 
   const onSubmit = handleSubmit(async (values) => {
     const failure = await signIn(values.email, values.password);
     if (failure) {
-      setError('root', { message: failure });
+      setRootError(failure);
       return;
     }
     onSuccess();
   });
 
-  const inputClass =
-    'w-full rounded-[10px] bg-card-strong px-3 py-2 text-lg ring-1 ring-ring-soft ' +
-    'placeholder:text-gray-400 focus:ring-white focus:outline-none';
+  // The "wrong pair" error concerns both fields and is shown below the password; a field's own error takes priority
+  const passwordError = formState.errors.password
+    ? t(fieldErrorKey('password', formState.errors.password.type))
+    : rootError
+      ? t(rootError)
+      : undefined;
 
   return (
     <form
       className="mx-auto flex w-full max-w-sm flex-col gap-3 pt-6"
+      noValidate
       onSubmit={(event) => void onSubmit(event)}
     >
-      <h2 className="text-center text-3xl">Вход</h2>
-      <input
-        type="email"
-        className={inputClass}
-        placeholder="Email"
-        aria-label="Email"
-        autoComplete="email"
-        aria-invalid={formState.errors.email !== undefined}
-        {...register('email')}
-      />
-      {formState.errors.email && (
-        <p role="alert" className="-mt-2 pl-1 text-sm text-accent">
-          {formState.errors.email.message}
-        </p>
-      )}
-      <input
-        type="password"
-        className={inputClass}
-        placeholder="Пароль"
-        aria-label="Пароль"
-        autoComplete="current-password"
-        aria-invalid={formState.errors.password !== undefined}
-        {...register('password')}
-      />
-      {formState.errors.password && (
-        <p role="alert" className="-mt-2 pl-1 text-sm text-accent">
-          {formState.errors.password.message}
-        </p>
-      )}
-      {formState.errors.root && (
-        <p role="alert" className="pl-1 text-sm text-accent">
-          {formState.errors.root.message}
-        </p>
-      )}
-      <button
-        type="submit"
-        className="rounded-[10px] bg-card-strong px-3 py-2 text-lg ring-1 ring-accent-soft transition-colors hover:bg-ring-soft disabled:opacity-40"
-        disabled={formState.isSubmitting}
-      >
-        Войти
-      </button>
+      <h2 className="text-center text-3xl">{t('auth.sign_in')}</h2>
+      <div className="flex flex-col gap-1">
+        <label className="sr-only" htmlFor="login-email">
+          {t('auth.email')}
+        </label>
+        <TextField
+          id="login-email"
+          type="email"
+          className="w-full"
+          placeholder={t('auth.email')}
+          autoComplete="email"
+          aria-invalid={formState.errors.email !== undefined}
+          aria-describedby="login-email-error"
+          {...register('email')}
+        />
+        <FieldError
+          id="login-email-error"
+          message={
+            formState.errors.email
+              ? t(fieldErrorKey('email', formState.errors.email.type))
+              : undefined
+          }
+        />
+      </div>
+      <div className="flex flex-col gap-1">
+        <label className="sr-only" htmlFor="login-password">
+          {t('auth.password')}
+        </label>
+        <PasswordField
+          id="login-password"
+          className="w-full"
+          placeholder={t('auth.password')}
+          autoComplete="current-password"
+          aria-invalid={formState.errors.password !== undefined}
+          aria-describedby="login-password-error"
+          {...register('password')}
+        />
+        <FieldError id="login-password-error" message={passwordError} />
+      </div>
+      <Button type="submit" disabled={formState.isSubmitting} aria-busy={formState.isSubmitting}>
+        {formState.isSubmitting && <Spinner />}
+        {t('auth.sign_in')}
+      </Button>
       {footer && <div className="text-center text-sm">{footer}</div>}
     </form>
   );

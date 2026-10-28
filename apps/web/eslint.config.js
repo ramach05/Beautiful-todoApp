@@ -4,7 +4,7 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 import globals from 'globals';
 
 export default [
-  { ignores: ['dist/**', 'src/routeTree.gen.ts'] },
+  { ignores: ['dist/**', 'src/app/routeTree.gen.ts'] },
   ...base,
   {
     files: ['**/*.{ts,tsx}'],
@@ -19,8 +19,8 @@ export default [
     },
   },
   {
-    // route-файлы TanStack по контракту экспортируют объект Route наряду с компонентом
-    files: ['src/routes/**/*.tsx'],
+    // TanStack route files export a Route object alongside the component by contract
+    files: ['src/app/routes/**/*.tsx'],
     rules: { 'react-refresh/only-export-components': 'off' },
   },
 ];

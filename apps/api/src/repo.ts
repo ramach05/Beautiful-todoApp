@@ -1,20 +1,22 @@
-import type { CreateTodoInput, Todo, UpdateTodoInput } from '@bt/shared';
+import type { AppLocale, CreateTodoInput, Todo, UpdateTodoInput } from '@bt/shared';
 
-/** Минимальный профиль аутентифицированного пользователя для слоя данных */
+/** Minimal authenticated-user profile for the data layer */
 export interface AppUser {
   id: string;
   email: string;
+  locale: AppLocale;
 }
 
-/** Источник пользователя запроса: better-auth в проде, фиксированная сессия в моках */
+/** Source of the request user: better-auth in prod, a fixed session in mocks */
 export interface SessionResolver {
   resolve(headers: Headers): Promise<AppUser | null>;
 }
 
-/** Порт репозитория задач: postgres-реализация в проде, in-memory в моках и юнитах; доступ только в рамках владельца */
+/** Todos repository port: postgres implementation in prod, in-memory in mocks and unit tests; access is owner-scoped only */
 export interface TodosRepository {
   list(userId: string): Promise<Todo[]>;
   create(input: CreateTodoInput, userId: string): Promise<Todo>;
   update(id: string, patch: UpdateTodoInput, userId: string): Promise<Todo | null>;
   remove(id: string, userId: string): Promise<boolean>;
+  reorder(ids: string[], userId: string): Promise<Todo[]>;
 }
