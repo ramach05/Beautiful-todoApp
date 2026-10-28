@@ -117,7 +117,7 @@ pnpm dev                                  # web 5173, api 3001, без сбро�
 
 Документация API после запуска: `http://localhost:3001/docs` (Scalar) и `http://localhost:3001/openapi.json`.
 
-Демо-аккаунты (сид): `demo@local.test` / `demo-pass-123` и тестовый `test_user@local.test` / `1234`.
+Демо-аккаунты (сид): `demo@local.test` / `demo-pass-123` (3 стартовые задачи) и тестовый `test_user@local.test` / `1234` (7 задач). Каждый новый зарегистрированный пользователь получает те же 3 стартовые задачи. При `pnpm run start` dev-БД каждый раз сбрасывается к сид-состоянию.
 
 ## Проверки
 

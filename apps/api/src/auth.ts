@@ -5,7 +5,9 @@ import { appLocaleSchema, DEFAULT_LOCALE, parseLocale } from '@bt/shared';
 
 import { env } from './config.js';
 import { DEV_AUTH_SECRET } from './env.js';
+import { DEFAULT_TODO_TITLES } from './db/default-todos.js';
 import * as schema from './db/schema.js';
+import { PostgresTodosRepository } from './db/todos-repo.js';
 import type { SessionResolver } from './repo.js';
 
 type AuthDb = PgDatabase<PgQueryResultHKT, typeof schema>;
@@ -18,6 +20,20 @@ export function buildAuth(db: AuthDb) {
     baseURL: env.BETTER_AUTH_URL,
     database: drizzleAdapter(db, { provider: 'pg', schema, usePlural: true }),
     emailAndPassword: { enabled: true, minPasswordLength: 4 },
+    // Каждому новому пользователю — стартовые задачи сразу при создании аккаунта
+    databaseHooks: {
+      user: {
+        create: {
+          // better-auth передает запись пользователя первым аргументом
+          after: async (user) => {
+            const repo = new PostgresTodosRepository(db);
+            for (const title of DEFAULT_TODO_TITLES) {
+              await repo.create({ title }, user.id);
+            }
+          },
+        },
+      },
+    },
     // Управление аккаунтом из /settings: смена email и удаление аккаунта (подтверждение паролем).
     // Пользователи здесь не верифицируются SMTP, поэтому email меняется сразу (updateEmailWithoutVerification)
     user: {

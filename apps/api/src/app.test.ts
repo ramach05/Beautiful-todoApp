@@ -12,6 +12,7 @@ import { afterAll, beforeAll, beforeEach, expect, it } from 'vitest';
 
 import { buildApp } from './app.js';
 import { betterAuthResolver, buildAuth } from './auth.js';
+import { DEFAULT_TODO_TITLES } from './db/default-todos.js';
 import * as schema from './db/schema.js';
 import { todos } from './db/schema.js';
 import { PostgresTodosRepository } from './db/todos-repo.js';
@@ -39,7 +40,7 @@ function createTestClient(cookie?: string): AppContractClient {
 }
 
 /** Регистрация через auth-эндпоинт: возвращает cookie сессии из ответа */
-async function signUp(email: string): Promise<string> {
+async function signUp(email: string, clearDefaults = true): Promise<string> {
   const response = await fetch(`${httpUrl}/api/auth/sign-up/email`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
@@ -47,6 +48,11 @@ async function signUp(email: string): Promise<string> {
   });
   if (!response.ok) {
     throw new Error(`Регистрация не удалась: ${response.status} ${await response.text()}`);
+  }
+  const body = (await response.json()) as { user: { id: string } };
+  // Хук создания пользователя выдает стартовые задачи: сценариям нужен детерминированный старт
+  if (clearDefaults) {
+    await db.delete(todos).where(eq(todos.userId, body.user.id));
   }
   const setCookie = response.headers.getSetCookie()[0];
   if (!setCookie) {
@@ -116,6 +122,13 @@ it('без сессии процедуры отдают UNAUTHORIZED', async () 
   if (error instanceof ORPCError) {
     expect(error.code).toBe('UNAUTHORIZED');
   }
+});
+
+it('новый пользователь получает стартовые задачи', async () => {
+  const api = createTestClient(await signUp('starter@test.local', false));
+
+  const titles = (await api.todos.list()).map((todo) => todo.title);
+  expect(titles).toEqual(DEFAULT_TODO_TITLES);
 });
 
 it('CRUD-сценарий через oRPC-клиент с сессией', async () => {

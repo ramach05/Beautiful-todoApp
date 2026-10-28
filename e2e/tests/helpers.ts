@@ -1,5 +1,8 @@
 import { expect, type Locator, type Page } from '@playwright/test';
 
+// Стартовые задачи создаются при регистрации (databaseHooks на стороне api)
+export const STARTER_TITLES = ['Buy groceries', 'Call mom', 'Do homework'] as const;
+
 let seq = 0;
 
 /** Уникальный email: повторы прогонов не сталкиваются на unique-индексе */

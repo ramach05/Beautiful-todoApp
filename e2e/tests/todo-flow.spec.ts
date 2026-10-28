@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { addTodo, register, todoRow, uniqueEmail } from './helpers';
+import { addTodo, register, STARTER_TITLES, todoRow, uniqueEmail } from './helpers';
 
 test('аноним попадает на /login', async ({ page }) => {
   await page.goto('/');
@@ -10,7 +10,10 @@ test('аноним попадает на /login', async ({ page }) => {
 test('регистрация, CRUD, фильтры и сессия', async ({ page }) => {
   const email = uniqueEmail();
   await register(page, email);
-  await expect(page.getByText('No todos')).toBeVisible();
+  // Новый пользователь стартует с готовым списком задач
+  for (const title of STARTER_TITLES) {
+    await expect(todoRow(page, title)).toBeVisible();
+  }
 
   await addTodo(page, 'E2E задача');
   const item = todoRow(page, 'E2E задача');
@@ -62,7 +65,8 @@ test('пользователи не видят чужие задачи', async (
   const contextB = await browser.newContext();
   const pageB = await contextB.newPage();
   await register(pageB);
-  await expect(pageB.getByText('No todos')).toBeVisible();
+  // У B свой список со стартовыми задачами, но задач A не видно (текст стартовых одинаковый — сверяем уникальное)
+  await expect(todoRow(pageB, STARTER_TITLES[0])).toBeVisible();
   await expect(pageB.getByText('Задача пользователя A')).toHaveCount(0);
 
   await contextA.close();
@@ -91,12 +95,10 @@ test('drag handle меняет порядок и он переживает пе�
 
   const titles = () => page.locator('#todo-list > li .todo-title').allTextContents();
 
-  await expect.poll(async () => (await titles()).join(',')).toBe('Вторая,Третья,Первая');
+  // Стартовые задачи остаются в начале списка: переставляются только добавленные
+  const expected = [...STARTER_TITLES, 'Вторая', 'Третья', 'Первая'].join(',');
+  await expect.poll(async () => (await titles()).join(',')).toBe(expected);
 
   await page.reload();
-  await expect(page.locator('#todo-list > li .todo-title')).toHaveText([
-    'Вторая',
-    'Третья',
-    'Первая',
-  ]);
+  await expect(page.locator('#todo-list > li .todo-title')).toHaveText(expected.split(','));
 });
