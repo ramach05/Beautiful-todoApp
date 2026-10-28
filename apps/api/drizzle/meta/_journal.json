@@ -29,6 +29,13 @@
       "when": 1793125532737,
       "tag": "0003_sudden_daimon_hellstrom",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793126776907,
+      "tag": "0004_outgoing_wendell_rand",
+      "breakpoints": true
     }
   ]
 }

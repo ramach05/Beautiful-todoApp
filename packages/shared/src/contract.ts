@@ -4,6 +4,7 @@ import { z } from 'zod';
 
 import {
   createTodoInputSchema,
+  reorderTodosInputSchema,
   todoListSchema,
   todoSchema,
   updateTodoInputSchema,
@@ -21,6 +22,7 @@ export const todoContract = {
   create: authed.input(createTodoInputSchema).output(todoSchema),
   update: authed.input(z.object({ id: z.uuid(), patch: updateTodoInputSchema })).output(todoSchema),
   remove: authed.input(z.uuid()),
+  reorder: authed.input(reorderTodosInputSchema).output(todoListSchema),
 };
 
 /** Корневой контракт приложения: добавление доменов = новая ветка здесь */

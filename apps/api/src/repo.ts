@@ -18,4 +18,5 @@ export interface TodosRepository {
   create(input: CreateTodoInput, userId: string): Promise<Todo>;
   update(id: string, patch: UpdateTodoInput, userId: string): Promise<Todo | null>;
   remove(id: string, userId: string): Promise<boolean>;
+  reorder(ids: string[], userId: string): Promise<Todo[]>;
 }

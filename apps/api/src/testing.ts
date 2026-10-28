@@ -80,4 +80,24 @@ export class InMemoryTodosRepository implements TodosRepository {
     this.items = this.items.filter((item) => !(item.id === id && item.userId === userId));
     return this.items.length < before;
   }
+
+  async reorder(ids: string[], userId: string): Promise<Todo[]> {
+    // порядок задач владельца задает массив; чужие id игнорируются, не названные идут в конец
+    const owned = this.items.filter((item) => item.userId === userId);
+    const byId = new Map(owned.map((item) => [item.id, item]));
+    const picked: OwnedTodo[] = [];
+    for (const id of ids) {
+      const item = byId.get(id);
+      if (item) {
+        picked.push(item);
+        byId.delete(id);
+      }
+    }
+    const ordered = [...picked, ...owned.filter((item) => byId.has(item.id))];
+    let cursor = 0;
+    this.items = this.items.map((item) =>
+      item.userId === userId ? (ordered[cursor++] ?? item) : item,
+    );
+    return ordered.map(({ userId: _, ...todo }) => todo);
+  }
 }

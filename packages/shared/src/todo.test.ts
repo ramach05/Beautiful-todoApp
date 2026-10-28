@@ -3,6 +3,8 @@ import { expect, it } from 'vitest';
 import {
   createTodoInputSchema,
   filterTodos,
+  reorderTodos,
+  reorderTodosInputSchema,
   todoFilterSchema,
   todoSchema,
   updateTodoInputSchema,
@@ -17,11 +19,10 @@ const todo = (overrides: Partial<Todo> = {}): Todo => ({
   ...overrides,
 });
 
-const items = [
-  todo({ title: 'Позвонить маме' }),
-  todo({ title: 'Магазин', done: true }),
-  todo({ title: 'Позвонить врачу', important: true }),
-];
+const first = todo({ title: 'Позвонить маме' });
+const second = todo({ title: 'Магазин', done: true });
+const third = todo({ title: 'Позвонить врачу', important: true });
+const items = [first, second, third];
 
 // Тесты мутабельных пакетов держим плоскими (без describe): per-test фильтр Stryker с vitest 5
 // не матчит вложенные тесты, и мутанты остаются живыми при наличии покрытия.
@@ -94,4 +95,21 @@ it('filterTodos: ищет по подстроке без учета регист
 it('filterTodos: комбинирует статус и поиск', () => {
   expect(filterTodos(items, 'active', 'маме')).toHaveLength(1);
   expect(filterTodos(items, 'done', 'маме')).toHaveLength(0);
+});
+
+it('reorderTodosInputSchema принимает непустой массив uuid и отклоняет мусор', () => {
+  expect(reorderTodosInputSchema.safeParse({ ids: [crypto.randomUUID()] }).success).toBe(true);
+  expect(reorderTodosInputSchema.safeParse({ ids: [] }).success).toBe(false);
+  expect(reorderTodosInputSchema.safeParse({ ids: ['not-a-uuid'] }).success).toBe(false);
+});
+
+it('reorderTodos ставит переносимую задачу на место целевой', () => {
+  const next = reorderTodos(items, third.id, first.id);
+  expect(next.map((todo) => todo.title)).toEqual(['Позвонить врачу', 'Позвонить маме', 'Магазин']);
+});
+
+it('reorderTodos не меняет список при совпадении id или отсутствии одного из них', () => {
+  expect(reorderTodos(items, first.id, first.id)).toBe(items);
+  expect(reorderTodos(items, crypto.randomUUID(), first.id)).toBe(items);
+  expect(reorderTodos(items, first.id, crypto.randomUUID())).toBe(items);
 });

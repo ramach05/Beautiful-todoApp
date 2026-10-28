@@ -1,4 +1,4 @@
-import { boolean, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { boolean, index, integer, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
 /**
  * Таблицы better-auth (user/session/account/verification): имена колонок = имена полей better-auth,
@@ -56,18 +56,30 @@ export const verifications = pgTable('verification', {
   updatedAt: timestamp('updatedAt', { withTimezone: true }).defaultNow(),
 });
 
-/** Таблица задач; created_at нужен для стабильного порядка списка, completed_at — для графика выполнения */
-export const todos = pgTable('todos', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  title: text('title').notNull(),
-  important: boolean('important').notNull().default(false),
-  done: boolean('done').notNull().default(false),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  completedAt: timestamp('completed_at', { withTimezone: true }),
-  userId: text('user_id')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
-});
+/**
+ * Таблица задач; position — порядок в списке, созданный по drag-and-drop,
+ * created_at дает стабильный порядок при равных position и для старых записей,
+ * completed_at — для графика выполнения.
+ */
+export const todos = pgTable(
+  'todos',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    title: text('title').notNull(),
+    important: boolean('important').notNull().default(false),
+    done: boolean('done').notNull().default(false),
+    position: integer('position').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+  },
+  (table) => [
+    // список выбирается фильтром по владельцу и сортируется по порядку
+    index('todos_user_position_idx').on(table.userId, table.position),
+  ],
+);
 
 export type TodoRow = typeof todos.$inferSelect;
 export type UserRow = typeof users.$inferSelect;

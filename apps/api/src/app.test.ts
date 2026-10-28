@@ -133,17 +133,24 @@ it('CRUD-сценарий через oRPC-клиент с сессией', async
   expect(await api.todos.list()).toEqual([]);
 });
 
-it('список отдает задачи в порядке created_at, при равенстве времени - по id', async () => {
+it('список отдает задачи в порядке position, при равенстве - по created_at и id', async () => {
   const api = createTestClient(await signUp('order@test.local'));
-  const oldest = await api.todos.create({ title: 'Старая' });
+  const first = await api.todos.create({ title: 'Первая' });
   const second = await api.todos.create({ title: 'Вторая B' });
   const third = await api.todos.create({ title: 'Вторая A' });
 
-  // now() соседних вставок может совпасть с точностью до микросекунды: порядок фиксируем явными метками
+  // position растет при создании: порядок списка совпадает с порядком создания
+  expect((await api.todos.list()).map((todo) => todo.id)).toEqual([first.id, second.id, third.id]);
+
+  // при равных position порядок отдан created_at и id: метки фиксируем обходом API
   await db
     .update(todos)
-    .set({ createdAt: new Date('2026-01-01T00:00:00Z') })
-    .where(eq(todos.id, oldest.id));
+    .set({ position: 0 })
+    .where(inArray(todos.id, [second.id, third.id]));
+  await db
+    .update(todos)
+    .set({ position: 5, createdAt: new Date('2026-01-01T00:00:00Z') })
+    .where(eq(todos.id, first.id));
   const same = new Date('2026-02-01T00:00:00Z');
   await db
     .update(todos)
@@ -151,7 +158,26 @@ it('список отдает задачи в порядке created_at, при 
     .where(inArray(todos.id, [second.id, third.id]));
 
   const ids = (await api.todos.list()).map((todo) => todo.id);
-  expect(ids).toEqual([oldest.id, ...[second.id, third.id].sort()]);
+  expect(ids).toEqual([...[second.id, third.id].sort(), first.id]);
+});
+
+it('reorder задает новый порядок, новая задача добавляется в конец', async () => {
+  const api = createTestClient(await signUp('reorder@test.local'));
+  const first = await api.todos.create({ title: 'A' });
+  const second = await api.todos.create({ title: 'B' });
+  const third = await api.todos.create({ title: 'C' });
+
+  const reordered = await api.todos.reorder({ ids: [third.id, first.id, second.id] });
+  expect(reordered.map((todo) => todo.id)).toEqual([third.id, first.id, second.id]);
+  expect((await api.todos.list()).map((todo) => todo.id)).toEqual([third.id, first.id, second.id]);
+
+  const added = await api.todos.create({ title: 'D' });
+  expect((await api.todos.list()).map((todo) => todo.id)).toEqual([
+    third.id,
+    first.id,
+    second.id,
+    added.id,
+  ]);
 });
 
 it('задачи другого пользователя не видны и не доступны для изменения', async () => {
@@ -161,6 +187,8 @@ it('задачи другого пользователя не видны и не
   const created = await owner.todos.create({ title: 'Личная задача' });
 
   expect(await intruder.todos.list()).toEqual([]);
+  // чужой id в reorder ничего не переносит: ответ пуст, как и список intruder
+  expect(await intruder.todos.reorder({ ids: [created.id] })).toEqual([]);
 
   const error = await intruder.todos
     .update({ id: created.id, patch: { done: true } })

@@ -44,5 +44,9 @@ export const appRouter = {
         throw new ORPCError('NOT_FOUND');
       }
     }),
+
+    reorder: appProcedure.todos.reorder.handler(({ input, context }) =>
+      context.todos.reorder(input.ids, context.user.id),
+    ),
   },
 };

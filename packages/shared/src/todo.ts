@@ -35,6 +35,12 @@ export const updateTodoInputSchema = z
   .refine((patch) => Object.keys(patch).length > 0, 'Patch must not be empty');
 export type UpdateTodoInput = z.infer<typeof updateTodoInputSchema>;
 
+/** Вход переноса порядка: id задач в новом порядке целиком */
+export const reorderTodosInputSchema = z.object({
+  ids: z.array(z.uuid()).min(1),
+});
+export type ReorderTodosInput = z.infer<typeof reorderTodosInputSchema>;
+
 export const todoFilterSchema = z.enum(['all', 'active', 'done']);
 export type TodoFilter = z.infer<typeof todoFilterSchema>;
 
@@ -46,4 +52,23 @@ export function filterTodos(todos: Todo[], filter: TodoFilter, search: string): 
     const byQuery = query === '' || todo.title.toLowerCase().includes(query);
     return byStatus && byQuery;
   });
+}
+
+/**
+ * Новый список с задачей draggedId на месте задачи overId.
+ * Если одного из id нет в списке или они совпадают — возвращаем исходный массив без изменений.
+ */
+export function reorderTodos(todos: Todo[], draggedId: string, overId: string): Todo[] {
+  const from = todos.findIndex((todo) => todo.id === draggedId);
+  const to = todos.findIndex((todo) => todo.id === overId);
+  if (from === -1 || to === -1 || from === to) {
+    return todos;
+  }
+  const next = [...todos];
+  const [moved] = next.splice(from, 1);
+  if (!moved) {
+    return todos;
+  }
+  next.splice(to, 0, moved);
+  return next;
 }

@@ -55,7 +55,13 @@ describe('docs', () => {
     const spec = (await response.json()) as Spec;
     expect(spec.openapi).toMatch(/^3\.1/);
 
-    for (const path of ['/todos/list', '/todos/create', '/todos/update', '/todos/remove']) {
+    for (const path of [
+      '/todos/list',
+      '/todos/create',
+      '/todos/update',
+      '/todos/remove',
+      '/todos/reorder',
+    ]) {
       const operation = spec.paths[path]?.post;
       expect(operation, `post ${path}`).toBeTruthy();
       // каждая процедура authed: в контракте описан UNAUTHORIZED -> 401

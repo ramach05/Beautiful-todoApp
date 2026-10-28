@@ -1,5 +1,5 @@
 import type { CreateTodoInput, Todo, UpdateTodoInput } from '@bt/shared';
-import { asc, and, eq } from 'drizzle-orm';
+import { asc, and, eq, sql } from 'drizzle-orm';
 import type { PgDatabase, PgQueryResultHKT } from 'drizzle-orm/pg-core';
 
 import * as schema from './schema.js';
@@ -45,14 +45,19 @@ export class PostgresTodosRepository implements TodosRepository {
       .select(todoColumns)
       .from(todos)
       .where(eq(todos.userId, userId))
-      .orderBy(asc(todos.createdAt), asc(todos.id));
+      .orderBy(asc(todos.position), asc(todos.createdAt), asc(todos.id));
     return rows.map(toTodo);
   }
 
   async create(input: CreateTodoInput, userId: string): Promise<Todo> {
+    // position = следующая свободная позиция владельца: новая задача попадает в конец списка
     const [row] = await this.db
       .insert(todos)
-      .values({ title: input.title, userId })
+      .values({
+        title: input.title,
+        userId,
+        position: sql`(select coalesce(max(${todos.position}), -1) + 1 from ${todos} where ${todos.userId} = ${userId})`,
+      })
       .returning(todoColumns);
     if (!row) {
       throw new Error('INSERT не вернул строку');
@@ -80,5 +85,18 @@ export class PostgresTodosRepository implements TodosRepository {
       .where(and(eq(todos.id, id), eq(todos.userId, userId)))
       .returning({ id: todos.id });
     return deleted.length > 0;
+  }
+
+  async reorder(ids: string[], userId: string): Promise<Todo[]> {
+    // порядок позициями индексов; чужие id не матчатся где-условием и молча игнорируются
+    await this.db.transaction(async (tx) => {
+      for (const [index, id] of ids.entries()) {
+        await tx
+          .update(todos)
+          .set({ position: index })
+          .where(and(eq(todos.id, id), eq(todos.userId, userId)));
+      }
+    });
+    return this.list(userId);
   }
 }
