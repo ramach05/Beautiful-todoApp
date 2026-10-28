@@ -19,7 +19,7 @@ async function credentialedTransport(request: Request): Promise<Response> {
 
 /** Ленивая загрузка in-process мока: в прод-бандл не попадает (ветка отсечается define); сам мок — dev/test-инфраструктура */
 async function mockTransport(request: Request): Promise<Response> {
-  const { handleMockRequest } = await import('../mocks');
+  const { handleMockRequest } = await import('@/shared/mocks');
   return handleMockRequest(request, RPC_PREFIX);
 }
 

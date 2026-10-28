@@ -1,6 +1,6 @@
 import type { CreateTodoInput, Todo, UpdateTodoInput } from '@bt/shared';
 
-import type { AppUser, TodosRepository } from './repo.js';
+import type { AppUser, TodosRepository } from '@/repo.js';
 
 const SEED_TITLES = ['Buy groceries', 'Call mom', 'Do homework', 'Iron the shirt'];
 

@@ -6,9 +6,9 @@ import { fileURLToPath } from 'node:url';
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { buildApp } from './app.js';
-import * as schema from './db/schema.js';
-import { PostgresTodosRepository } from './db/todos-repo.js';
+import { buildApp } from '@/app.js';
+import * as schema from '@/db/schema.js';
+import { PostgresTodosRepository } from '@/db/todos-repo.js';
 
 const pglite = new PGlite();
 const db = drizzle(pglite, { schema });

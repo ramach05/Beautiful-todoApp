@@ -1,12 +1,12 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 
-import { buildApp } from './app.js';
-import { betterAuthResolver, buildAuth } from './auth.js';
-import { env } from './config.js';
-import * as schema from './db/schema.js';
-import { PostgresTodosRepository } from './db/todos-repo.js';
-import { attachSentry, initSentry } from './observability.js';
+import { buildApp } from '@/app.js';
+import { betterAuthResolver, buildAuth } from '@/auth.js';
+import { env } from '@/config.js';
+import * as schema from '@/db/schema.js';
+import { PostgresTodosRepository } from '@/db/todos-repo.js';
+import { attachSentry, initSentry } from '@/observability.js';
 
 initSentry();
 

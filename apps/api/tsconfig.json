@@ -2,7 +2,8 @@
   "extends": "@bt/config/tsconfig/node.json",
   "compilerOptions": {
     "noEmit": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "paths": { "@/*": ["./src/*"] }
   },
   "include": ["src", "drizzle.config.ts", "vitest.config.ts"]
 }

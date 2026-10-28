@@ -5,8 +5,8 @@ import { count, eq } from 'drizzle-orm';
 import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import * as schema from './db/schema.js';
-import { todos, users } from './db/schema.js';
+import * as schema from '@/db/schema.js';
+import { todos, users } from '@/db/schema.js';
 
 const pglite = new PGlite();
 const db = drizzle(pglite, { schema });

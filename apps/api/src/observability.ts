@@ -1,7 +1,7 @@
 import { fastifyIntegration, init, setupFastifyErrorHandler } from '@sentry/node';
 import type { FastifyInstance } from 'fastify';
 
-import { env } from './config.js';
+import { env } from '@/config.js';
 
 /** Sentry включается только при заданном SENTRY_DSN: dev/test не шлют ошибки в облако */
 export function initSentry(): void {

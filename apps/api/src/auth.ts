@@ -3,12 +3,12 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import type { PgDatabase, PgQueryResultHKT } from 'drizzle-orm/pg-core';
 import { appLocaleSchema, DEFAULT_LOCALE, parseLocale } from '@bt/shared';
 
-import { env } from './config.js';
-import { DEV_AUTH_SECRET } from './env.js';
-import { DEFAULT_TODO_TITLES } from './db/default-todos.js';
-import * as schema from './db/schema.js';
-import { PostgresTodosRepository } from './db/todos-repo.js';
-import type { SessionResolver } from './repo.js';
+import { env } from '@/config.js';
+import { DEV_AUTH_SECRET } from '@/env.js';
+import { DEFAULT_TODO_TITLES } from '@/db/default-todos.js';
+import * as schema from '@/db/schema.js';
+import { PostgresTodosRepository } from '@/db/todos-repo.js';
+import type { SessionResolver } from '@/repo.js';
 
 type AuthDb = PgDatabase<PgQueryResultHKT, typeof schema>;
 

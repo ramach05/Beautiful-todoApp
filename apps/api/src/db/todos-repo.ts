@@ -2,9 +2,9 @@ import type { CreateTodoInput, Todo, UpdateTodoInput } from '@bt/shared';
 import { asc, and, eq, sql } from 'drizzle-orm';
 import type { PgDatabase, PgQueryResultHKT } from 'drizzle-orm/pg-core';
 
-import * as schema from './schema.js';
-import { todos } from './schema.js';
-import type { TodosRepository } from '../repo.js';
+import * as schema from '@/db/schema.js';
+import { todos } from '@/db/schema.js';
+import type { TodosRepository } from '@/repo.js';
 
 type TodosDb = PgDatabase<PgQueryResultHKT, typeof schema>;
 

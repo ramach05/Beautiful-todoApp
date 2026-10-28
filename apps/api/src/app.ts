@@ -7,10 +7,10 @@ import { RPCHandler } from '@orpc/server/fastify';
 import { randomUUID } from 'node:crypto';
 import Fastify, { type FastifyInstance, type RouteHandler } from 'fastify';
 
-import type { Auth } from './auth.js';
-import { registerDocs } from './docs.js';
-import { appRouter, type Context } from './router.js';
-import type { SessionResolver, TodosRepository } from './repo.js';
+import type { Auth } from '@/auth.js';
+import { registerDocs } from '@/docs.js';
+import { appRouter, type Context } from '@/router.js';
+import type { SessionResolver, TodosRepository } from '@/repo.js';
 
 /** Запасное значение лимита auth, когда max не передан; совпадает с дефолтом AUTH_RATE_LIMIT_MAX в env-схеме */
 const DEFAULT_AUTH_RATE_LIMIT_MAX = 20;

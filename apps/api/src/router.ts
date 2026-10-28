@@ -2,7 +2,7 @@ import { ORPCError, implement } from '@orpc/server';
 
 import { appContract } from '@bt/shared';
 
-import type { SessionResolver, TodosRepository } from './repo.js';
+import type { SessionResolver, TodosRepository } from '@/repo.js';
 
 export interface Context {
   todos: TodosRepository;

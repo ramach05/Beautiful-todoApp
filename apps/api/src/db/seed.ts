@@ -2,12 +2,12 @@ import { eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 
-import { buildAuth } from '../auth.js';
-import { env } from '../config.js';
-import { DEFAULT_TODO_TITLES } from './default-todos.js';
-import * as schema from './schema.js';
-import { users } from './schema.js';
-import { PostgresTodosRepository } from './todos-repo.js';
+import { buildAuth } from '@/auth.js';
+import { env } from '@/config.js';
+import { DEFAULT_TODO_TITLES } from '@/db/default-todos.js';
+import * as schema from '@/db/schema.js';
+import { users } from '@/db/schema.js';
+import { PostgresTodosRepository } from '@/db/todos-repo.js';
 
 // Сверх стартовых 3 задач (их выдает databaseHooks в buildAuth) — только тестовому: итого 7
 const TEST_USER_EXTRA_TITLES = [

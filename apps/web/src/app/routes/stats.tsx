@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { lazy } from 'react';
 
-import { requireSession } from '../guards';
+import { requireSession } from '@/app/guards';
 import { todoKeys } from '@/entities/todo';
 import { StatsPageSuspense } from '@/pages/stats-skeleton';
 import { api, queryClient } from '@/shared/api';

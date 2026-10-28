@@ -10,14 +10,14 @@ import { fileURLToPath } from 'node:url';
 import type { AppContractClient } from '@bt/shared';
 import { afterAll, beforeAll, beforeEach, expect, it } from 'vitest';
 
-import { buildApp } from './app.js';
-import { betterAuthResolver, buildAuth } from './auth.js';
-import { DEFAULT_TODO_TITLES } from './db/default-todos.js';
-import * as schema from './db/schema.js';
-import { todos } from './db/schema.js';
-import { PostgresTodosRepository } from './db/todos-repo.js';
-import { envSchema } from './env.js';
-import { InMemoryTodosRepository } from './testing.js';
+import { buildApp } from '@/app.js';
+import { betterAuthResolver, buildAuth } from '@/auth.js';
+import { DEFAULT_TODO_TITLES } from '@/db/default-todos.js';
+import * as schema from '@/db/schema.js';
+import { todos } from '@/db/schema.js';
+import { PostgresTodosRepository } from '@/db/todos-repo.js';
+import { envSchema } from '@/env.js';
+import { InMemoryTodosRepository } from '@/testing.js';
 
 const pglite = new PGlite();
 const db = drizzle(pglite, { schema });
