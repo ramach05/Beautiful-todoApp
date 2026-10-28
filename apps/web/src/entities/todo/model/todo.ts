@@ -5,6 +5,7 @@
 export type { Todo, TodoFilter, CreateTodoInput, UpdateTodoInput } from '@bt/shared';
 export {
   filterTodos,
+  reorderTodos,
   todoFilterSchema,
   createTodoInputSchema,
   updateTodoInputSchema,

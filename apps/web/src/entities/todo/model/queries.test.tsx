@@ -5,11 +5,18 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CreateTodoInput, Todo, UpdateTodoInput } from '@bt/shared';
 import { DEMO_USER, InMemoryTodosRepository } from '@bt/api/testing';
 
-import { todoKeys, useAddTodo, useDeleteTodo, useTodos, useUpdateTodo } from './queries';
+import {
+  todoKeys,
+  useAddTodo,
+  useDeleteTodo,
+  useReorderTodos,
+  useTodos,
+  useUpdateTodo,
+} from './queries';
 
 /** Транспорт подменяем, хранилище то же, что у web-мока: проверяем поведение кэша Query */
 const apiMock = vi.hoisted(() => ({
-  todos: { list: vi.fn(), create: vi.fn(), update: vi.fn(), remove: vi.fn() },
+  todos: { list: vi.fn(), create: vi.fn(), update: vi.fn(), remove: vi.fn(), reorder: vi.fn() },
 }));
 
 vi.mock('@/shared/api', () => ({ api: apiMock }));
@@ -52,6 +59,7 @@ async function renderTodoHooks() {
       add: useAddTodo(),
       update: useUpdateTodo(),
       remove: useDeleteTodo(),
+      reorder: useReorderTodos(),
     }),
     { wrapper },
   );
@@ -90,6 +98,9 @@ beforeEach(() => {
       throw new Error('Задача не найдена');
     }
   });
+  apiMock.todos.reorder.mockImplementation((input: { ids: string[] }) =>
+    repo.reorder(input.ids, DEMO_USER.id),
+  );
 });
 
 describe('мутации задач поверх кэша Query', () => {
@@ -173,5 +184,35 @@ describe('мутации задач поверх кэша Query', () => {
     await waitFor(() =>
       expect(result.current.list.data?.some((todo) => todo.title === 'Новая задача')).toBe(true),
     );
+  });
+
+  it('reorder выстраивает кэш по ids до ответа и откатывает порядок при ошибке', async () => {
+    const { result } = await renderTodoHooks();
+    const initial = ids(result.current.list.data) ?? [];
+    const reversed = [...initial].reverse();
+    const pending = deferred<Todo[]>();
+    // инвалидацию гасим: вернуть прежний порядок после сбоя может только onError-откат
+    vi.spyOn(client, 'invalidateQueries').mockResolvedValue();
+    apiMock.todos.reorder.mockImplementation(() => pending.promise);
+
+    result.current.reorder.mutate(reversed);
+    await waitFor(() => expect(ids(result.current.list.data)).toEqual(reversed));
+
+    pending.reject(new Error('Сервер недоступен'));
+    await waitFor(() => expect(result.current.reorder.isError).toBe(true));
+    await waitFor(() => expect(ids(result.current.list.data)).toEqual(initial));
+  });
+
+  it('reorder подтверждает порядок ответом сервера и инвалидирует список', async () => {
+    const { result } = await renderTodoHooks();
+    const reversed = (ids(result.current.list.data) ?? []).reverse();
+    const invalidated = vi.spyOn(client, 'invalidateQueries');
+
+    result.current.reorder.mutate(reversed);
+    await waitFor(() => expect(result.current.reorder.isSuccess).toBe(true));
+
+    expect(apiMock.todos.reorder).toHaveBeenCalledWith({ ids: reversed });
+    expect(invalidated).toHaveBeenCalledWith({ queryKey: todoKeys.all });
+    await waitFor(() => expect(ids(result.current.list.data)).toEqual(reversed));
   });
 });

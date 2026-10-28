@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { type AuthErrorKey, signIn } from '@/features/auth';
 import { Button } from '@/shared/ui/button';
 import { fieldErrorKey } from '@/shared/i18n';
+import { PasswordField } from '@/shared/ui/password-field';
 import { Spinner } from '@/shared/ui/spinner';
 import { TextField } from '@/shared/ui/text-field';
 
@@ -73,9 +74,8 @@ export function LoginPage({ onSuccess, footer }: LoginPageProps) {
         <label className="sr-only" htmlFor="login-password">
           {t('auth.password')}
         </label>
-        <TextField
+        <PasswordField
           id="login-password"
-          type="password"
           className="w-full"
           placeholder={t('auth.password')}
           autoComplete="current-password"

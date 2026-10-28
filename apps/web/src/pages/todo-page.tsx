@@ -4,12 +4,14 @@ import { useTranslation } from 'react-i18next';
 
 import { TodoAdd } from '@/features/todo-add';
 import { buildTodoSearch, TodoFilterBar } from '@/features/todo-filter';
+import { SortableTodoItem, TodoDndContext } from '@/features/todo-reorder';
 import {
   type Todo,
   type TodoFilter,
   filterTodos,
-  TodoItem,
+  reorderTodos,
   useDeleteTodo,
+  useReorderTodos,
   useTodos,
   useUpdateTodo,
 } from '@/entities/todo';
@@ -49,6 +51,7 @@ export function TodoPage() {
   const todosQuery = useTodos();
   const updateTodo = useUpdateTodo();
   const deleteTodo = useDeleteTodo();
+  const reorderTodo = useReorderTodos();
 
   const filter: TodoFilter = search.filter ?? 'all';
   const query = search.q ?? '';
@@ -93,6 +96,15 @@ export function TodoPage() {
     updateTodo.mutate({ id: todo.id, patch: { important: !todo.important } });
   }
 
+  // Порядок пересчитываем по полному списку: при фильтре часть задач скрыта,
+  // но перенос к цели в полном массиве дает предсказуемый результат
+  function reorder(draggedId: string, overId: string) {
+    const full = todosQuery.data ?? [];
+    const next = reorderTodos(full, draggedId, overId);
+    if (next === full) return;
+    reorderTodo.mutate(next.map((todo) => todo.id));
+  }
+
   if (todosQuery.isPending) {
     return <TodoListSkeleton />;
   }
@@ -124,27 +136,30 @@ export function TodoPage() {
         })}
       </p>
 
-      <ul
-        id="todo-list"
-        className={cn('flex flex-col gap-2', entrance && 'row-entrance')}
-        aria-label={t('todos.list_aria')}
-      >
-        {todos.map((todo, index) => (
-          <TodoItem
-            key={todo.id}
-            todo={todo}
-            entranceDelay={entrance && index < ENTRANCE_LIMIT ? index * ENTRANCE_STEP : undefined}
-            onToggleDone={toggleDone}
-            onToggleImportant={toggleImportant}
-            onDelete={(id) => deleteTodo.mutate(id)}
-          />
-        ))}
-        {todos.length === 0 && (
-          <li className="rounded-[10px] bg-card px-3 py-6 text-center text-xl text-gray-300">
-            {t('todos.empty')}
-          </li>
-        )}
-      </ul>
+      <TodoDndContext ids={todos.map((todo) => todo.id)} onReorder={reorder}>
+        <ul
+          id="todo-list"
+          className={cn('flex flex-col gap-2', entrance && 'row-entrance')}
+          aria-label={t('todos.list_aria')}
+        >
+          {todos.map((todo, index) => (
+            <SortableTodoItem
+              key={todo.id}
+              todo={todo}
+              query={query}
+              entranceDelay={entrance && index < ENTRANCE_LIMIT ? index * ENTRANCE_STEP : undefined}
+              onToggleDone={toggleDone}
+              onToggleImportant={toggleImportant}
+              onDelete={(id) => deleteTodo.mutate(id)}
+            />
+          ))}
+          {todos.length === 0 && (
+            <li className="rounded-[10px] bg-card px-3 py-6 text-center text-xl text-gray-300">
+              {t('todos.empty')}
+            </li>
+          )}
+        </ul>
+      </TodoDndContext>
 
       <TodoAdd />
     </div>

@@ -10,6 +10,7 @@ import { signUp, type AuthErrorKey } from '@/features/auth';
 import { $locale } from '@/features/locale';
 import { Button } from '@/shared/ui/button';
 import { fieldErrorKey } from '@/shared/i18n';
+import { PasswordField } from '@/shared/ui/password-field';
 import { Spinner } from '@/shared/ui/spinner';
 import { TextField } from '@/shared/ui/text-field';
 
@@ -100,9 +101,8 @@ export function RegisterPage({ onSuccess, footer }: RegisterPageProps) {
         <label className="sr-only" htmlFor="register-password">
           {t('auth.password')}
         </label>
-        <TextField
+        <PasswordField
           id="register-password"
-          type="password"
           className="w-full"
           placeholder={t('auth.password')}
           autoComplete="new-password"

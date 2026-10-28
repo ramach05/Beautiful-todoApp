@@ -10,10 +10,10 @@ Todo-приложение уровня production: монорепо, сквоз�
 ## Возможности
 
 - регистрация и вход (email + пароль), сессия в httpOnly-cookie, переживает перезагрузку;
-- задачи пользователя: создание, завершение, приоритет, удаление, поиск и фильтры (All / Active / Done);
+- задачи пользователя: создание, завершение, приоритет, удаление, ручной порядок drag-and-drop (мышью и клавиатурой, порядок хранится на сервере), поиск и фильтры (All / Active / Done);
 - фильтр и поиск — часть адреса (`/?filter=active&q=текст`): ссылка переживает перезагрузку и отправляется другому человеку, «назад» работает, а мусор в адресе схлопывается до значений по умолчанию;
 - `/stats`: агрегаты (всего, активных, выполнено, важных), SVG-график выполнения за 7 дней и самое старое незавершённое; страница грузится отдельным lazy-чанком, а данные дотягиваются до рендера;
-- `/settings`: смена email и пароля, выход на всех устройствах, удаление аккаунта;
+- `/settings`: смена email и пароля, выход на всех устройствах, удаление аккаунта; пароли — с кнопкой показа/скрытия и подсказкой-тултипом;
 - интерфейс на английском с переключателем на русский: язык хранится в профиле пользователя, приезжает вместе с сессией и применяется до первого рендера;
 - данные изолированы по владельцу — каждый видит только свои задачи;
 - адаптивная вёрстка, фон — фото ночного города по лицензии CC0, a11y-проверка всех экранов на desktop и mobile, состояние в PostgreSQL.
@@ -26,7 +26,7 @@ Todo-приложение уровня production: монорепо, сквоз�
 
 | Слой          | Технологии                                                                                                                                             |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Frontend      | React 19, Vite 8, TypeScript 6, TanStack Router/Query, Effector, Tailwind 4, react-i18next                                                             |
+| Frontend      | React 19, Vite 8, TypeScript 6, TanStack Router/Query, Effector, Tailwind 4, react-i18next, @dnd-kit                                                   |
 | Backend       | Node.js 24, Fastify 5, oRPC, Drizzle ORM, PostgreSQL 17                                                                                                |
 | Auth          | better-auth (email+password, httpOnly cookie); `@fastify/rate-limit` на auth-POST, `@fastify/helmet`, trust-proxy по CIDR-списку                       |
 | Контракт      | zod-схемы в `packages/shared` — один источник типов для клиента и сервера; из него же генерируются OpenAPI 3.1 (`/openapi.json`) и Scalar UI (`/docs`) |
@@ -52,7 +52,7 @@ flowchart LR
 - Угрозы и контрмеры авторизации (подбор пароля, `X-Forwarded-For`, CSRF, разведка email) разобраны таблицей в [ADR-004](./docs/adr/0004-auth-better-auth.md).
 - i18n: словари бандлятся, ключи типизированы по форме `en.json` (ошибка в ключе — ошибка компиляции), паритет `ru` проверяет тест; язык — additionalField better-auth (`user.locale`), цепочка резолва «сессия → localStorage → браузер → en»: [ADR-006](./docs/adr/0006-i18n-react-i18next.md).
 - Фон — fixed-слой (его размер не зависит от высоты списка, поэтому картинка не «дёргается»): AVIF/WebP по `srcset`, LQIP-плейсхолдер с blur-up, `preload` варианта, подходящего по ширине вьюпорта; JPEG 458 КБ → AVIF 159 КБ. Лицензия и происхождение — в [docs/image-licenses.md](./docs/image-licenses.md).
-- Анимации — CSS и один rAF-цикл на spotlight и параллакс, без библиотек: stagger появления первых строк, hover-lift, view transitions между роутами. Всё выключается на тач-устройствах и по `prefers-reduced-motion`.
+- Анимации — CSS и один rAF-цикл на spotlight и параллакс: stagger появления первых строк, hover-lift, view transitions между роутами, тултипы кнопок на CSS (`data-tip`); перетаскивание строк — transform/transition от @dnd-kit. Всё выключается на тач-устройствах и по `prefers-reduced-motion`.
 
 ```
 apps/web        SPA на Feature-Sliced Design (см. ниже)
@@ -68,14 +68,14 @@ scripts         dev-запуск одной командой, оптимизац
 
 `apps/web` построен по FSD v2; связи и структура проверяются линтером steiger — `pnpm fsd:check` (входит в CI-quality):
 
-| Слой        | Содержимое                                                                                                                                                                                                     |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/`      | composition root: `main.tsx`, провайдеры, observability, `routes/` — `/`, `/login`, `/register`, `/stats`, `/settings`, 404                                                                                    |
-| `widgets/`  | каркасы страниц: `layout` (header с навигацией, footer, shell, city-background)                                                                                                                                |
-| `features/` | пользовательские действия: `auth` (сессия и действия аккаунта), `locale` (стор языка и переключатель), `todo-add`, `todo-filter` (схема search-параметров), `todo-stats` (агрегация и график)                  |
-| `entities/` | доменные объекты: `todo` (типы, Query-хуки, `TodoItem`)                                                                                                                                                        |
-| `pages/`    | страницы: todo / login / register / stats / settings                                                                                                                                                           |
-| `shared/`   | фундамент: `api` (oRPC-клиент и QueryClient), `i18n` (инстанс, словари en/ru), `lib` (`cn`, `pointer-ambient`), `mocks` (in-process oRPC-мок для dev/тестов), `ui` (`assets`, `spinner`, `skeleton`), `styles` |
+| Слой        | Содержимое                                                                                                                                                                                                                                     |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/`      | composition root: `main.tsx`, провайдеры, observability, `routes/` — `/`, `/login`, `/register`, `/stats`, `/settings`, 404                                                                                                                    |
+| `widgets/`  | каркасы страниц: `layout` (header с навигацией, footer, shell, city-background)                                                                                                                                                                |
+| `features/` | пользовательские действия: `auth` (сессия и действия аккаунта), `locale` (стор языка и переключатель), `todo-add`, `todo-filter` (схема search-параметров), `todo-reorder` (dnd-контекст и sortable-строка), `todo-stats` (агрегация и график) |
+| `entities/` | доменные объекты: `todo` (типы, Query-хуки, `TodoItem`)                                                                                                                                                                                        |
+| `pages/`    | страницы: todo / login / register / stats / settings                                                                                                                                                                                           |
+| `shared/`   | фундамент: `api` (oRPC-клиент и QueryClient), `i18n` (инстанс, словари en/ru), `lib` (`cn`, `pointer-ambient`), `mocks` (in-process oRPC-мок для dev/тестов), `ui` (`assets`, `spinner`, `skeleton`), `styles`                                 |
 
 Правила, которые соблюдает код и за которыми следит steiger:
 

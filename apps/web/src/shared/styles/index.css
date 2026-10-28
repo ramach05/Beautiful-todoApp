@@ -194,6 +194,53 @@ button:not(:disabled),
   transform: scaleX(1);
 }
 
+/* Нативный крестик search-инпута выглядит чужеродно: рисуем свою кнопку очистки */
+input[type='search']::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+/* Теплый курсор ввода в тон акценту */
+input {
+  caret-color: var(--color-accent);
+}
+
+/* Тултип над элементом: текст из data-tip, показ на hover и focus-visible.
+   Слой components — чтобы у absolute-кнопок хостом оставалась их собственная позиция */
+@layer components {
+  .tip {
+    position: relative;
+  }
+
+  .tip::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    z-index: 20;
+    padding: 2px 10px;
+    border-radius: 8px;
+    background: var(--color-canvas);
+    color: #fff;
+    font-size: 1.05rem;
+    line-height: 1.4;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px #00000073;
+    outline: 1px solid var(--color-ring-soft);
+    opacity: 0;
+    translate: -50% 4px;
+    transition:
+      opacity 0.18s ease,
+      translate 0.18s ease;
+    pointer-events: none;
+  }
+
+  .tip:hover::after,
+  .tip:focus-visible::after {
+    opacity: 1;
+    translate: -50% 0;
+  }
+}
+
 /* Подчеркивание поиска: акцентная линия выезжает слева направо на фокусе */
 .field-underline {
   background-image: linear-gradient(var(--color-accent), var(--color-accent));
@@ -214,6 +261,23 @@ button:not(:disabled),
   transition: transform 0.18s ease;
 }
 
+/* Перетаскиваемая строка: поднята над соседями и с тенью */
+.row-dragging {
+  z-index: 10;
+  box-shadow: 0 10px 24px #00000080;
+}
+
+/* Handle только перетаскивает: свой курсор и отключение сенсорного скролла;
+   селектор сильнее правила cursor:pointer для кнопок */
+button.drag-handle {
+  cursor: grab;
+  touch-action: none;
+}
+
+.row-dragging button.drag-handle {
+  cursor: grabbing;
+}
+
 /* Иконки действий притенены, пока строка не активна (только на устройствах с hover) */
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   .icon-btn:hover:not(:disabled) img {
@@ -224,9 +288,24 @@ button:not(:disabled),
     transform: scale(1.18) rotate(8deg);
   }
 
+  .icon-btn-clear:hover:not(:disabled) img {
+    transform: scale(1.18) rotate(90deg);
+  }
+
   .row-actions {
     opacity: 0.6;
     transition: opacity 0.18s ease;
+  }
+
+  /* Ручка перетаскивания проступает вместе с действиями строки */
+  .row-handle {
+    opacity: 0.45;
+    transition: opacity 0.18s ease;
+  }
+
+  .lift:hover .row-handle,
+  .row-handle:focus-within {
+    opacity: 1;
   }
 
   .lift:hover .row-actions,
@@ -291,7 +370,8 @@ button:not(:disabled),
   .field-underline,
   .sheen::after,
   .icon-btn img,
-  .todo-title {
+  .todo-title,
+  .tip::after {
     transition: none;
   }
 

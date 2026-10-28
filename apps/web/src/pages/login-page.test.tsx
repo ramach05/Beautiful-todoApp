@@ -47,4 +47,17 @@ describe('LoginPage', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Invalid email or password');
     expect(onSuccess).not.toHaveBeenCalled();
   });
+
+  it('кнопка-глаз переключает type инпута пароля и свое доступное имя', async () => {
+    render(<LoginPage onSuccess={vi.fn()} />);
+
+    const input = screen.getByLabelText('Password');
+    expect(input).toHaveAttribute('type', 'password');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Show password' }));
+    expect(input).toHaveAttribute('type', 'text');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Hide password' }));
+    expect(input).toHaveAttribute('type', 'password');
+  });
 });

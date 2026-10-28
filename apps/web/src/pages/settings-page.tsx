@@ -12,11 +12,30 @@ import {
   signOutEverywhere,
 } from '@/features/auth';
 import { Button } from '@/shared/ui/button';
+import { PasswordField } from '@/shared/ui/password-field';
 import { Spinner } from '@/shared/ui/spinner';
 import { TextField } from '@/shared/ui/text-field';
 
 type ActionKey = 'email' | 'password' | 'revoke' | 'delete';
 type Feedback = { tone: 'ok' | 'err'; text: string };
+
+/**
+ * Скрытое поле логина для форм с паролем: браузерные менеджеры паролей
+ * иначе предупреждают, что форме не хватает username (console: goo.gl/9n2vKq).
+ */
+function HiddenUsername({ email }: { email: string }) {
+  return (
+    <input
+      type="text"
+      autoComplete="username"
+      value={email}
+      readOnly
+      tabIndex={-1}
+      aria-hidden
+      className="sr-only"
+    />
+  );
+}
 
 /**
  * Настройки аккаунта: смена email/пароля, выход на всех устройствах, удаление аккаунта.
@@ -111,8 +130,8 @@ export function SettingsPage() {
             void run('password', () => changeAccountPassword(currentPassword, newPassword));
           }}
         >
-          <TextField
-            type="password"
+          <HiddenUsername email={session?.user.email ?? ''} />
+          <PasswordField
             className="w-full"
             placeholder={t('settings.current_password')}
             aria-label={t('settings.current_password')}
@@ -120,8 +139,7 @@ export function SettingsPage() {
             value={currentPassword}
             onChange={(event) => setCurrentPassword(event.target.value)}
           />
-          <TextField
-            type="password"
+          <PasswordField
             className="w-full"
             placeholder={t('settings.new_password')}
             aria-label={t('settings.new_password')}
@@ -162,8 +180,8 @@ export function SettingsPage() {
             void run('delete', () => deleteAccount(password), true);
           }}
         >
-          <TextField
-            type="password"
+          <HiddenUsername email={session?.user.email ?? ''} />
+          <PasswordField
             className="w-full"
             placeholder={t('settings.confirm_placeholder')}
             aria-label={t('settings.confirm_aria')}

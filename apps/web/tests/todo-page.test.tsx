@@ -141,4 +141,38 @@ describe('TodoPage', () => {
     expect(screen.getByRole('button', { name: 'Call mom' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Buy groceries' })).toBeInTheDocument();
   });
+
+  it('подсвечивает жирным совпадение поиска', async () => {
+    const user = userEvent.setup();
+    await renderPage();
+
+    await user.type(screen.getByRole('searchbox', { name: 'Search todos' }), 'mom');
+
+    const hit = await screen.findByText('mom');
+    expect(hit.tagName).toBe('STRONG');
+    expect(hit.closest('button')).toHaveAccessibleName('Call mom');
+  });
+
+  it('кнопка очистки убирает q из URL, текст и возвращает фокус в инпут', async () => {
+    const user = userEvent.setup();
+    const { router } = await renderPage();
+    const input = screen.getByRole('searchbox', { name: 'Search todos' });
+
+    await user.type(input, 'mom');
+    await user.click(screen.getByRole('button', { name: 'Clear search' }));
+
+    await waitFor(() => expect(router.state.location.search).toEqual({}));
+    expect(input).toHaveValue('');
+    expect(input).toHaveFocus();
+    expect(screen.queryByRole('button', { name: 'Clear search' })).not.toBeInTheDocument();
+  });
+
+  it('у каждой строки есть кнопка-ручка перетаскивания с доступным именем', async () => {
+    await renderPage();
+
+    expect(
+      screen.getByRole('button', { name: 'Drag to reorder: Buy groceries' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Drag to reorder: Call mom' })).toBeInTheDocument();
+  });
 });

@@ -1,7 +1,9 @@
 import { useTranslation } from 'react-i18next';
+import { useRef } from 'react';
 
 import type { TodoFilter } from '@/entities/todo';
-import { checkIcon, clearAllIcon, doneIcon } from '@/shared/ui/assets';
+import { checkIcon, clearAllIcon, closeIcon, doneIcon } from '@/shared/ui/assets';
+import { cn } from '@/shared/lib';
 import { Button } from '@/shared/ui/button';
 import { TextField } from '@/shared/ui/text-field';
 
@@ -21,6 +23,8 @@ const options: Array<{ value: TodoFilter; icon: string }> = [
 /** Поиск и сегментированный переключатель статуса; значения приходят из URL, изменения отдаются наверх */
 export function TodoFilterBar({ filter, search, onFilterChange, onSearchChange }: TodoFilterProps) {
   const { t } = useTranslation();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const clearLabel = t('todos.search_clear');
   return (
     <form
       role="search"
@@ -30,16 +34,33 @@ export function TodoFilterBar({ filter, search, onFilterChange, onSearchChange }
       <label className="sr-only" htmlFor="todo-search">
         {t('todos.search_label')}
       </label>
-      <TextField
-        id="todo-search"
-        type="search"
-        variant="search"
-        className="min-w-40 flex-1"
-        placeholder={t('todos.search_placeholder')}
-        autoComplete="off"
-        value={search}
-        onChange={(event) => onSearchChange(event.target.value)}
-      />
+      <div className="relative min-w-40 flex-1">
+        <TextField
+          ref={inputRef}
+          id="todo-search"
+          type="search"
+          variant="search"
+          className={cn('w-full', search !== '' && 'pr-10')}
+          placeholder={t('todos.search_placeholder')}
+          autoComplete="off"
+          value={search}
+          onChange={(event) => onSearchChange(event.target.value)}
+        />
+        {search !== '' && (
+          <Button
+            variant="icon"
+            className="icon-btn-clear tip absolute top-1/2 right-1 -translate-y-1/2"
+            aria-label={clearLabel}
+            data-tip={clearLabel}
+            onClick={() => {
+              onSearchChange('');
+              inputRef.current?.focus();
+            }}
+          >
+            <img src={closeIcon} alt="" aria-hidden className="size-5" />
+          </Button>
+        )}
+      </div>
 
       <div role="group" aria-label={t('todos.filter_aria')} className="flex flex-wrap gap-1">
         {options.map((option) => (

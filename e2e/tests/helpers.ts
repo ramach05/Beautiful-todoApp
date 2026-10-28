@@ -13,7 +13,8 @@ export async function register(page: Page, email = uniqueEmail()): Promise<void>
   await page.getByRole('link', { name: 'No account? Sign up' }).click();
   await page.getByLabel('Name').fill('E2E User');
   await page.getByLabel('Email').fill(email);
-  await page.getByLabel('Password').fill('password-123');
+  // exact: рядом появилось поле-глаз с aria-label "Show password" — подстрока ловила и кнопку
+  await page.getByLabel('Password', { exact: true }).fill('password-123');
   await page.getByRole('button', { name: 'Create account' }).click();
   await expect(page).toHaveURL('/');
 }

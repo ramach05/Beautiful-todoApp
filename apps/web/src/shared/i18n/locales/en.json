@@ -34,6 +34,8 @@
     "create_account": "Create account",
     "email": "Email",
     "password": "Password",
+    "show_password": "Show password",
+    "hide_password": "Hide password",
     "name": "Name",
     "no_account": "No account? Sign up",
     "have_account": "Already have an account? Sign in",
@@ -81,6 +83,7 @@
     "added": "Todo added",
     "search_label": "Search todos",
     "search_placeholder": "Search Todos",
+    "search_clear": "Clear search",
     "filter_aria": "Status filter",
     "filters": {
       "all": "All",
@@ -97,6 +100,14 @@
       "mark_important": "Mark as important",
       "delete_title": "Delete",
       "delete_aria": "Delete todo"
+    },
+    "drag": {
+      "handle": "Drag to reorder: {{title}}",
+      "instructions": "Press the space bar to pick up a todo, use the arrow keys to move it, press space again to drop it, or press Escape to cancel.",
+      "started": "Picked up {{title}}. Use the arrow keys to move it.",
+      "over": "{{title}} is now next to {{over}}.",
+      "ended": "Dropped {{title}} next to {{over}}.",
+      "cancelled": "Moving {{title}} was cancelled."
     }
   },
   "stats": {

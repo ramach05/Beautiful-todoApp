@@ -66,3 +66,30 @@ export function useDeleteTodo() {
     onSettled: () => queryClient.invalidateQueries({ queryKey: todoKeys.all }),
   });
 }
+
+/** Перенос порядка с optimistic update: кэш выстраивается по ids до ответа, откат на ошибке */
+export function useReorderTodos() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (ids: string[]) => api.todos.reorder({ ids }),
+    onMutate: async (ids) => {
+      await queryClient.cancelQueries({ queryKey: todoKeys.all });
+      const previous = queryClient.getQueryData<Todo[]>(todoKeys.all);
+      const rank = new Map(ids.map((id, index) => [id, index]));
+      queryClient.setQueryData<Todo[]>(todoKeys.all, (current) =>
+        current
+          ? [...current].sort(
+              (a, b) => (rank.get(a.id) ?? ids.length) - (rank.get(b.id) ?? ids.length),
+            )
+          : current,
+      );
+      return { previous };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(todoKeys.all, context.previous);
+      }
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: todoKeys.all }),
+  });
+}
