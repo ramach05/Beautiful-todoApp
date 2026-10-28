@@ -7,6 +7,7 @@ import { z } from 'zod';
 
 import { type AuthErrorKey, signIn } from '@/features/auth';
 import { Button } from '@/shared/ui/button';
+import { FieldError } from '@/shared/ui/field-error';
 import { fieldErrorKey } from '@/shared/i18n';
 import { PasswordField } from '@/shared/ui/password-field';
 import { Spinner } from '@/shared/ui/spinner';
@@ -43,6 +44,13 @@ export function LoginPage({ onSuccess, footer }: LoginPageProps) {
     onSuccess();
   });
 
+  // Ошибка «неверная пара» относится к обоим полям и показывается под паролем; своя ошибка поля приоритетнее
+  const passwordError = formState.errors.password
+    ? t(fieldErrorKey('password', formState.errors.password.type))
+    : rootError
+      ? t(rootError)
+      : undefined;
+
   return (
     <form
       className="mx-auto flex w-full max-w-sm flex-col gap-3 pt-6"
@@ -61,14 +69,17 @@ export function LoginPage({ onSuccess, footer }: LoginPageProps) {
           placeholder={t('auth.email')}
           autoComplete="email"
           aria-invalid={formState.errors.email !== undefined}
-          aria-describedby={formState.errors.email ? 'login-email-error' : undefined}
+          aria-describedby="login-email-error"
           {...register('email')}
         />
-        {formState.errors.email && (
-          <p id="login-email-error" role="alert" className="pl-1 text-sm text-accent">
-            {t(fieldErrorKey('email', formState.errors.email.type))}
-          </p>
-        )}
+        <FieldError
+          id="login-email-error"
+          message={
+            formState.errors.email
+              ? t(fieldErrorKey('email', formState.errors.email.type))
+              : undefined
+          }
+        />
       </div>
       <div className="flex flex-col gap-1">
         <label className="sr-only" htmlFor="login-password">
@@ -80,20 +91,11 @@ export function LoginPage({ onSuccess, footer }: LoginPageProps) {
           placeholder={t('auth.password')}
           autoComplete="current-password"
           aria-invalid={formState.errors.password !== undefined}
-          aria-describedby={formState.errors.password ? 'login-password-error' : undefined}
+          aria-describedby="login-password-error"
           {...register('password')}
         />
-        {formState.errors.password && (
-          <p id="login-password-error" role="alert" className="pl-1 text-sm text-accent">
-            {t(fieldErrorKey('password', formState.errors.password.type))}
-          </p>
-        )}
+        <FieldError id="login-password-error" message={passwordError} />
       </div>
-      {rootError && (
-        <p role="alert" className="pl-1 text-sm text-accent">
-          {t(rootError)}
-        </p>
-      )}
       <Button type="submit" disabled={formState.isSubmitting} aria-busy={formState.isSubmitting}>
         {formState.isSubmitting && <Spinner />}
         {t('auth.sign_in')}

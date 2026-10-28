@@ -73,7 +73,11 @@
     "sign_out_everywhere": "Sign out everywhere",
     "delete_account": "Delete account",
     "confirm_placeholder": "Confirm with your password",
-    "confirm_aria": "Confirm password"
+    "confirm_aria": "Confirm password",
+    "delete_confirm_title": "Delete account?",
+    "delete_confirm_text": "The account {{email}} and all its todos will be permanently deleted. This action cannot be undone.",
+    "delete_confirm_action": "Delete",
+    "delete_cancel": "Cancel"
   },
   "todos": {
     "add_heading": "Add a todo",

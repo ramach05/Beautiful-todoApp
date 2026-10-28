@@ -73,7 +73,11 @@
     "sign_out_everywhere": "Выйти на всех устройствах",
     "delete_account": "Удаление аккаунта",
     "confirm_placeholder": "Подтвердите паролем",
-    "confirm_aria": "Пароль для подтверждения"
+    "confirm_aria": "Пароль для подтверждения",
+    "delete_confirm_title": "Удалить аккаунт?",
+    "delete_confirm_text": "Аккаунт {{email}} и все его задачи будут удалены безвозвратно. Это действие нельзя отменить.",
+    "delete_confirm_action": "Удалить",
+    "delete_cancel": "Отмена"
   },
   "todos": {
     "add_heading": "Добавление задачи",

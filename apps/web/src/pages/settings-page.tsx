@@ -12,6 +12,8 @@ import {
   signOutEverywhere,
 } from '@/features/auth';
 import { Button } from '@/shared/ui/button';
+import { FieldError } from '@/shared/ui/field-error';
+import { Modal } from '@/shared/ui/modal';
 import { PasswordField } from '@/shared/ui/password-field';
 import { Spinner } from '@/shared/ui/spinner';
 import { TextField } from '@/shared/ui/text-field';
@@ -53,17 +55,23 @@ export function SettingsPage() {
 
   const [pending, setPending] = useState<ActionKey | null>(null);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [errors, setErrors] = useState<Partial<Record<ActionKey, string>>>({});
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   async function run(key: ActionKey, action: () => Promise<AccountResult>, leaveApp = false) {
     setPending(key);
     setFeedback(null);
+    setErrors((prev) => ({ ...prev, [key]: undefined }));
     const result = await action();
     setPending(null);
     if (result.ok) {
       setFeedback({ tone: 'ok', text: t(result.message ?? 'settings.done') });
       if (leaveApp) await navigate({ to: '/login' });
-    } else {
+    } else if (key === 'revoke') {
+      // У выхода на всех устройствах нет инпутов: ошибка остается в верхнем баннере
       setFeedback({ tone: 'err', text: t(result.error) });
+    } else {
+      setErrors((prev) => ({ ...prev, [key]: t(result.error) }));
     }
   }
 
@@ -109,9 +117,12 @@ export function SettingsPage() {
             placeholder={t('settings.new_email')}
             aria-label={t('settings.new_email')}
             autoComplete="email"
+            aria-invalid={errors.email !== undefined}
+            aria-describedby="settings-email-error"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
           />
+          <FieldError id="settings-email-error" message={errors.email} />
           <Button type="submit" disabled={disabled} aria-busy={busy('email')}>
             {busy('email') && <Spinner />}
             {t('settings.update_email')}
@@ -136,9 +147,12 @@ export function SettingsPage() {
             placeholder={t('settings.current_password')}
             aria-label={t('settings.current_password')}
             autoComplete="current-password"
+            aria-invalid={errors.password !== undefined}
+            aria-describedby="settings-current-password-error"
             value={currentPassword}
             onChange={(event) => setCurrentPassword(event.target.value)}
           />
+          <FieldError id="settings-current-password-error" message={errors.password} />
           <PasswordField
             className="w-full"
             placeholder={t('settings.new_password')}
@@ -177,7 +191,7 @@ export function SettingsPage() {
           className="flex flex-col gap-2"
           onSubmit={(event) => {
             event.preventDefault();
-            void run('delete', () => deleteAccount(password), true);
+            setConfirmDelete(true);
           }}
         >
           <HiddenUsername email={session?.user.email ?? ''} />
@@ -186,14 +200,49 @@ export function SettingsPage() {
             placeholder={t('settings.confirm_placeholder')}
             aria-label={t('settings.confirm_aria')}
             autoComplete="current-password"
+            aria-invalid={errors.delete !== undefined}
+            aria-describedby="settings-delete-password-error"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
           />
-          <Button variant="danger" type="submit" disabled={disabled} aria-busy={busy('delete')}>
+          <FieldError id="settings-delete-password-error" message={errors.delete} />
+          <Button
+            variant="danger"
+            type="submit"
+            disabled={disabled || !password}
+            aria-busy={busy('delete')}
+          >
             {busy('delete') && <Spinner />}
             {t('settings.delete_account')}
           </Button>
         </form>
+        <Modal
+          open={confirmDelete}
+          onClose={() => setConfirmDelete(false)}
+          title={t('settings.delete_confirm_title')}
+          footer={
+            <>
+              <Button variant="ghost" onClick={() => setConfirmDelete(false)}>
+                {t('settings.delete_cancel')}
+              </Button>
+              <Button
+                variant="danger"
+                onClick={() => {
+                  setConfirmDelete(false);
+                  void run('delete', () => deleteAccount(password), true);
+                }}
+              >
+                {t('settings.delete_confirm_action')}
+              </Button>
+            </>
+          }
+        >
+          <p>
+            {t('settings.delete_confirm_text', {
+              email: session?.user.email ?? '—',
+            })}
+          </p>
+        </Modal>
       </section>
     </div>
   );

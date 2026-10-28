@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { signUp, type AuthErrorKey } from '@/features/auth';
 import { $locale } from '@/features/locale';
 import { Button } from '@/shared/ui/button';
+import { FieldError } from '@/shared/ui/field-error';
 import { fieldErrorKey } from '@/shared/i18n';
 import { PasswordField } from '@/shared/ui/password-field';
 import { Spinner } from '@/shared/ui/spinner';
@@ -47,6 +48,13 @@ export function RegisterPage({ onSuccess, footer }: RegisterPageProps) {
     onSuccess();
   });
 
+  // Ошибка сервера (например, занятый email) относится к паре полей и показывается под паролем; своя ошибка поля приоритетнее
+  const passwordError = formState.errors.password
+    ? t(fieldErrorKey('password', formState.errors.password.type))
+    : rootError
+      ? t(rootError)
+      : undefined;
+
   return (
     <form
       className="mx-auto flex w-full max-w-sm flex-col gap-3 pt-6"
@@ -66,14 +74,15 @@ export function RegisterPage({ onSuccess, footer }: RegisterPageProps) {
           placeholder={t('auth.name')}
           autoComplete="name"
           aria-invalid={formState.errors.name !== undefined}
-          aria-describedby={formState.errors.name ? 'register-name-error' : undefined}
+          aria-describedby="register-name-error"
           {...register('name')}
         />
-        {formState.errors.name && (
-          <p id="register-name-error" role="alert" className="pl-1 text-sm text-accent">
-            {t(fieldErrorKey('name', formState.errors.name.type))}
-          </p>
-        )}
+        <FieldError
+          id="register-name-error"
+          message={
+            formState.errors.name ? t(fieldErrorKey('name', formState.errors.name.type)) : undefined
+          }
+        />
       </div>
 
       <div className="flex flex-col gap-1">
@@ -87,14 +96,17 @@ export function RegisterPage({ onSuccess, footer }: RegisterPageProps) {
           placeholder={t('auth.email')}
           autoComplete="email"
           aria-invalid={formState.errors.email !== undefined}
-          aria-describedby={formState.errors.email ? 'register-email-error' : undefined}
+          aria-describedby="register-email-error"
           {...register('email')}
         />
-        {formState.errors.email && (
-          <p id="register-email-error" role="alert" className="pl-1 text-sm text-accent">
-            {t(fieldErrorKey('email', formState.errors.email.type))}
-          </p>
-        )}
+        <FieldError
+          id="register-email-error"
+          message={
+            formState.errors.email
+              ? t(fieldErrorKey('email', formState.errors.email.type))
+              : undefined
+          }
+        />
       </div>
 
       <div className="flex flex-col gap-1">
@@ -107,21 +119,11 @@ export function RegisterPage({ onSuccess, footer }: RegisterPageProps) {
           placeholder={t('auth.password')}
           autoComplete="new-password"
           aria-invalid={formState.errors.password !== undefined}
-          aria-describedby={formState.errors.password ? 'register-password-error' : undefined}
+          aria-describedby="register-password-error"
           {...register('password')}
         />
-        {formState.errors.password && (
-          <p id="register-password-error" role="alert" className="pl-1 text-sm text-accent">
-            {t(fieldErrorKey('password', formState.errors.password.type))}
-          </p>
-        )}
+        <FieldError id="register-password-error" message={passwordError} />
       </div>
-
-      {rootError && (
-        <p role="alert" className="pl-1 text-sm text-accent">
-          {t(rootError)}
-        </p>
-      )}
 
       <Button type="submit" disabled={formState.isSubmitting} aria-busy={formState.isSubmitting}>
         {formState.isSubmitting && <Spinner />}

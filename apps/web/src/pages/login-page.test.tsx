@@ -44,7 +44,7 @@ describe('LoginPage', () => {
     await userEvent.type(screen.getByLabelText('Password'), 'wrong-password');
     await userEvent.click(screen.getByRole('button', { name: 'Sign in' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Invalid email or password');
+    expect(await screen.findByText('Invalid email or password')).toBeInTheDocument();
     expect(onSuccess).not.toHaveBeenCalled();
   });
 
