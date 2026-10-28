@@ -46,12 +46,15 @@ export function SortableTodoItem(props: SortableTodoItemProps) {
       {...props}
       drag={{
         nodeRef: setNodeRef,
-        // на prefers-reduced-motion transition обнуляем: строки переезжают без анимации
-        style: {
-          transform: CSS.Translate.toString(transform),
-          transition: prefersReducedMotion() ? undefined : transition,
-        },
-        active: isDragging,
+        // ведомая строка скрыта на своем месте: клон летает в DragOverlay,
+        // transform не применяем — он растягивал бы прокрутку документа
+        style: isDragging
+          ? { opacity: 0 }
+          : {
+              // на prefers-reduced-motion transition обнуляем: строки переезжают без анимации
+              transform: CSS.Translate.toString(transform),
+              transition: prefersReducedMotion() ? undefined : transition,
+            },
         handle,
       }}
     />

@@ -11,8 +11,8 @@ import { Button } from '@/shared/ui/button';
 interface TodoDragProps {
   nodeRef: (node: HTMLElement | null) => void;
   style: CSSProperties;
-  /** Строку тащат прямо сейчас */
-  active: boolean;
+  /** Стилизовать строку как ведомую (тень поверх соседей): ставится только клону в DragOverlay */
+  active?: boolean;
   /** Кнопка-активатор перетаскивания со слушателями */
   handle: ReactNode;
 }
@@ -76,7 +76,10 @@ export function TodoItem({
         aria-pressed={todo.done}
         onClick={() => onToggleDone(todo)}
       >
-        <HighlightText text={todo.title} query={query ?? ''} />
+        {/* inline-обертка: фон дробится по строкам, штрих на каждой строке текста */}
+        <span className="todo-strike">
+          <HighlightText text={todo.title} query={query ?? ''} />
+        </span>
       </button>
 
       {/* Слой выше перекрытия строки, иначе его псевдоэлемент перехватывал бы клики действий */}

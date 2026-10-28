@@ -41,6 +41,12 @@ function TodoListSkeleton() {
   );
 }
 
+/** Локальный порядок дропа, живой, пока кэш не обновился; base — данные кэша на момент дропа */
+interface DropOrder {
+  ids: string[];
+  base: Todo[] | undefined;
+}
+
 /**
  * Страница todo: серверные задачи из Query, фильтр и поиск из URL (ADR-002).
  */
@@ -56,14 +62,29 @@ export function TodoPage() {
   const filter: TodoFilter = search.filter ?? 'all';
   const query = search.q ?? '';
 
-  const todos = useMemo(
-    () => filterTodos(todosQuery.data ?? [], filter, query),
-    [todosQuery.data, filter, query],
-  );
+  // Порядок дропа держим в локальном state: уведомление кэша Query приходит в макрозадаче
+  // setTimeout, и без локального порядка список рисует кадр в старом порядке между этими состояниями
+  const [dropOrder, setDropOrder] = useState<DropOrder | null>(null);
+
+  const fullTodos = useMemo(() => {
+    const data = todosQuery.data ?? [];
+    // Локальный порядок действителен только для данных, на которых создан: оптимистичный
+    // порядок или откат дают новую ссылку — она сама становится источником порядка
+    if (dropOrder === null || dropOrder.base !== todosQuery.data) return data;
+    const rank = new Map(dropOrder.ids.map((id, index) => [id, index]));
+    return [...data].sort(
+      (a, b) => (rank.get(a.id) ?? data.length) - (rank.get(b.id) ?? data.length),
+    );
+  }, [todosQuery.data, dropOrder]);
+
+  const todos = useMemo(() => filterTodos(fullTodos, filter, query), [fullTodos, filter, query]);
   const remaining = useMemo(
     () => (todosQuery.data ?? []).filter((todo) => !todo.done).length,
     [todosQuery.data],
   );
+  // Стабильный массив id: dnd-kit пересобирает раскладки на каждое движение указателя,
+  // новый массив на рендер заставлял бы пересчитывать их заново и ронял бы переходы строк
+  const ids = useMemo(() => todos.map((todo) => todo.id), [todos]);
 
   const [entrance, setEntrance] = useState(false);
   const entranceStarted = useRef(false);
@@ -99,10 +120,11 @@ export function TodoPage() {
   // Порядок пересчитываем по полному списку: при фильтре часть задач скрыта,
   // но перенос к цели в полном массиве дает предсказуемый результат
   function reorder(draggedId: string, overId: string) {
-    const full = todosQuery.data ?? [];
-    const next = reorderTodos(full, draggedId, overId);
-    if (next === full) return;
-    reorderTodo.mutate(next.map((todo) => todo.id));
+    const next = reorderTodos(fullTodos, draggedId, overId);
+    if (next === fullTodos) return;
+    const orderedIds = next.map((todo) => todo.id);
+    setDropOrder({ ids: orderedIds, base: todosQuery.data });
+    reorderTodo.mutate(orderedIds);
   }
 
   if (todosQuery.isPending) {
@@ -136,7 +158,7 @@ export function TodoPage() {
         })}
       </p>
 
-      <TodoDndContext ids={todos.map((todo) => todo.id)} onReorder={reorder}>
+      <TodoDndContext ids={ids} todos={todos} query={query} onReorder={reorder}>
         <ul
           id="todo-list"
           className={cn('flex flex-col gap-2', entrance && 'row-entrance')}

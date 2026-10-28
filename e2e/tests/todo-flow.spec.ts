@@ -91,7 +91,12 @@ test('drag handle меняет порядок и он переживает пе�
   await page.mouse.down();
   // больше activationConstraint (4px) и шагами: dnd-kit должен успевать обрабатывать move
   await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 12 });
+  // на время драга на body висит класс: по нему гасятся hover-состояния строк, иначе они моргают
+  await expect(page.locator('body')).toHaveClass(/todo-dragging/);
+  // ведомая строка — клон в оверлее, исходная скрыта на своем месте
+  await expect(page.locator('.todo-drag-overlay')).toHaveCount(1);
   await page.mouse.up();
+  await expect(page.locator('body')).not.toHaveClass(/todo-dragging/);
 
   const titles = () => page.locator('#todo-list > li .todo-title').allTextContents();
 

@@ -67,7 +67,10 @@ export function useDeleteTodo() {
   });
 }
 
-/** Перенос порядка с optimistic update: кэш выстраивается по ids до ответа, откат на ошибке */
+/**
+ * Перенос порядка с optimistic update: кэш выстраивается по ids до ответа, откат на ошибке.
+ * На успехе не инвалидируем: сервер меняет только порядок, он уже в кэше, а refetch моргает списком.
+ */
 export function useReorderTodos() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -90,6 +93,5 @@ export function useReorderTodos() {
         queryClient.setQueryData(todoKeys.all, context.previous);
       }
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: todoKeys.all }),
   });
 }

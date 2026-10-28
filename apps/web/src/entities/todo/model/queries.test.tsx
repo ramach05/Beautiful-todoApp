@@ -203,7 +203,7 @@ describe('мутации задач поверх кэша Query', () => {
     await waitFor(() => expect(ids(result.current.list.data)).toEqual(initial));
   });
 
-  it('reorder подтверждает порядок ответом сервера и инвалидирует список', async () => {
+  it('reorder подтверждает порядок без рефетча: оптимистичный порядок и есть итоговый', async () => {
     const { result } = await renderTodoHooks();
     const reversed = (ids(result.current.list.data) ?? []).reverse();
     const invalidated = vi.spyOn(client, 'invalidateQueries');
@@ -212,7 +212,7 @@ describe('мутации задач поверх кэша Query', () => {
     await waitFor(() => expect(result.current.reorder.isSuccess).toBe(true));
 
     expect(apiMock.todos.reorder).toHaveBeenCalledWith({ ids: reversed });
-    expect(invalidated).toHaveBeenCalledWith({ queryKey: todoKeys.all });
-    await waitFor(() => expect(ids(result.current.list.data)).toEqual(reversed));
+    expect(invalidated).not.toHaveBeenCalled();
+    expect(ids(result.current.list.data)).toEqual(reversed);
   });
 });

@@ -17,13 +17,6 @@ body {
   background: var(--color-canvas);
   color: #fff;
   font-family: var(--font-hand);
-  /* UI-приложение: статичный текст не выделяем, чтобы над ним не появлялась каретка */
-  user-select: none;
-}
-
-input,
-textarea {
-  user-select: text;
 }
 
 .focus-ring:focus-visible {
@@ -142,12 +135,14 @@ button:not(:disabled),
 }
 
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .lift:hover {
+  /* На время драга lift-элементы под курсором не поднимаются и не подсвечиваются:
+     transform из hover перебивает inline-transform от dnd-kit, элементы моргают */
+  body:not(.todo-dragging) .lift:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 18px #00000059;
   }
 
-  .lift:active {
+  body:not(.todo-dragging) .lift:active {
     transform: scale(0.99);
   }
 }
@@ -268,12 +263,6 @@ input {
   transition: transform 0.18s ease;
 }
 
-/* Перетаскиваемая строка: поднята над соседями и с тенью */
-.row-dragging {
-  z-index: 10;
-  box-shadow: 0 10px 24px #00000080;
-}
-
 /* Handle только перетаскивает: свой курсор и отключение сенсорного скролла;
    селектор сильнее правила cursor:pointer для кнопок */
 button.drag-handle {
@@ -281,8 +270,34 @@ button.drag-handle {
   touch-action: none;
 }
 
-.row-dragging button.drag-handle {
+/* Клон в DragOverlay: его transform меняется каждый кадр, нужен compose-слой */
+.todo-drag-overlay {
+  will-change: transform;
+}
+
+/* Курсор на время драга не зависит от того, под чем он оказался: строки не ловят указатель */
+body.todo-dragging {
   cursor: grabbing;
+  /* на время драга текст не выделяем, иначе протяжка цепляет подсветку строк */
+  user-select: none;
+}
+
+/* Ведомый клон поднят над списком тенью.
+   transition: none — клон идет точно за курсором, а не догоняет его через свой переход */
+body.todo-dragging .row-dragging {
+  box-shadow: 0 10px 24px #00000080;
+  transition: none;
+}
+
+/* Строки не реагируют на курсор на время драга: гасит hover-подсветку, тултипы и :active.
+   Область — только список, иначе гасли бы nav и footer */
+body.todo-dragging #todo-list li {
+  pointer-events: none;
+}
+
+/* Ручку ведомого клона держим видимой: hover к клону не приходит, а подсветка ручки — по hover */
+body.todo-dragging .row-dragging .row-handle {
+  opacity: 1;
 }
 
 /* Иконки действий притенены, пока строка не активна (только на устройствах с hover) */
@@ -321,18 +336,22 @@ button.drag-handle {
   }
 }
 
-/* Зачеркивание выполненной задачи: линия рисуется слева направо */
+/* Зачеркивание выполненной задачи: линия рисуется слева направо.
+   Штрих на inline-обертке — фон дробится на каждую строку переноса */
 .todo-title {
-  background-image: linear-gradient(currentColor, currentColor);
-  background-position: left 68%;
-  background-size: 0% 2px;
-  background-repeat: no-repeat;
-  transition:
-    background-size 0.28s ease,
-    color 0.28s ease;
+  transition: color 0.28s ease;
 }
 
-.todo-title[data-done='true'] {
+.todo-strike {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: left 62%;
+  background-size: 0% 2px;
+  background-repeat: no-repeat;
+  box-decoration-break: clone;
+  transition: background-size 0.28s ease;
+}
+
+.todo-title[data-done='true'] .todo-strike {
   background-size: 100% 2px;
 }
 
@@ -377,7 +396,7 @@ button.drag-handle {
   .field-underline,
   .sheen::after,
   .icon-btn img,
-  .todo-title,
+  .todo-strike,
   .tip::after {
     transition: none;
   }
