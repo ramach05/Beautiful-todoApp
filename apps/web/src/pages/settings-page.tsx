@@ -23,7 +23,7 @@ type Feedback = { tone: 'ok' | 'err'; text: string };
 
 /**
  * Скрытое поле логина для форм с паролем: браузерные менеджеры паролей
- * иначе предупреждают, что форме не хватает username (console: goo.gl/9n2vKq).
+ * иначе предупреждают, что форме не хватает username.
  */
 function HiddenUsername({ email }: { email: string }) {
   return (

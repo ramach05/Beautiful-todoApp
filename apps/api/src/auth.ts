@@ -58,7 +58,7 @@ export function buildAuth(db: AuthDb) {
       ...(env.NODE_ENV === 'production' ? [] : ['http://localhost:*', 'http://127.0.0.1:*']),
     ],
     // Прод: web и api на разных сайтах (vercel.app / railway.app) - сессионная cookie должна
-    // отправляться cross-site, иначе браузер не приложит её к запросам; в dev/e2e оставить lax
+    // отправляться cross-site, иначе браузер не приложит ее к запросам; в dev/e2e оставить lax
     ...(env.NODE_ENV === 'production'
       ? {
           advanced: {

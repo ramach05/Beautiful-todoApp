@@ -4,7 +4,7 @@ import { DEFAULT_LOCALE, type AppLocale } from '@bt/shared';
 
 import { applyLocale, readStoredLocale } from '@/shared/i18n';
 
-/** Язык UI — клиентское состояние (ADR-002); i18next остается механизмом перевода */
+/** Язык UI — клиентское состояние; i18next остается механизмом перевода */
 export const $locale = createStore<AppLocale>(readStoredLocale() ?? DEFAULT_LOCALE);
 
 /** Явный выбор пользователя: применяется сразу, в профиль пишет слой app */

@@ -24,7 +24,6 @@ body {
   outline-offset: 2px;
 }
 
-/* Tailwind v4 preflight обнуляет курсор кнопок: возвращаем указатель на кликабельных */
 button:not(:disabled),
 [role='button']:not(:disabled) {
   cursor: pointer;
@@ -77,7 +76,6 @@ button:not(:disabled),
   }
 }
 
-/* Пятно света за курсором: координаты пишутся JS-ом в --spot-x/--spot-y самого слоя через rAF */
 .spotlight {
   background: radial-gradient(
     44rem at var(--spot-x, 50%) var(--spot-y, 50%),
@@ -88,7 +86,6 @@ button:not(:disabled),
   );
 }
 
-/* Горячее ядро пятна: разгорается по скорости курсора (--spot-boost от 0 до 1) */
 .spotlight-hot {
   background: radial-gradient(
     16rem at var(--spot-x, 50%) var(--spot-y, 50%),
@@ -100,10 +97,6 @@ button:not(:disabled),
   transition: opacity 0.3s ease-out;
 }
 
-/* Обводка карточки: теплый градиент подсвечивает рамку со стороны курсора.
-   Обводка — leaf-элемент вне содержимого карточки: координаты пятна пишутся в нее,
-   и пересчет стилей не расходится по всему дереву страницы.
-   background-attachment: fixed оставляет градиент в координатах вьюпорта под --spot-x/--spot-y */
 .edge-ring {
   position: absolute;
   inset: 0;
@@ -136,7 +129,6 @@ button:not(:disabled),
   opacity: calc(0.35 + 0.5 * var(--spot-boost, 0));
 }
 
-/* Hover-подъем карточек и кнопок: transform/box-shadow, цвет фона для hover:bg */
 .lift {
   transition-property: transform, box-shadow, background-color;
   transition-duration: 0.18s;
@@ -144,8 +136,6 @@ button:not(:disabled),
 }
 
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  /* На время драга lift-элементы под курсором не поднимаются и не подсвечиваются:
-     transform из hover перебивает inline-transform от dnd-kit, элементы моргают */
   body:not(.todo-dragging) .lift:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 18px #00000059;
@@ -156,7 +146,6 @@ button:not(:disabled),
   }
 }
 
-/* Диагональный блик, пробегающий по кнопке при наведении */
 .sheen {
   position: relative;
   overflow: hidden;
@@ -181,7 +170,6 @@ button:not(:disabled),
   }
 }
 
-/* Подчёркивание ссылок навигации: рисуется слева направо на hover и активном пункте */
 .nav-link {
   position: relative;
 }
@@ -205,18 +193,14 @@ button:not(:disabled),
   transform: scaleX(1);
 }
 
-/* Нативный крестик search-инпута выглядит чужеродно: рисуем свою кнопку очистки */
 input[type='search']::-webkit-search-cancel-button {
   appearance: none;
 }
 
-/* Теплый курсор ввода в тон акценту */
 input {
   caret-color: var(--color-accent);
 }
 
-/* Тултип над элементом: текст из data-tip, показ на hover и focus-visible.
-   Слой components — чтобы у absolute-кнопок хостом оставалась их собственная позиция */
 @layer components {
   .tip {
     position: relative;
@@ -252,7 +236,6 @@ input {
   }
 }
 
-/* Подчеркивание поиска: акцентная линия выезжает слева направо на фокусе */
 .field-underline {
   background-image: linear-gradient(var(--color-accent), var(--color-accent));
   background-position: left bottom;
@@ -267,49 +250,37 @@ input {
   background-size: 100% 2px;
 }
 
-/* Иконки действий: подрастание и лёгкий поворот на hover */
 .icon-btn img {
   transition: transform 0.18s ease;
 }
 
-/* Handle только перетаскивает: свой курсор и отключение сенсорного скролла;
-   селектор сильнее правила cursor:pointer для кнопок */
 button.drag-handle {
   cursor: grab;
   touch-action: none;
 }
 
-/* Клон в DragOverlay: его transform меняется каждый кадр, нужен compose-слой */
 .todo-drag-overlay {
   will-change: transform;
 }
 
-/* Курсор на время драга не зависит от того, под чем он оказался: строки не ловят указатель */
 body.todo-dragging {
   cursor: grabbing;
-  /* на время драга текст не выделяем, иначе протяжка цепляет подсветку строк */
   user-select: none;
 }
 
-/* Ведомый клон поднят над списком тенью.
-   transition: none — клон идет точно за курсором, а не догоняет его через свой переход */
 body.todo-dragging .row-dragging {
   box-shadow: 0 10px 24px #00000080;
   transition: none;
 }
 
-/* Строки не реагируют на курсор на время драга: гасит hover-подсветку, тултипы и :active.
-   Область — только список, иначе гасли бы nav и footer */
 body.todo-dragging #todo-list li {
   pointer-events: none;
 }
 
-/* Ручку ведомого клона держим видимой: hover к клону не приходит, а подсветка ручки — по hover */
 body.todo-dragging .row-dragging .row-handle {
   opacity: 1;
 }
 
-/* Иконки действий притенены, пока строка не активна (только на устройствах с hover) */
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   .icon-btn:hover:not(:disabled) img {
     transform: scale(1.18) rotate(-8deg);
@@ -328,7 +299,6 @@ body.todo-dragging .row-dragging .row-handle {
     transition: opacity 0.18s ease;
   }
 
-  /* Ручка перетаскивания проступает вместе с действиями строки */
   .row-handle {
     opacity: 0.45;
     transition: opacity 0.18s ease;
@@ -345,8 +315,6 @@ body.todo-dragging .row-dragging .row-handle {
   }
 }
 
-/* Зачеркивание выполненной задачи: линия рисуется слева направо.
-   Штрих на inline-обертке — фон дробится на каждую строку переноса */
 .todo-title {
   transition: color 0.28s ease;
 }
@@ -364,7 +332,6 @@ body.todo-dragging .row-dragging .row-handle {
   background-size: 100% 2px;
 }
 
-/* Мерцание окон города: точки-спаны с индивидуальными длительностью и задержкой */
 @keyframes bt-window {
   0%,
   100% {
@@ -384,7 +351,6 @@ body.todo-dragging .row-dragging .row-handle {
   animation: bt-window 6s ease-in-out infinite;
 }
 
-/* Медленное дыхание теплого свечения за линией skyline */
 @keyframes bt-breathe {
   from {
     opacity: 0.35;
@@ -431,7 +397,6 @@ body.todo-dragging .row-dragging .row-handle {
   }
 }
 
-/* Entrance только на первичном монтировании: висячий класс снимается родителем после проигрывания */
 .row-entrance > li:nth-child(-n + 8) {
   animation: bt-row-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
@@ -454,7 +419,6 @@ body.todo-dragging .row-dragging .row-handle {
   }
 }
 
-/* Столбцы графика: подсвечиваются при наведении */
 .stats-bar {
   transition: filter 0.18s ease;
 }
@@ -465,7 +429,6 @@ body.todo-dragging .row-dragging .row-handle {
   }
 }
 
-/* View transition между роутами: перелистывается только область контента, оболочка стоит */
 #main-content {
   view-transition-name: main-content;
 }

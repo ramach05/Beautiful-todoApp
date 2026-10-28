@@ -47,9 +47,7 @@ interface DropOrder {
   base: Todo[] | undefined;
 }
 
-/**
- * Страница todo: серверные задачи из Query, фильтр и поиск из URL (ADR-002).
- */
+/** Страница todo: серверные задачи из Query, фильтр и поиск из URL. */
 export function TodoPage() {
   const { t } = useTranslation();
   const search = useSearch({ from: '/' });

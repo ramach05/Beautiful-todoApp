@@ -14,7 +14,7 @@ const searchSchema = z.object({
   q: z.string().max(200).trim().catch(''),
 });
 
-/** Разбор search-параметров для validateSearch роута / — источник истины фильтров (ADR-002) */
+/** Разбор search-параметров для validateSearch роута / — источник истины фильтров */
 export function parseTodoSearch(search: Record<string, unknown>): TodoSearch {
   const parsed = searchSchema.safeParse(search);
   return parsed.success ? buildTodoSearch(parsed.data) : {};

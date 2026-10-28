@@ -8,7 +8,7 @@ import { requireSession } from '@/app/guards';
 
 export const Route = createFileRoute('/')({
   head: () => ({ meta: [{ title: i18n.t('doc_title.app') }] }),
-  // Фильтр и поиск — часть адреса: схему валидации держит фича фильтров (ADR-002)
+  // Фильтр и поиск — часть адреса: схему валидации держит фича фильтров
   validateSearch: parseTodoSearch,
   beforeLoad: requireSession,
   component: TodoPage,

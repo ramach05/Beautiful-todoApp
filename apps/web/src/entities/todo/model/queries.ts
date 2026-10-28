@@ -3,7 +3,7 @@ import type { CreateTodoInput, Todo, UpdateTodoInput } from '@bt/shared';
 
 import { api } from '@/shared/api';
 
-/** Серверные данные живут только в кэше Query; Effector их не дублирует (ADR-002) */
+/** Серверные данные живут только в кэше Query; Effector их не дублирует */
 export const todoKeys = {
   all: ['todos'] as const,
 };

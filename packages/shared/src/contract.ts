@@ -14,7 +14,7 @@ import {
 const authed = oc.errors({ UNAUTHORIZED: { message: 'Unauthorized' } });
 
 /**
- * oRPC-контракт - единая точка истины для api и web (ADR-003):
+ * oRPC-контракт - единая точка истины для api и web:
  * сервер реализует его через implement(), клиент вызывает типизированно без кодогенерации
  */
 export const todoContract = {
