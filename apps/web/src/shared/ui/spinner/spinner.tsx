@@ -1,6 +1,6 @@
 import { cn } from '@/shared/lib';
 
-/** Вращающийся индикатор: чистая декорация, состояние отдается кнопке через aria-busy */
+/** Spinning indicator: pure decoration, state is exposed on the button via aria-busy */
 export function Spinner({ className }: { className?: string }) {
   return (
     <span

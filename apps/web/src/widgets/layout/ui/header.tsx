@@ -16,7 +16,7 @@ const navItems = [
 const navLinkClass =
   'nav-link focus-ring rounded-md px-2 py-1 text-gray-300 transition-colors hover:bg-ring-soft hover:text-white sm:px-3';
 
-/** Обходной ярлык: виден только при фокусе с клавиатуры и уводит сразу к содержимому страницы */
+/** Skip link: visible only on keyboard focus and goes straight to the page content */
 function SkipLink() {
   const { t } = useTranslation();
   return (

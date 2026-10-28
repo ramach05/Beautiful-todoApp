@@ -4,7 +4,7 @@ import type { Todo } from '@/entities/todo';
 
 import { computeStats } from './stats';
 
-// Локальные ISO-строки без Z: new Date трактует их как локальное время, значит dayKey стабилен в любой TZ
+// Local ISO strings without Z: new Date treats them as local time, so dayKey is stable in any TZ
 function iso(y: number, m: number, d: number, hh = 9): string {
   return new Date(y, m - 1, d, hh, 0, 0).toISOString();
 }
@@ -40,11 +40,11 @@ describe('computeStats', () => {
     const { daily } = computeStats(todos, now);
     expect(daily).toHaveLength(7);
     expect(daily.at(-1)).toMatchObject({ key: '2026-10-23', completed: 1 });
-    // Подписи дней — Intl по локали: en short-формат без точки
+    // Day labels — Intl by locale: en short format without a dot
     expect(daily.at(-1)?.label).toBe('Fri');
     expect(computeStats(todos, now, 'ru').daily.at(-1)?.label).toBe('пт');
     expect(daily.find((point) => point.key === '2026-10-21')?.completed).toBe(1);
-    // выполненные вне окна (2026-09-01) не попадают ни в один из 7 дней
+    // completed outside the window (2026-09-01) falls into none of the 7 days
     expect(daily.reduce((sum, point) => sum + point.completed, 0)).toBe(2);
   });
 });

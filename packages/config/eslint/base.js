@@ -3,8 +3,8 @@ import tseslint from 'typescript-eslint';
 import prettier from 'eslint-config-prettier';
 
 /**
- * Базовый flat-config: js/ts рекомендации + отключение конфликтующих с prettier правил.
- * Прикладные пакеты расширяют его своими плагинами и globals.
+ * Base flat-config: js/ts recommendations + disabling rules that conflict with prettier.
+ * Application packages extend it with their own plugins and globals.
  */
 export default [
   { ignores: ['dist/**'] },
@@ -13,7 +13,7 @@ export default [
   ...tseslint.configs.recommended,
   {
     rules: {
-      // Вытеснение служебных полей через rest-деструктуризацию — идиоматичный прием
+      // Dropping internal fields via rest destructuring is an idiomatic pattern
       '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
     },
   },

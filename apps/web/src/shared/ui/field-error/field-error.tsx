@@ -7,8 +7,8 @@ interface FieldErrorProps {
 }
 
 /**
- * Слот ошибки поля: рендерится всегда с фиксированной высотой строки,
- * место под сообщение зарезервировано заранее и верстка при появлении не сдвигается.
+ * Field error slot: always rendered with a fixed line height,
+ * space for the message is reserved upfront so the layout does not shift when it appears.
  */
 export function FieldError({ id, message, className }: FieldErrorProps) {
   return (

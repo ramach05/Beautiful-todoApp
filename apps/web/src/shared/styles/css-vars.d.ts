@@ -2,7 +2,7 @@ import 'react';
 
 declare module 'react' {
   interface CSSProperties {
-    /** Пик яркости мерцающего окна города (0..1) */
+    /** Brightness peak of a twinkling city window (0..1) */
     '--peak'?: string;
   }
 }

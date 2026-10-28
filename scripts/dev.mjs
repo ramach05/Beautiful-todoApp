@@ -1,6 +1,6 @@
 /**
- * Локальный запуск одной командой: env-файлы -> postgres -> миграции -> сид -> dev-серверы.
- * Использование: pnpm start
+ * Local one-command startup: env files -> postgres -> migrations -> seed -> dev servers.
+ * Usage: pnpm start
  */
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
-/** Запуск команды в корне репозитория; при ненулевом коде — падение с текстом ошибки */
+/** Run a command in the repo root; on a non-zero exit code — fail with the error text */
 function run(cmd, args, hint) {
   console.log(`\n$ ${cmd} ${args.join(' ')}`);
   const result = spawnSync(cmd, args, {
@@ -18,24 +18,24 @@ function run(cmd, args, hint) {
     shell: process.platform === 'win32',
   });
   if (result.status !== 0) {
-    if (result.error) console.error(`Не удалось запустить "${cmd}": ${result.error.message}`);
+    if (result.error) console.error(`Failed to start "${cmd}": ${result.error.message}`);
     if (hint) console.error(hint);
     process.exit(result.status ?? 1);
   }
 }
 
 if (Number(process.versions.node.split('.')[0]) < 24) {
-  console.error(`Нужен Node.js >= 24, сейчас ${process.versions.node}. Выполните "nvm use".`);
+  console.error(`Node.js >= 24 is required, currently ${process.versions.node}. Run "nvm use".`);
   process.exit(1);
 }
 
-// .env создаются из примеров; в web-конфиге принудительно выключается мок, чтобы работал реальный api
+// .env files are created from the examples; the web config force-disables the mock so the real api is used
 for (const app of ['api', 'web']) {
   const envPath = join(root, 'apps', app, '.env');
   const examplePath = `${envPath}.example`;
   if (!existsSync(envPath)) {
     writeFileSync(envPath, readFileSync(examplePath, 'utf8'));
-    console.log(`Создан apps/${app}/.env из примера`);
+    console.log(`Created apps/${app}/.env from the example`);
   }
   if (app === 'web') {
     const content = readFileSync(envPath, 'utf8');
@@ -49,10 +49,10 @@ for (const app of ['api', 'web']) {
 run(
   'docker',
   ['compose', 'up', '-d', '--wait', 'postgres'],
-  'Не удалось поднять postgres. Проверьте, что Docker запущен.',
+  'Failed to start postgres. Make sure Docker is running.',
 );
-// Dev-БД каждый запуск приводится к сид-состоянию: данные из volume не переживают перезапуск
-console.log('\nDev-БД будет сброшена к сид-состоянию: все локальные данные будут удалены.');
+// Every run resets the dev DB to the seed state: volume data does not survive a restart
+console.log('\nThe dev DB will be reset to the seed state: all local data will be deleted.');
 run('pnpm', ['--filter', '@bt/api', 'db:reset']);
 run('pnpm', ['--filter', '@bt/api', 'db:migrate']);
 run('pnpm', ['--filter', '@bt/api', 'db:seed']);

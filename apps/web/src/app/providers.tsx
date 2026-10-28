@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 
 import { queryClient } from '@/shared/api';
 
-/** Общие провайдеры приложения; devtools только в разработке */
+/** Shared app providers; devtools only in development */
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>

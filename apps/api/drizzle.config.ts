@@ -5,7 +5,7 @@ export default defineConfig({
   schema: './src/db/schema.ts',
   out: './drizzle',
   dbCredentials: {
-    // Значение из docker-compose; для migrate/push запускается с DATABASE_URL из окружения
+    // Value from docker-compose; run with DATABASE_URL from the environment for migrate/push
     url: process.env.DATABASE_URL ?? 'postgres://todo:todo@localhost:5433/beautiful_todo',
   },
 });

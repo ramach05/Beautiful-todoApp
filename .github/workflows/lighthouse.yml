@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      # Превью автономно без api и БД: in-process мок, поэтому бюджет измеряет UI, а не прод-данные
+      # Preview runs standalone without api and DB: in-process mock, so the budget measures the UI, not prod data
       VITE_USE_MOCKS: '1'
     steps:
       - uses: actions/checkout@v4
@@ -24,7 +24,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm turbo run build --filter=@bt/web
-      # Chrome предустановлен на ubuntu-latest, chrome-launcher находит его сам
+      # Chrome is preinstalled on ubuntu-latest, chrome-launcher finds it on its own
       - name: Lighthouse budgets
         run: pnpm --filter @bt/web run lhci
       - uses: actions/upload-artifact@v4

@@ -4,18 +4,18 @@ import { DEFAULT_LOCALE, type AppLocale } from '@bt/shared';
 
 import { applyLocale, readStoredLocale } from '@/shared/i18n';
 
-/** Язык UI — клиентское состояние; i18next остается механизмом перевода */
+/** UI language is client state; i18next stays the translation mechanism */
 export const $locale = createStore<AppLocale>(readStoredLocale() ?? DEFAULT_LOCALE);
 
-/** Явный выбор пользователя: применяется сразу, в профиль пишет слой app */
+/** Explicit user choice: applied immediately, the app layer writes it to the profile */
 export const localeChanged = createEvent<AppLocale>();
 
-/** Резолв из сессии или при старте: применяется без записи в профиль */
-// Экспортируется для тестов и связывания в app; сам его никто, кроме них, не порождает
+/** Resolve from the session or at startup: applied without writing to the profile */
+// Exported for tests and app wiring; nothing else raises it
 export const localeSuggested = createEvent<AppLocale>();
 
 $locale.on(localeChanged, (_, locale) => locale).on(localeSuggested, (_, locale) => locale);
 
-// Побочные эффекты любого изменения языка: i18next, lang документа, локальная копия.
-// watch вызывает колбэк и на стартовом значении стора — язык применен до первого рендера
+// Side effects of any language change: i18next, document lang, local copy.
+// watch calls the callback on the store's initial value too — language is applied before the first render
 $locale.watch((locale) => applyLocale(locale));

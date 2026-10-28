@@ -12,7 +12,7 @@ import { TextField } from '@/shared/ui/text-field';
 
 import { useAddTodo } from '@/entities/todo';
 
-/** Форма добавления: валидация общим zod-контрактом, мутация с инвалидацией кэша */
+/** Add form: validated by the shared zod contract, mutation with cache invalidation */
 export function TodoAdd() {
   const { t } = useTranslation();
   const addTodo = useAddTodo();

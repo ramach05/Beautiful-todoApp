@@ -1,7 +1,7 @@
 import en from './locales/en.json';
 import ru from './locales/ru.json';
 
-/** Плоский список ключей вложенного словаря: 'a.b.c' */
+/** Flat list of keys of a nested dictionary: 'a.b.c' */
 function flattenKeys(value: object, prefix = ''): string[] {
   return Object.entries(value).flatMap(([key, child]) => {
     const path = prefix === '' ? key : `${prefix}.${key}`;
@@ -10,8 +10,8 @@ function flattenKeys(value: object, prefix = ''): string[] {
 }
 
 /**
- * Суффиксы CLDR-плюралей нормализуются в базовый ключ:
- * у en базового ключа достаточно, ru требует one/few/many рядом
+ * CLDR plural suffixes are normalized to the base key:
+ * for en the base key is enough, ru requires one/few/many alongside
  */
 function normalize(keys: string[]): string[] {
   return [...new Set(keys.map((key) => key.replace(/_(zero|one|two|few|many|other)$/, '')))].sort();

@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
 
-# GITHUB_TOKEN: action создает релизный PR, теги и GitHub Releases; внешних секретов нет
+# GITHUB_TOKEN: the action creates the release PR, tags and GitHub Releases; no external secrets
 permissions:
   contents: write
   pull-requests: write

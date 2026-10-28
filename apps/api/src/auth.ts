@@ -12,7 +12,7 @@ import type { SessionResolver } from '@/repo.js';
 
 type AuthDb = PgDatabase<PgQueryResultHKT, typeof schema>;
 
-/** better-auth: email+password, сессии в httpOnly cookie; таблицы управляются нашими drizzle-миграциями */
+/** better-auth: email+password, sessions in an httpOnly cookie; tables are managed by our drizzle migrations */
 export function buildAuth(db: AuthDb) {
   return betterAuth({
     appName: 'Beautiful TodoApp',
@@ -20,11 +20,11 @@ export function buildAuth(db: AuthDb) {
     baseURL: env.BETTER_AUTH_URL,
     database: drizzleAdapter(db, { provider: 'pg', schema, usePlural: true }),
     emailAndPassword: { enabled: true, minPasswordLength: 4 },
-    // Каждому новому пользователю — стартовые задачи сразу при создании аккаунта
+    // Every new user gets starter todos right at account creation
     databaseHooks: {
       user: {
         create: {
-          // better-auth передает запись пользователя первым аргументом
+          // better-auth passes the user record as the first argument
           after: async (user) => {
             const repo = new PostgresTodosRepository(db);
             for (const title of DEFAULT_TODO_TITLES) {
@@ -34,13 +34,13 @@ export function buildAuth(db: AuthDb) {
         },
       },
     },
-    // Управление аккаунтом из /settings: смена email и удаление аккаунта (подтверждение паролем).
-    // Пользователи здесь не верифицируются SMTP, поэтому email меняется сразу (updateEmailWithoutVerification)
+    // Account management from /settings: change email and delete account (password confirmation).
+    // Users aren't SMTP-verified here, so the email changes right away (updateEmailWithoutVerification)
     user: {
       changeEmail: { enabled: true, updateEmailWithoutVerification: true },
       deleteUser: { enabled: true },
-      // Язык интерфейса: колонка user.locale, приезжает в getSession, пишется через updateUser/signUp.
-      // validator не пускает в БД произвольные строки из публичного update-user
+      // UI language: user.locale column, arrives in getSession, written via updateUser/signUp.
+      // the validator keeps arbitrary strings from the public update-user out of the DB
       additionalFields: {
         locale: {
           type: 'string',
@@ -51,14 +51,14 @@ export function buildAuth(db: AuthDb) {
         },
       },
     },
-    // CORS_ORIGIN списком через запятую: origin-проверки better-auth должны знать каждый web-origin.
-    // В dev дополнительно любые localhost-порты: Vite занимает следующий порт, если 5173 занят
+    // CORS_ORIGIN as a comma-separated list: better-auth origin checks must know every web origin.
+    // In dev, any localhost ports are added: Vite takes the next port if 5173 is busy
     trustedOrigins: [
       ...env.CORS_ORIGIN.split(',').map((origin) => origin.trim()),
       ...(env.NODE_ENV === 'production' ? [] : ['http://localhost:*', 'http://127.0.0.1:*']),
     ],
-    // Прод: web и api на разных сайтах (vercel.app / railway.app) - сессионная cookie должна
-    // отправляться cross-site, иначе браузер не приложит ее к запросам; в dev/e2e оставить lax
+    // Prod: web and api live on different sites (vercel.app / railway.app) - the session cookie must
+    // be sent cross-site, otherwise the browser won't attach it to requests; keep lax in dev/e2e
     ...(env.NODE_ENV === 'production'
       ? {
           advanced: {
@@ -71,7 +71,7 @@ export function buildAuth(db: AuthDb) {
 
 export type Auth = ReturnType<typeof buildAuth>;
 
-/** SessionResolver поверх better-auth: пользователя запроса берет из сессионной cookie */
+/** SessionResolver on top of better-auth: resolves the request user from the session cookie */
 export function betterAuthResolver(auth: Auth): SessionResolver {
   return {
     async resolve(headers: Headers) {

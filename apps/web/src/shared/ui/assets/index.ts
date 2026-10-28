@@ -3,24 +3,24 @@ import city2560Avif from './images/city-2560.avif';
 import city1920Webp from './images/city-1920.webp';
 import city2560Webp from './images/city-2560.webp';
 
-/** Каталог реальных изображений: единая точка доступа к bitmap-ассетам UI */
+/** Catalog of real images: the single access point for UI bitmap assets */
 
-/** Вариант <source> для picture: MIME-тип и srcset с ширинами в CSS-пикселях */
+/** <source> variant for picture: MIME type and srcset with widths in CSS pixels */
 export interface PictureSource {
   type: string;
   srcSet: string;
 }
 
-/** Фоновое фото города: варианты от лучшего формата к запасному, нужный выбирает браузер */
+/** City background photo: variants from the best format to the fallback, the browser picks the right one */
 export const cityBgSources: readonly PictureSource[] = [
   { type: 'image/avif', srcSet: `${city1920Avif} 1920w, ${city2560Avif} 2560w` },
   { type: 'image/webp', srcSet: `${city1920Webp} 1920w, ${city2560Webp} 2560w` },
 ];
 
-/** Запасной вариант фона для img: webp понимают все целевые браузеры, avif-ветка приоритетнее */
+/** Fallback background for img: all target browsers understand webp, the avif branch takes priority */
 export const cityBg = city1920Webp;
 
-/** LQIP фона: 32px webp в base64 — виден пока грузится полный вариант; создает scripts/optimize-images.mjs */
+/** Background LQIP: 32px webp in base64, visible while the full variant loads; produced by scripts/optimize-images.mjs */
 export const cityBgLqip =
   'data:image/webp;base64,UklGRrAAAABXRUJQVlA4IKQAAAAwBQCdASogABMAPs1SokynpKMiN/qoAPAZiWMAtDQh3416CnLrybtS0QOYoZveafdgAAD+2J0LcSuZ4xRw5a5aglFqA2KzTqt1GaKUKEc3KLJYxzLnYyhF5Fj1Rh/dAEyuD0VKANwKf6MbHmFdCm8FBUmb7BGxxov0+CTGwjR8GbDrBhfVTpQ/96WEbuK1K6PeEFJx8SFQQtAxCEKjBEmNOYAAAA==';
 

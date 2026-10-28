@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { PageShell } from '@/widgets/layout';
 
-/** Заглушка 404 для несуществующих маршрутов: ссылка возвращает на главную */
+/** 404 placeholder for unknown routes: a link returns to the home page */
 function NotFound() {
   const { t } = useTranslation();
   return (

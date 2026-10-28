@@ -5,18 +5,18 @@ import type { FastifyInstance } from 'fastify';
 
 import { appContract } from '@bt/shared';
 
-// имя сессионной cookie better-auth по умолчанию (в auth.ts переопределены только атрибуты)
+// better-auth default session cookie name (auth.ts overrides only the attributes)
 const SESSION_COOKIE_NAME = 'better-auth.session_token';
 
 /**
- * Публичная документация API: /openapi.json (OpenAPI 3.1) и /docs (Scalar UI).
- * Спецификация генерируется из oRPC-контракта @bt/shared — тот же источник,
- * что типизирует сервер и клиент; без сессии, но только по нашему rpc-контракту.
+ * Public API docs: /openapi.json (OpenAPI 3.1) and /docs (Scalar UI).
+ * The spec is generated from the @bt/shared oRPC contract — the same source
+ * that types the server and client; no session required, but only our rpc contract.
  */
 export async function registerDocs(app: FastifyInstance): Promise<void> {
   const generator = new OpenAPIGenerator({ schemaConverters: [new ZodToJsonSchemaConverter()] });
 
-  // все процедуры контракта построены на authed-базе, поэтому security scheme глобальная
+  // all contract procedures are built on the authed base, so the security scheme is global
   const spec = await generator.generate(appContract, {
     info: {
       title: 'Beautiful TODO API',
@@ -41,7 +41,7 @@ export async function registerDocs(app: FastifyInstance): Promise<void> {
 
   app.get('/openapi.json', async () => spec);
 
-  // Scalar отдает свой JS-бандл из пакета, CDN не используется (важно для Docker-образа)
+  // Scalar serves its JS bundle from the package, no CDN is used (matters for the Docker image)
   await app.register(scalarApiReference, {
     routePrefix: '/docs',
     configuration: { url: '/openapi.json' },

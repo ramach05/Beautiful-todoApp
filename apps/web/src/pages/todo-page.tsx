@@ -19,11 +19,11 @@ import { cn } from '@/shared/lib';
 import { Skeleton, SkeletonBlock } from '@/shared/ui/skeleton';
 import { Button } from '@/shared/ui/button';
 
-/** Сколько первых строк списка получают stagger-entrance и шаг задержки между ними, мс */
+/** How many first list rows get stagger-entrance and the delay step between them, ms */
 const ENTRANCE_LIMIT = 8;
 const ENTRANCE_STEP = 55;
 
-/** Каркас списка на время загрузки задач: строки той же высоты, что реальные задачи */
+/** List skeleton while todos load: rows of the same height as real todos */
 function TodoListSkeleton() {
   const { t } = useTranslation();
   return (
@@ -41,13 +41,13 @@ function TodoListSkeleton() {
   );
 }
 
-/** Локальный порядок дропа, живой, пока кэш не обновился; base — данные кэша на момент дропа */
+/** Local drop order, live until the Query cache refreshes; base is the cache data at the drop moment */
 interface DropOrder {
   ids: string[];
   base: Todo[] | undefined;
 }
 
-/** Страница todo: серверные задачи из Query, фильтр и поиск из URL. */
+/** Todo page: server todos from Query, filter and search from the URL. */
 export function TodoPage() {
   const { t } = useTranslation();
   const search = useSearch({ from: '/' });
@@ -60,14 +60,14 @@ export function TodoPage() {
   const filter: TodoFilter = search.filter ?? 'all';
   const query = search.q ?? '';
 
-  // Порядок дропа держим в локальном state: уведомление кэша Query приходит в макрозадаче
-  // setTimeout, и без локального порядка список рисует кадр в старом порядке между этими состояниями
+  // Keep the drop order in local state: the Query cache notice arrives in a setTimeout
+  // macrotask, and without a local order the list paints one frame in the old order between these states
   const [dropOrder, setDropOrder] = useState<DropOrder | null>(null);
 
   const fullTodos = useMemo(() => {
     const data = todosQuery.data ?? [];
-    // Локальный порядок действителен только для данных, на которых создан: оптимистичный
-    // порядок или откат дают новую ссылку — она сама становится источником порядка
+    // The local order is valid only for the data it was created on: an optimistic
+    // order or a rollback produce a new reference — it becomes the source of order itself
     if (dropOrder === null || dropOrder.base !== todosQuery.data) return data;
     const rank = new Map(dropOrder.ids.map((id, index) => [id, index]));
     return [...data].sort(
@@ -80,15 +80,15 @@ export function TodoPage() {
     () => (todosQuery.data ?? []).filter((todo) => !todo.done).length,
     [todosQuery.data],
   );
-  // Стабильный массив id: dnd-kit пересобирает раскладки на каждое движение указателя,
-  // новый массив на рендер заставлял бы пересчитывать их заново и ронял бы переходы строк
+  // Stable array of ids: dnd-kit re-lays out on every pointer move,
+  // a new array each render would force recomputation and break row transitions
   const ids = useMemo(() => todos.map((todo) => todo.id), [todos]);
 
   const [entrance, setEntrance] = useState(false);
   const entranceStarted = useRef(false);
 
-  // Entrance только на первичном приходе данных: класс висит до конца stagger и снимается,
-  // поэтому апдейты, поиск и последующие добавления анимацию не перетриггерят
+  // Entrance only on the first data arrival: the class stays until the stagger ends and is removed,
+  // so updates, search and later additions do not retrigger the animation
   useLayoutEffect(() => {
     if (todosQuery.data === undefined || entranceStarted.current) return;
     entranceStarted.current = true;
@@ -97,7 +97,7 @@ export function TodoPage() {
     return () => clearTimeout(timer);
   }, [todosQuery.data]);
 
-  // Фильтр пишется в историю (кнопка «назад» откатывает фильтр), поиск — replace: набор текста не плодит записи
+  // The filter is pushed to history (the "back" button rolls it back), search uses replace: typing does not spawn entries
   function changeFilter(next: TodoFilter) {
     void navigate({ search: buildTodoSearch({ filter: next, q: query }) });
   }
@@ -115,8 +115,8 @@ export function TodoPage() {
     updateTodo.mutate({ id: todo.id, patch: { important: !todo.important } });
   }
 
-  // Порядок пересчитываем по полному списку: при фильтре часть задач скрыта,
-  // но перенос к цели в полном массиве дает предсказуемый результат
+  // Order is recomputed over the full list: under a filter some todos are hidden,
+  // but moving to the target in the full array gives a predictable result
   function reorder(draggedId: string, overId: string) {
     const next = reorderTodos(fullTodos, draggedId, overId);
     if (next === fullTodos) return;

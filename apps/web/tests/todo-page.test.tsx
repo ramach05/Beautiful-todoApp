@@ -6,15 +6,15 @@ import userEvent from '@testing-library/user-event';
 import { routeTree } from '@/app/routeTree.gen';
 import { sessionReady, signIn } from '@/features/auth';
 
-/** Мок-режим резолвит сессию не сразу, а guard роутов читает ее синхронно */
+/** Mock mode resolves the session not immediately, while the route guard reads it synchronously */
 async function prepareSession(): Promise<void> {
   await sessionReady;
   await signIn('demo@local.test', 'password-123');
 }
 
 /**
- * Рендер приложения настоящим роутером в памяти: фильтр и поиск читаются из URL,
- * поэтому тесты проверяют и адрес, и выдачу. Возвращает роутер ради проверок адреса.
+ * Renders the app with a real in-memory router: filter and search are read from the URL,
+ * so tests check both the address and the output. Returns the router for address checks.
  */
 function mountApp(initialEntry = '/') {
   const client = new QueryClient({
@@ -35,7 +35,7 @@ function mountApp(initialEntry = '/') {
   return { router, ...view };
 }
 
-/** Монтирует страницу и ждет задачи из мока */
+/** Mounts the page and waits for a todo from the mock */
 async function renderPage(initialEntry = '/') {
   await prepareSession();
   const app = mountApp(initialEntry);
@@ -49,7 +49,7 @@ describe('TodoPage', () => {
 
     expect(screen.getByText('Buy groceries')).toBeInTheDocument();
     expect(screen.getByText('4 more to do, 0 done')).toBeInTheDocument();
-    // Значения по умолчанию в адрес не пишутся
+    // Default values are not written to the address
     expect(router.state.location.searchStr).toBe('');
   });
 
@@ -68,7 +68,7 @@ describe('TodoPage', () => {
 
     await user.click(await screen.findByRole('button', { name: 'Buy groceries' }));
 
-    // счетчики считаются по кэшу Query: проверяем состояние текстом, а не классами и разметкой строки
+    // counters are computed from the Query cache: check the state by text, not by classes or row markup
     await waitFor(() => expect(screen.getByText('3 more to do, 1 done')).toBeInTheDocument());
   });
 
@@ -103,7 +103,7 @@ describe('TodoPage', () => {
 
   it('opening ?filter=done shows only done todos', async () => {
     const user = userEvent.setup();
-    // Выполняем задачу обычным рендером, затем размонтируем и заходим напрямую по ссылке
+    // Complete a todo via a regular render, then unmount and navigate directly by link
     const first = await renderPage();
     await user.click(screen.getByRole('button', { name: 'Call mom' }));
     await waitFor(() => expect(screen.getByText('3 more to do, 1 done')).toBeInTheDocument());

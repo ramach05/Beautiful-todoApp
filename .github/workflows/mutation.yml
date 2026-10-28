@@ -2,7 +2,7 @@ name: Mutation testing
 
 on:
   schedule:
-    # Ночной прогон мутационного тестирования
+    # Nightly mutation testing run
     - cron: '0 3 * * *'
   workflow_dispatch:
 
@@ -23,10 +23,10 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # Тесты api поднимают PGlite in-process, а типы web/shared берутся из dist — postgres-сервис не нужен
+      # api tests spin up PGlite in-process, and web/shared types are taken from dist — no postgres service needed
       - run: pnpm turbo run build
 
-      # Пороги в stryker.config.json настроены без break: отчет носит информационный характер
+      # Thresholds in stryker.config.json are set without break: the report is informational only
       - name: Mutation testing @bt/shared
         run: pnpm --filter @bt/shared mutation
         continue-on-error: true

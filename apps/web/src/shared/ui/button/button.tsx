@@ -6,9 +6,9 @@ type Variant = 'primary' | 'danger' | 'ghost' | 'chip' | 'icon';
 type Size = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  /** primary — акцентная с бликом, danger — удаление, ghost — вторичные, chip — переключатели, icon — только иконка */
+  /** primary — accent with a sheen, danger — delete, ghost — secondary, chip — toggles, icon — icon only */
   variant?: Variant;
-  /** Игнорируется у компактных вариантов chip и icon, у них своя раскладка */
+  /** Ignored by the compact chip and icon variants, they have their own layout */
   size?: Size;
   ref?: Ref<HTMLButtonElement>;
 }
@@ -33,7 +33,7 @@ const variants: Record<Variant, string> = {
   icon: 'icon-btn rounded-full p-1.5 hover:bg-ring-soft',
 };
 
-/** Кнопка с вариантами раскраски и размера: курсор-указатель, lift, hover и disabled заданы здесь */
+/** Button with color and size variants: pointer cursor, lift, hover and disabled are defined here */
 export function Button({
   variant = 'primary',
   size = 'md',

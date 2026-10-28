@@ -23,8 +23,8 @@ const second = todo({ title: 'Магазин', done: true });
 const third = todo({ title: 'Позвонить врачу', important: true });
 const items = [first, second, third];
 
-// Тесты мутабельных пакетов держим плоскими (без describe): per-test фильтр Stryker с vitest 5
-// не матчит вложенные тесты, и мутанты остаются живыми при наличии покрытия.
+// Keep mutable-package tests flat (no describe): the Stryker per-test filter with vitest 5
+// does not match nested tests, so mutants survive even when covered.
 
 it('todoSchema validates a well-formed todo', () => {
   expect(todoSchema.safeParse(todo()).success).toBe(true);

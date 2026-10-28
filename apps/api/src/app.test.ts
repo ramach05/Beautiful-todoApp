@@ -23,7 +23,7 @@ const db = drizzle(pglite, { schema });
 let app: FastifyInstance;
 let httpUrl: string;
 
-/** Клиент oRPC, приклеивающий сессионную cookie better-auth к каждому запросу */
+/** oRPC client that attaches the better-auth session cookie to every request */
 function createTestClient(cookie?: string): AppContractClient {
   const link = new RPCLink({
     url: `${httpUrl}/rpc`,
@@ -37,7 +37,7 @@ function createTestClient(cookie?: string): AppContractClient {
   return createORPCClient(link);
 }
 
-/** Регистрация через auth-эндпоинт: возвращает cookie сессии из ответа */
+/** Signs up through the auth endpoint: returns the session cookie from the response */
 async function signUp(email: string, clearDefaults = true): Promise<string> {
   const response = await fetch(`${httpUrl}/api/auth/sign-up/email`, {
     method: 'POST',
@@ -48,7 +48,7 @@ async function signUp(email: string, clearDefaults = true): Promise<string> {
     throw new Error(`sign-up failed: ${response.status} ${await response.text()}`);
   }
   const body = (await response.json()) as { user: { id: string } };
-  // Хук создания пользователя выдает стартовые задачи: сценариям нужен детерминированный старт
+  // The user-create hook issues starter todos: scenarios need a deterministic start
   if (clearDefaults) {
     await db.delete(todos).where(eq(todos.userId, body.user.id));
   }
@@ -86,8 +86,8 @@ beforeEach(async () => {
   await db.delete(todos);
 });
 
-// Тесты мутабельных пакетов держим плоскими (без describe): per-test фильтр Stryker с vitest 5
-// не матчит вложенные тесты, и мутанты остаются живыми даже при наличии покрытия.
+// Keep mutable-package tests flat (no describe): Stryker's per-test filter with vitest 5
+// doesn't match nested tests, so mutants survive even with coverage.
 
 it('health returns ok', async () => {
   const response = await fetch(`${httpUrl}/health`);
@@ -135,7 +135,7 @@ it('list returns todos in position order', async () => {
   const second = await api.todos.create({ title: 'Вторая' });
   const third = await api.todos.create({ title: 'Третья' });
 
-  // position растет при создании: порядок списка совпадает с порядком создания
+  // position grows on create: list order matches creation order
   expect((await api.todos.list()).map((todo) => todo.id)).toEqual([first.id, second.id, third.id]);
 });
 
@@ -165,7 +165,7 @@ it('users cannot see or change foreign todos', async () => {
   const created = await owner.todos.create({ title: 'Личная задача' });
 
   expect(await intruder.todos.list()).toEqual([]);
-  // чужой id в reorder ничего не переносит: ответ пуст, как и список intruder
+  // a foreign id in reorder moves nothing: the response is empty, just like the intruder's list
   expect(await intruder.todos.reorder({ ids: [created.id] })).toEqual([]);
 
   const error = await intruder.todos

@@ -7,7 +7,7 @@ import { StatsPageSuspense } from '@/pages/stats-skeleton';
 import { api, queryClient } from '@/shared/api';
 import { i18n } from '@/shared/i18n';
 
-// Ленивый чанк страницы: отдельно грузится только код самой статистики
+// Lazy page chunk: only the stats code itself is loaded separately
 const StatsPage = lazy(() => import('@/pages/stats-page').then((m) => ({ default: m.StatsPage })));
 
 export const Route = createFileRoute('/stats')({
@@ -18,7 +18,7 @@ export const Route = createFileRoute('/stats')({
       <StatsPage />
     </StatsPageSuspense>
   ),
-  // Предварительная загрузка данных до рендера: ensureQueryData отдает кэш если свежий, иначе качает
+  // Prefetch data before render: ensureQueryData returns cache when fresh, otherwise downloads
   loader: async () => {
     await queryClient.ensureQueryData({ queryKey: todoKeys.all, queryFn: () => api.todos.list() });
   },

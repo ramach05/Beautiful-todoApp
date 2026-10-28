@@ -26,17 +26,17 @@ import { type Todo, TodoItem } from '@/entities/todo';
 import { dragIcon } from '@/shared/ui/assets';
 import { Button } from '@/shared/ui/button';
 
-/** Вешается на body на время перетаскивания: по нему отключаются hover-состояния */
+/** Put on body for the duration of a drag: hover states are disabled through it */
 const DRAGGING_CLASS = 'todo-dragging';
 
-/** Класс нужен до первого ре-рендера: иначе hover-подъем успевает начаться на первых пикселях драга */
+/** The class is needed before the first re-render: otherwise the hover lift starts on the first drag pixels */
 function setDragging(on: boolean) {
   document.body.classList.toggle(DRAGGING_CLASS, on);
 }
 
 const noop = () => undefined;
 
-/** Статичный клон строки в оверлее: слушателей нет, библиотекой указатель поверх него игнорируется */
+/** Static row clone in the overlay: no listeners, the library ignores the pointer over it */
 function DragOverlayRow({ todo, query }: { todo: Todo; query?: string }) {
   const { t } = useTranslation();
   const handleLabel = t('todos.drag.handle', { title: todo.title });
@@ -68,17 +68,17 @@ function DragOverlayRow({ todo, query }: { todo: Todo; query?: string }) {
 }
 
 interface TodoDndContextProps {
-  /** id видимых строк в текущем порядке: по ним sortable считает перестановку */
+  /** ids of visible rows in current order: sortable computes the permutation from them */
   ids: string[];
-  /** Видимые задачи: по activeTodo строится клон строки в DragOverlay */
+  /** Visible todos: activeTodo builds the row clone in DragOverlay */
   todos: Todo[];
-  /** Строка поиска: подсветка клона совпадает со строкой в списке */
+  /** Search string: the clone highlight matches the row in the list */
   query?: string;
   onReorder: (draggedId: string, overId: string) => void;
   children: ReactNode;
 }
 
-/** dnd-kit отдает data нетипизированным: достаем заголовок задачи, переданный в useSortable */
+/** dnd-kit returns data untyped: extract the todo title passed into useSortable */
 function titleOf(data: Active['data'] | Over['data']): string {
   const current: unknown = data.current;
   if (typeof current === 'object' && current !== null && 'title' in current) {
@@ -89,20 +89,20 @@ function titleOf(data: Active['data'] | Over['data']): string {
 }
 
 /**
- * DnD-контекст списка задач: мышь и клавиатура, перетаскивание только по вертикали,
- * экранные дикторы получают переведенные объявления.
+ * Todo list DnD context: mouse and keyboard, vertical-only dragging,
+ * screen readers get translated announcements.
  */
 export function TodoDndContext({ ids, todos, query, onReorder, children }: TodoDndContextProps) {
   const { t } = useTranslation();
   const [activeId, setActiveId] = useState<string | null>(null);
   const activeTodo = activeId === null ? undefined : todos.find((todo) => todo.id === activeId);
   const sensors = useSensors(
-    // дистанция 4px отличает клик по кнопке-активатору от начала перетаскивания
+    // 4px distance tells a click on the activator button apart from the start of a drag
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
-  // Фиксированная ссылка: настройки диктора не должны пересоздаваться на каждый pointermove
+  // Fixed reference: screen reader settings must not be recreated on every pointermove
   const accessibility = useMemo(
     () => ({
       screenReaderInstructions: { draggable: t('todos.drag.instructions') },
@@ -124,7 +124,7 @@ export function TodoDndContext({ ids, todos, query, onReorder, children }: TodoD
     [t],
   );
 
-  // Класс снимается и в onDragEnd/onDragCancel, и здесь: на случай размонтирования посреди драга
+  // The class is removed both in onDragEnd/onDragCancel and here: in case of unmounting mid-drag
   useEffect(() => () => setDragging(false), []);
 
   function handleDragStart({ active }: DragStartEvent) {
@@ -158,10 +158,10 @@ export function TodoDndContext({ ids, todos, query, onReorder, children }: TodoD
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
         {children}
       </SortableContext>
-      {/* Ведомая строка — клон в fixed-оверлее: исходная стоит на месте скрытой,
-          поэтому список не растягивает прокрутку и автоскролл считает зоны по клону.
-          dropAnimation={null}: долетать клон некуда — строка в момент отпускания
-          уже на новом месте, а анимация по умолчанию утаскивает клон к прежнему слоту */}
+      {/* The dragged row is a clone in a fixed overlay: the original stands hidden in place,
+          so the list does not stretch the scroll and autoscroll computes zones from the clone.
+          dropAnimation={null}: the clone has nowhere to fly back to — the row at release
+          is already at its new place, while the default animation would pull the clone to the old slot */}
       <DragOverlay
         className="todo-drag-overlay"
         modifiers={[restrictToVerticalAxis]}

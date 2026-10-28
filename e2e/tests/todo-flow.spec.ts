@@ -10,7 +10,7 @@ test('an anonymous user lands on /login', async ({ page }) => {
 test('sign up, CRUD, filters and session', async ({ page }) => {
   const email = uniqueEmail();
   await register(page, email);
-  // Новый пользователь стартует с готовым списком задач
+  // A new user starts with a ready-made todo list
   for (const title of STARTER_TITLES) {
     await expect(todoRow(page, title)).toBeVisible();
   }
@@ -19,7 +19,7 @@ test('sign up, CRUD, filters and session', async ({ page }) => {
   const item = todoRow(page, 'E2E задача');
 
   await item.getByRole('button', { name: 'Mark as important' }).click();
-  // exact: кнопка-ручка "Drag to reorder: E2E задача" тоже содержит это имя
+  // exact: the "Drag to reorder: <title>" handle button also contains this name
   await expect(item.getByRole('button', { name: 'E2E задача', exact: true })).toHaveClass(
     /text-accent-soft/,
   );
@@ -41,7 +41,7 @@ test('sign up, CRUD, filters and session', async ({ page }) => {
   await todoRow(page, 'Вторая задача').getByRole('button', { name: 'Delete todo' }).click();
   await expect(todoRow(page, 'Вторая задача')).toHaveCount(0);
 
-  // Прод-сборка + реальный postgres: состояние переживает перезагрузку
+  // Prod build + real postgres: state survives a reload
   await page.reload();
   await expect(item).toBeVisible();
   await page.getByRole('button', { name: 'Done', exact: true }).click();
@@ -65,7 +65,7 @@ test('users do not see foreign todos', async ({ browser }) => {
   const contextB = await browser.newContext();
   const pageB = await contextB.newPage();
   await register(pageB);
-  // У B свой список со стартовыми задачами, но задач A не видно (текст стартовых одинаковый — сверяем уникальное)
+  // B has its own list with starter todos, but A's todos are not visible (starter texts are identical — check the unique one)
   await expect(todoRow(pageB, STARTER_TITLES[0])).toBeVisible();
   await expect(pageB.getByText('Задача пользователя A')).toHaveCount(0);
 
@@ -89,18 +89,18 @@ test('drag handle reorders and the order survives a reload', async ({ page }) =>
 
   await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
   await page.mouse.down();
-  // больше activationConstraint (4px) и шагами: dnd-kit должен успевать обрабатывать move
+  // more than activationConstraint (4px) and in steps: dnd-kit must keep up with processing move
   await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 12 });
-  // на время драга на body висит класс: по нему гасятся hover-состояния строк, иначе они моргают
+  // during the drag body carries a class: it suppresses row hover states, otherwise they flicker
   await expect(page.locator('body')).toHaveClass(/todo-dragging/);
-  // ведомая строка — клон в оверлее, исходная скрыта на своем месте
+  // the dragged row is a clone in an overlay, the original stays hidden in its place
   await expect(page.locator('.todo-drag-overlay')).toHaveCount(1);
   await page.mouse.up();
   await expect(page.locator('body')).not.toHaveClass(/todo-dragging/);
 
   const titles = () => page.locator('#todo-list > li .todo-title').allTextContents();
 
-  // Стартовые задачи остаются в начале списка: переставляются только добавленные
+  // Starter todos stay at the top of the list: only the added ones are reordered
   const expected = [...STARTER_TITLES, 'Вторая', 'Третья', 'Первая'].join(',');
   await expect.poll(async () => (await titles()).join(',')).toBe(expected);
 

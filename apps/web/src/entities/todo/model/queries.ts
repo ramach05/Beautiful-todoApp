@@ -3,7 +3,7 @@ import type { CreateTodoInput, Todo, UpdateTodoInput } from '@bt/shared';
 
 import { api } from '@/shared/api';
 
-/** Серверные данные живут только в кэше Query; Effector их не дублирует */
+/** Server data lives only in the Query cache; Effector does not duplicate it */
 export const todoKeys = {
   all: ['todos'] as const,
 };
@@ -23,7 +23,7 @@ export function useAddTodo() {
   });
 }
 
-/** Обновление с optimistic update: кат-даун кэша, откат на ошибке, инвалидация на settled */
+/** Update with optimistic update: cache cut-down, rollback on error, invalidation on settled */
 export function useUpdateTodo() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -68,8 +68,8 @@ export function useDeleteTodo() {
 }
 
 /**
- * Перенос порядка с optimistic update: кэш выстраивается по ids до ответа, откат на ошибке.
- * На успехе не инвалидируем: сервер меняет только порядок, он уже в кэше, а refetch моргает списком.
+ * Order move with optimistic update: the cache is reordered by ids before the response, rollback on error.
+ * On success no invalidation: the server changes only the order, it is already in the cache, and a refetch flashes the list.
  */
 export function useReorderTodos() {
   const queryClient = useQueryClient();

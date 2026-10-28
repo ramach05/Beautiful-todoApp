@@ -7,7 +7,7 @@ import { DEMO_USER, InMemoryTodosRepository } from '@bt/api/testing';
 
 import { useDeleteTodo, useReorderTodos, useTodos, useUpdateTodo } from './queries';
 
-/** Транспорт подменяем, хранилище то же, что у web-мока: проверяем поведение кэша Query */
+/** Transport is replaced, the storage is the same as the web mock: we check Query cache behavior */
 const apiMock = vi.hoisted(() => ({
   todos: { list: vi.fn(), create: vi.fn(), update: vi.fn(), remove: vi.fn(), reorder: vi.fn() },
 }));
@@ -16,7 +16,7 @@ vi.mock('@/shared/api', () => ({ api: apiMock }));
 
 const repo = new InMemoryTodosRepository();
 
-/** Ответ сервера резолвим вручную: так видно кэш между оптимистичным патчем и приходом ответа */
+/** The server response is resolved manually: this shows the cache between the optimistic patch and the response */
 function deferred<T>() {
   let resolve: (value: T) => void = () => {};
   let reject: (reason: Error) => void = () => {};
@@ -27,7 +27,7 @@ function deferred<T>() {
   return { promise, resolve, reject };
 }
 
-/** Клиент пересоздается под каждый рендер: ссылка нужна тестам, чтобы подменять инвалидацию */
+/** The client is recreated per render: tests need the reference to replace invalidation */
 function createQueryClient() {
   return new QueryClient({
     defaultOptions: {
@@ -43,7 +43,7 @@ function wrapper({ children }: { children: ReactNode }) {
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 }
 
-/** Список загружен в кэш вместе с хуками мутаций поверх него */
+/** The list is loaded into the cache along with the mutation hooks on top of it */
 async function renderTodoHooks() {
   client = createQueryClient();
   const utils = renderHook(
@@ -100,7 +100,7 @@ describe('todo mutations over the Query cache', () => {
     const { result } = await renderTodoHooks();
     const target = await todoByTitle('Call mom');
     const pending = deferred<Todo>();
-    // инвалидацию гасим: кэш меняется только оптимистичным патчем
+    // suppress invalidation: the cache changes only via the optimistic patch
     vi.spyOn(client, 'invalidateQueries').mockResolvedValue();
     apiMock.todos.update.mockImplementation(() => pending.promise);
 
@@ -116,7 +116,7 @@ describe('todo mutations over the Query cache', () => {
     const { result } = await renderTodoHooks();
     const target = await todoByTitle('Call mom');
     const pending = deferred<Todo>();
-    // вернуть кэш в исходное состояние после сбоя может только onError-откат
+    // only the onError rollback can return the cache to its original state after a failure
     vi.spyOn(client, 'invalidateQueries').mockResolvedValue();
     apiMock.todos.update.mockImplementation(() => pending.promise);
 
@@ -143,7 +143,7 @@ describe('todo mutations over the Query cache', () => {
       .filter((todo) => todo.id !== target.id)
       .map((todo) => todo.id);
     const pending = deferred<undefined>();
-    // вернуть удаленную задачу в кэш может только onError-откат
+    // only the onError rollback can return the deleted todo to the cache
     vi.spyOn(client, 'invalidateQueries').mockResolvedValue();
     apiMock.todos.remove.mockImplementation(() => pending.promise);
 

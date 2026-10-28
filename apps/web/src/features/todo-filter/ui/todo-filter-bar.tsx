@@ -20,7 +20,7 @@ const options: Array<{ value: TodoFilter; icon: string }> = [
   { value: 'done', icon: doneIcon },
 ];
 
-/** Поиск и сегментированный переключатель статуса; значения приходят из URL, изменения отдаются наверх */
+/** Search and segmented status switch; values come from the URL, changes are passed up */
 export function TodoFilterBar({ filter, search, onFilterChange, onSearchChange }: TodoFilterProps) {
   const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);

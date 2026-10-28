@@ -10,12 +10,12 @@ import {
   updateTodoInputSchema,
 } from './todo.js';
 
-/** Базовая процедура: все доменные процедуры требуют сессию, ошибка типизирована в контракте */
+/** Base procedure: all domain procedures require a session, the error is typed in the contract */
 const authed = oc.errors({ UNAUTHORIZED: { message: 'Unauthorized' } });
 
 /**
- * oRPC-контракт - единая точка истины для api и web:
- * сервер реализует его через implement(), клиент вызывает типизированно без кодогенерации
+ * oRPC contract - the single source of truth for api and web:
+ * the server implements it via implement(), the client calls it typed without codegen
  */
 export const todoContract = {
   list: authed.output(todoListSchema),
@@ -25,10 +25,10 @@ export const todoContract = {
   reorder: authed.input(reorderTodosInputSchema).output(todoListSchema),
 };
 
-/** Корневой контракт приложения: добавление доменов = новая ветка здесь */
+/** Root app contract: adding a domain = a new branch here */
 export const appContract = {
   todos: todoContract,
 };
 
-/** Тип типизированного клиента для createORPCClient (web и тесты api) */
+/** Typed client type for createORPCClient (web and api tests) */
 export type AppContractClient = ContractRouterClient<typeof appContract>;

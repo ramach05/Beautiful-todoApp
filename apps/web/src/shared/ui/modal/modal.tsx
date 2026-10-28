@@ -4,16 +4,16 @@ import { cn } from '@/shared/lib';
 
 interface ModalProps {
   open: boolean;
-  /** Срабатывает на Escape и клик по затемнению: родитель должен синхронизировать open */
+  /** Fires on Escape and a click on the overlay: the parent must sync open */
   onClose: () => void;
   title: string;
   children: ReactNode;
-  /** Панель кнопок под содержимым */
+  /** Button panel below the content */
   footer?: ReactNode;
   className?: string;
 }
 
-/** Модальный диалог на нативном <dialog>: showModal дает фокус-ловушку, Escape и блокировку фона */
+/** Modal dialog on the native <dialog>: showModal gives a focus trap, Escape and background blocking */
 export function Modal({ open, onClose, title, children, footer, className }: ModalProps) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -31,7 +31,7 @@ export function Modal({ open, onClose, title, children, footer, className }: Mod
       aria-labelledby={titleId}
       onClose={onClose}
       onClick={(event) => {
-        // клик по затемнению приходит на сам dialog: внутрь не всплывает
+        // a click on the overlay lands on the dialog itself: it does not bubble from inside
         if (event.target === ref.current) ref.current?.close();
       }}
       className={cn(

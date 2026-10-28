@@ -2,16 +2,16 @@ import { DEFAULT_LOCALE, type AppLocale } from '@bt/shared';
 
 import type { Todo } from '@/entities/todo';
 
-/** Точка графика: выполнено задач в конкретный день */
+/** Chart point: todos completed on a specific day */
 export interface DailyPoint {
-  /** Ключ дня в формате YYYY-MM-DD по локальной таймзоне */
+  /** Day key in YYYY-MM-DD format by local timezone */
   key: string;
-  /** Короткое имя дня недели для локали (Mon / пн) */
+  /** Short weekday name for the locale (e.g. 'Mon' in en) */
   label: string;
   completed: number;
 }
 
-/** Агрегаты и ряды для страницы статистики; считаются детерминированно из списка задач */
+/** Aggregates and series for the stats page; computed deterministically from the todo list */
 export interface TodoStats {
   total: number;
   active: number;
@@ -23,12 +23,12 @@ export interface TodoStats {
 
 const WINDOW_DAYS = 7;
 
-/** Короткое имя дня недели через Intl: подписи графика следуют языку интерфейса */
+/** Short weekday name via Intl: chart labels follow the UI language */
 function formatWeekday(date: Date, locale: AppLocale): string {
   return new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(date);
 }
 
-/** Ключ дня YYYY-MM-DD по локальной таймзоне из ISO-строки или Date */
+/** Day key YYYY-MM-DD in the local timezone from an ISO string or Date */
 function dayKey(value: string | Date): string {
   const date = typeof value === 'string' ? new Date(value) : value;
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -36,7 +36,7 @@ function dayKey(value: string | Date): string {
   return `${date.getFullYear()}-${month}-${day}`;
 }
 
-/** Самое старое незавершенное по createdAt; при равенстве или отсутствии даты — первое по порядку */
+/** Oldest incomplete by createdAt; on a tie or missing date — first in order */
 function findOldestIncomplete(todos: readonly Todo[]): Todo | null {
   let oldest: Todo | null = null;
   for (const todo of todos) {
@@ -57,9 +57,9 @@ function findOldestIncomplete(todos: readonly Todo[]): Todo | null {
 }
 
 /**
- * Чистая агрегация для /stats. now — опорная дата конца окна (по умолчанию текущая),
- * locale — язык подписей дней. daily — WINDOW_DAYS последних дней включая now;
- * completed считается по completedAt задачи.
+ * Pure aggregation for /stats. now is the reference end-of-window date (current by default),
+ * locale is the language of day labels. daily is the WINDOW_DAYS last days including now;
+ * completed is counted by the todo's completedAt.
  */
 export function computeStats(
   todos: readonly Todo[],

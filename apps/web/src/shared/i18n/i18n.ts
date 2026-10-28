@@ -8,7 +8,7 @@ import ru from './locales/ru.json';
 
 const STORAGE_KEY = 'bt-locale';
 
-// Словари в бандле: смена языка синхронная, без мигания и без backend-загрузчика
+// Dictionaries in the bundle: language switch is synchronous, no flicker and no backend loader
 void i18n.use(initReactI18next).init({
   resources: { en: { translation: en }, ru: { translation: ru } },
   lng: readStoredLocale() ?? DEFAULT_LOCALE,
@@ -16,7 +16,7 @@ void i18n.use(initReactI18next).init({
   supportedLngs: ['en', 'ru'],
 });
 
-/** Применяет язык: i18next, lang документа и локальная копия для гостей и следующего визита */
+/** Applies the language: i18next, document lang and a local copy for guests and the next visit */
 export function applyLocale(locale: AppLocale): void {
   if (i18n.language !== locale) {
     void i18n.changeLanguage(locale);
@@ -25,21 +25,21 @@ export function applyLocale(locale: AppLocale): void {
   try {
     window.localStorage.setItem(STORAGE_KEY, locale);
   } catch {
-    // Приватный режим Safari ломает localStorage: локальная копия не критична
+    // Safari private mode breaks localStorage: the local copy is not critical
   }
 }
 
-/** Язык, сохраненный в браузере: выбор гостя или последний примененный */
+/** Language stored in the browser: the guest's choice or the last applied one */
 export function readStoredLocale(): AppLocale | null {
   try {
     return parseLocale(window.localStorage.getItem(STORAGE_KEY));
   } catch {
-    // Приватный режим Safari: считаем, что сохраненного языка нет
+    // Safari private mode: assume no stored language
     return null;
   }
 }
 
-/** Подсказка из браузерной локали: из поддерживаемых распознаем русский */
+/** Hint from the browser locale: among the supported ones we detect Russian */
 export function readBrowserLocale(): AppLocale | null {
   return navigator.language.toLowerCase().startsWith('ru') ? 'ru' : null;
 }

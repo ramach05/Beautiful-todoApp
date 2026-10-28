@@ -10,8 +10,8 @@ const TOP_H = 14;
 const GAP = 8;
 
 /**
- * Столбчатый график выполнений по дням: чистый inline SVG без библиотек.
- * Высота столбца масштабируется относительно максимума окна.
+ * Bar chart of completions by day: plain inline SVG without libraries.
+ * Bar height scales relative to the window maximum.
  */
 export function StatsChart({ data }: { data: DailyPoint[] }) {
   const { t } = useTranslation();

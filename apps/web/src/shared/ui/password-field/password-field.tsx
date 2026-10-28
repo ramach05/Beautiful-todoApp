@@ -11,8 +11,8 @@ interface PasswordFieldProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 /**
- * Инпут пароля с кнопкой-глазом: переключает type password/text,
- * подсказка на hover и доступное имя описывают действие кнопки.
+ * Password input with an eye button: toggles type password/text,
+ * the hover tooltip and the accessible name describe the button action.
  */
 export function PasswordField({ className, ref, ...rest }: PasswordFieldProps) {
   const { t } = useTranslation();

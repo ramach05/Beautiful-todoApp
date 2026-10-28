@@ -2,12 +2,12 @@ import { RPCHandler } from '@orpc/server/fetch';
 import { appRouter } from '@bt/api/router';
 import { DEMO_USER, InMemoryTodosRepository } from '@bt/api/testing';
 
-/** Общие данные мока: сбрасываются между тестами через reset() */
+/** Shared mock data: reset between tests via reset() */
 export const mockTodos = new InMemoryTodosRepository();
 
 const handler = new RPCHandler(appRouter);
 
-/** Обработка запроса oRPC-клиента in-process (dev и тесты без запущенного api) */
+/** Handles an oRPC client request in-process (dev and tests without a running api) */
 export async function handleMockRequest(request: Request, prefix: `/${string}`): Promise<Response> {
   const result = await handler.handle(request, {
     context: {

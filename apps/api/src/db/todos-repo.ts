@@ -8,7 +8,7 @@ import type { TodosRepository } from '@/repo.js';
 
 type TodosDb = PgDatabase<PgQueryResultHKT, typeof schema>;
 
-/** Проекция контрактных полей + служебные даты и владелец для ограничений */
+/** Projection of contract fields + bookkeeping dates and the owner for scoping */
 type TodoProjection = Pick<Todo, 'id' | 'title' | 'important' | 'done'> & {
   createdAt: Date;
   completedAt: Date | null;
@@ -26,7 +26,7 @@ const todoColumns = {
   userId: todos.userId,
 };
 
-// Даты наружу отдаем ISO-строками: контракт валидирует вывод, Date-объект zod не примет
+// Dates go out as ISO strings: the contract validates output, zod won't accept a Date object
 const toTodo = (row: TodoProjection): Todo => ({
   id: row.id,
   title: row.title,
@@ -36,7 +36,7 @@ const toTodo = (row: TodoProjection): Todo => ({
   completedAt: row.completedAt?.toISOString() ?? null,
 });
 
-/** Репозиторий задач на Postgres; все операции ограничены владельцем (user_id) */
+/** Postgres todos repository; every operation is scoped to the owner (user_id) */
 export class PostgresTodosRepository implements TodosRepository {
   constructor(private readonly db: TodosDb) {}
 
@@ -50,7 +50,7 @@ export class PostgresTodosRepository implements TodosRepository {
   }
 
   async create(input: CreateTodoInput, userId: string): Promise<Todo> {
-    // position = следующая свободная позиция владельца: новая задача попадает в конец списка
+    // position = the owner's next free position: a new todo lands at the end of the list
     const [row] = await this.db
       .insert(todos)
       .values({
@@ -60,13 +60,13 @@ export class PostgresTodosRepository implements TodosRepository {
       })
       .returning(todoColumns);
     if (!row) {
-      throw new Error('INSERT не вернул строку');
+      throw new Error('INSERT returned no row');
     }
     return toTodo(row);
   }
 
   async update(id: string, patch: UpdateTodoInput, userId: string): Promise<Todo | null> {
-    // completedAt проставляем/сбрасываем по переходу done, чтобы график выполнялся по реальным датам
+    // set/clear completedAt on the done transition so the completion chart uses real dates
     const data: Partial<TodoInsert> = { ...patch };
     if (patch.done === true) data.completedAt = new Date();
     else if (patch.done === false) data.completedAt = null;
@@ -88,7 +88,7 @@ export class PostgresTodosRepository implements TodosRepository {
   }
 
   async reorder(ids: string[], userId: string): Promise<Todo[]> {
-    // порядок позициями индексов; чужие id не матчатся где-условием и молча игнорируются
+    // order comes from index positions; foreign ids match no where-clause and are silently ignored
     await this.db.transaction(async (tx) => {
       for (const [index, id] of ids.entries()) {
         await tx

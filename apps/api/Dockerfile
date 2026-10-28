@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# Контекст сборки - корень монорепо: docker build -f apps/api/Dockerfile .
+# Build context is the monorepo root: docker build -f apps/api/Dockerfile .
 
 FROM node:24-alpine AS build
 WORKDIR /repo
@@ -12,7 +12,7 @@ RUN pnpm install --frozen-lockfile --filter @bt/api...
 COPY packages packages
 COPY apps/api apps/api
 RUN pnpm --filter @bt/shared --filter @bt/api build
-# Самодостаточный прод-артефакт со сплющенными зависимостями (включая @bt/shared)
+# Self-contained prod artifact with flattened dependencies (including @bt/shared)
 RUN pnpm deploy --legacy --filter=@bt/api --prod /deploy/api
 
 FROM node:24-alpine

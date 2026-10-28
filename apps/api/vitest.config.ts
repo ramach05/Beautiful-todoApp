@@ -9,7 +9,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['src/**/*.test.ts'],
-    // env-схема требует DATABASE_URL при импорте; сами тесты используют in-process PGlite
+    // the env schema requires DATABASE_URL at import; the tests themselves use in-process PGlite
     env: { DATABASE_URL: 'postgres://test:test@localhost:5433/test' },
   },
 });

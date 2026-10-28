@@ -1,4 +1,4 @@
-/** Ключи словаря ошибок полей; значения карты ниже проверяются этим же типом */
+/** Field error dictionary keys; the map values below are checked by this same type */
 type FieldErrorKey =
   | 'validation.fallback'
   | 'validation.title.required'
@@ -8,8 +8,8 @@ type FieldErrorKey =
   | 'validation.name.short';
 
 /**
- * Поля форм и zod-коды issues (react-hook-form кладет код zod в FieldError.type) → ключи словаря;
- * текст сообщения схемы в UI не участвует
+ * Form fields and zod issue codes (react-hook-form puts the zod code into FieldError.type) → dictionary keys;
+ * the schema message text is not used in the UI
  */
 const FIELD_ISSUE_KEYS = {
   title: { too_small: 'validation.title.required', too_big: 'validation.title.too_long' },
@@ -20,7 +20,7 @@ const FIELD_ISSUE_KEYS = {
 
 export type ValidationField = keyof typeof FIELD_ISSUE_KEYS;
 
-/** Ключ словаря для ошибки поля: несопоставленный код отдает общий ключ */
+/** Dictionary key for a field error: an unmatched code returns the generic key */
 export function fieldErrorKey(field: ValidationField, code?: string): FieldErrorKey {
   const byCode: Readonly<Record<string, FieldErrorKey | undefined>> = FIELD_ISSUE_KEYS[field];
   return byCode[code ?? ''] ?? 'validation.fallback';

@@ -5,7 +5,7 @@ import type { CSSProperties } from 'react';
 import { cn, registerSpotTarget, startPointerAmbient } from '@/shared/lib';
 import { cityBg, cityBgLqip, cityBgSources } from '@/shared/ui/assets';
 
-/** Плавное проявление фона; по запросу системы сокращений анимаций — без перехода */
+/** Smooth background fade-in; no transition when the system requests reduced motion */
 const fade = 'transition-opacity duration-300 motion-reduce:transition-none';
 
 interface WindowLight {
@@ -18,10 +18,10 @@ interface WindowLight {
   peak: number;
 }
 
-/** Теплые и редкие холодные оттенки окон на ночном фото города */
+/** Warm and rare cool window tints over a night city photo */
 const WINDOW_COLORS = ['#ffd9a0', '#ffe9c9', '#fff6e3', '#ffcf8a', '#ffbe7a', '#cfe4ff'] as const;
 
-/** Детерминированный PRNG: расклад окон одинаков на всех клиентах и между рендерами */
+/** Deterministic PRNG: the window layout is the same on all clients and between renders */
 function createRandom(seed: number): () => number {
   let state = seed;
   return () => {
@@ -33,9 +33,9 @@ function createRandom(seed: number): () => number {
 }
 
 /**
- * Расклад мерцающих «окошек»: нижние ~70% кадра (город), плотнее к нижнему краю.
- * Позиции в процентах слоя фона — совпадения с конкретными окнами фото не требуется,
- * на фоне сотен реальных огней дополнительные искры читаются как живая городская ночь.
+ * Layout of twinkling "windows": the lower ~70% of the frame (the city), denser toward the bottom edge.
+ * Positions in percentages of the background layer — no need to match specific windows in the photo,
+ * against hundreds of real lights the extra sparks read as a living city night.
  */
 const WINDOW_LIGHTS: readonly WindowLight[] = (() => {
   const random = createRandom(0x5eed_2026);
@@ -50,7 +50,7 @@ const WINDOW_LIGHTS: readonly WindowLight[] = (() => {
   }));
 })();
 
-/** Мерцающие окна города: только opacity-анимации, слой движется вместе с параллаксом */
+/** Twinkling city windows: opacity animations only, the layer moves together with the parallax */
 function CityWindows() {
   return (
     <div className="pointer-events-none absolute inset-0">
@@ -76,19 +76,19 @@ function CityWindows() {
   );
 }
 
-/** Fixed-слой фона: его box равен вьюпорту, поэтому рост списка задач не меняет масштаб картинки */
+/** Fixed background layer: its box equals the viewport, so a growing todo list does not scale the image */
 export function CityBackground() {
   const [loaded, setLoaded] = useState(false);
   const layerRef = useRef<HTMLDivElement | null>(null);
 
-  // Параллакс слоя (картинка + окна + дыхание) живет одним rAF-циклом с прямыми записями в DOM
+  // The layer parallax (image + windows + breathing) lives in one rAF loop with direct DOM writes
   useEffect(() => {
     const layer = layerRef.current;
     if (!layer) return;
     return startPointerAmbient(layer);
   }, []);
 
-  // Картинка после preload уже в кэше и load на нее не приходит — смотрим на complete
+  // The image is already in cache after preload and never fires load — check complete instead
   function trackImage(img: HTMLImageElement | null) {
     if (img?.complete && img.naturalWidth > 0) {
       setLoaded(true);
@@ -97,7 +97,7 @@ export function CityBackground() {
 
   return (
     <div aria-hidden className="fixed inset-0 overflow-hidden bg-canvas">
-      {/* LQIP растянут под вьюпорт; scale прячет полупрозрачные края, которые оставляет blur */}
+      {/* LQIP stretched to the viewport; scale hides the translucent edges left by the blur */}
       <div
         className={cn(
           'absolute inset-0 scale-110 bg-cover bg-center blur-2xl',
@@ -106,7 +106,7 @@ export function CityBackground() {
         )}
         style={{ backgroundImage: `url("${cityBgLqip}")` }}
       />
-      {/* Общий transform-слой: scale-110 через CSS-свойство scale, translate пишет JS в transform */}
+      {/* Shared transform layer: scale-110 via the CSS scale property, translate is written to transform by JS */}
       <div ref={layerRef} className="absolute inset-0 scale-110 will-change-transform">
         <picture className="absolute inset-0 block">
           {cityBgSources.map((source) => (
@@ -125,7 +125,7 @@ export function CityBackground() {
         <div className="city-breathe pointer-events-none absolute inset-0" />
         <CityWindows />
       </div>
-      {/* Пятна света над фоном под контентом: координаты JS пишет в сами слои */}
+      {/* Light spots above the background under the content: JS writes coordinates into the layers themselves */}
       <div
         aria-hidden
         ref={registerSpotTarget}

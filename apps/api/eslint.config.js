@@ -8,7 +8,7 @@ export default [
     languageOptions: { globals: globals.node },
   },
   {
-    // node-скрипты: globals для no-undef
+    // node scripts: globals for no-undef
     files: ['scripts/**/*.mjs'],
     languageOptions: { globals: globals.node },
   },

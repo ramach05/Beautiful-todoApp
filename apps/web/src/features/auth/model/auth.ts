@@ -3,7 +3,7 @@ import { inferAdditionalFields } from 'better-auth/client/plugins';
 
 const AUTH_URL = import.meta.env.VITE_AUTH_URL ?? 'http://localhost:3001/api/auth';
 
-/** Клиент better-auth: email+password и сессия через httpOnly cookie; locale — additionalField сервера */
+/** better-auth client: email+password and session via httpOnly cookie; locale is a server additionalField */
 export const authClient = createAuthClient({
   baseURL: AUTH_URL,
   fetchOptions: { credentials: 'include' },

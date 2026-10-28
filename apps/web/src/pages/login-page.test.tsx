@@ -6,7 +6,7 @@ import { signIn } from '@/features/auth';
 
 import { LoginPage } from './login-page';
 
-/** signIn подменяем шпионом поверх реальной реализации: нужен кейс отказа авторизации */
+/** signIn is replaced with a spy over the real implementation: needed for the auth-rejection case */
 vi.mock('@/features/auth', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/features/auth')>();
   return { ...actual, signIn: vi.fn(actual.signIn) };

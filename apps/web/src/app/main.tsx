@@ -12,8 +12,8 @@ import '@/shared/styles/index.css';
 
 const router = createRouter({
   routeTree,
-  // View transition только при смене пути: набор текста в поиске (replace) ее не триггерит;
-  // без поддержки startViewTransition браузером опция игнорируется
+  // View transition only on path change: typing in search (replace) does not trigger it;
+  // the option is ignored when the browser lacks startViewTransition support
   defaultViewTransition: { types: ({ pathChanged }) => (pathChanged ? ['bt-route'] : false) },
 });
 
@@ -25,11 +25,11 @@ declare module '@tanstack/react-router' {
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
-  throw new Error('Не найден корневой элемент #root');
+  throw new Error('Root element #root not found');
 }
 
-// Монтируем только после инициализации observability и резолва сессии:
-// иначе первый рендер успевает показать неверный экран (вход вместо уже авторизованного)
+// Mount only after observability init and session resolution:
+// otherwise the first render manages to show the wrong screen (login for an already authorized user)
 void Promise.all([initObservability(), sessionReady]).then(() => {
   initLocale();
   createRoot(rootElement).render(

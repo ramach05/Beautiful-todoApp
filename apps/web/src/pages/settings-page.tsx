@@ -22,8 +22,8 @@ type ActionKey = 'email' | 'password' | 'revoke' | 'delete';
 type Feedback = { tone: 'ok' | 'err'; text: string };
 
 /**
- * Скрытое поле логина для форм с паролем: браузерные менеджеры паролей
- * иначе предупреждают, что форме не хватает username.
+ * Hidden login field for password forms: browser password managers
+ * otherwise warn that the form lacks a username.
  */
 function HiddenUsername({ email }: { email: string }) {
   return (
@@ -40,8 +40,8 @@ function HiddenUsername({ email }: { email: string }) {
 }
 
 /**
- * Настройки аккаунта: смена email/пароля, выход на всех устройствах, удаление аккаунта.
- * В демо-режиме действия честно возвращают недоступность вместо падения.
+ * Account settings: change email/password, sign out everywhere, delete the account.
+ * In demo mode actions honestly report unavailability instead of failing.
  */
 export function SettingsPage() {
   const { t } = useTranslation();
@@ -68,7 +68,7 @@ export function SettingsPage() {
       setFeedback({ tone: 'ok', text: t(result.message ?? 'settings.done') });
       if (leaveApp) await navigate({ to: '/login' });
     } else if (key === 'revoke') {
-      // У выхода на всех устройствах нет инпутов: ошибка остается в верхнем баннере
+      // Signing out everywhere has no inputs: the error stays in the top banner
       setFeedback({ tone: 'err', text: t(result.error) });
     } else {
       setErrors((prev) => ({ ...prev, [key]: t(result.error) }));

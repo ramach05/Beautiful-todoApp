@@ -12,34 +12,34 @@ import { registerDocs } from '@/docs.js';
 import { appRouter, type Context } from '@/router.js';
 import type { SessionResolver, TodosRepository } from '@/repo.js';
 
-/** Запасное значение лимита auth, когда max не передан; совпадает с дефолтом AUTH_RATE_LIMIT_MAX в env-схеме */
+/** Fallback auth rate limit when max is not passed; matches the AUTH_RATE_LIMIT_MAX default in the env schema */
 const DEFAULT_AUTH_RATE_LIMIT_MAX = 20;
 
 export interface AppOptions {
   todos: TodosRepository;
   session: SessionResolver;
-  /** Без auth маршруты /api/auth/* не подключаются (тесты с фейковой сессией) */
+  /** Without auth the /api/auth/* routes are not mounted (tests with a fake session) */
   auth?: Auth;
   corsOrigin?: string | string[];
   logger?: boolean;
-  /** POST-запросы к auth на IP за минуту: защита от подбора пароля */
+  /** auth POST requests per IP per minute: protects against password guessing */
   authRateLimitMax?: number;
-  /** HSTS только за HTTPS: на http в dev браузер его все равно игнорирует */
+  /** HSTS only behind HTTPS: browsers ignore it over plain http in dev anyway */
   hsts?: boolean;
-  /** Адреса/CIDR прокси списком через запятую: request.ip берется из XFF только для peer из этого списка */
+  /** Comma-separated proxy addresses/CIDRs: request.ip is taken from XFF only for peers from this list */
   trustProxy?: string;
-  /** Dev-режим: к списку corsOrigin добавляются любые localhost/127.0.0.1 порты (Vite уходит на свободный порт) */
+  /** Dev mode: any localhost/127.0.0.1 ports are added to the corsOrigin list (Vite moves to a free port) */
   devLocalhostAnyPort?: boolean;
 }
 
-/** Локальный origin на любом порту: в dev порт web-сервера может сдвинуться с 5173 */
+/** Local origin on any port: in dev the web server port may shift from 5173 */
 const DEV_LOCALHOST_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 
-/** Dev CORS: явный whitelist CORS_ORIGIN плюс любые localhost-порты; внешний origin отклоняется */
+/** Dev CORS: explicit CORS_ORIGIN whitelist plus any localhost ports; external origins are rejected */
 function devLocalhostCors(corsOrigins: string | string[] | true): OriginFunction {
   return (origin, callback) => {
     if (corsOrigins === true) return callback(null, true);
-    // Без Origin (curl, same-origin) зеркалить нечего
+    // Without an Origin header (curl, same-origin) there is nothing to mirror
     if (origin === undefined) return callback(null, false);
     if (DEV_LOCALHOST_ORIGIN.test(origin)) return callback(null, origin);
     const listed = Array.isArray(corsOrigins)
@@ -49,25 +49,25 @@ function devLocalhostCors(corsOrigins: string | string[] | true): OriginFunction
   };
 }
 
-/** Сборка Fastify-приложения: RPC-эндпоинт oRPC, auth better-auth, healthcheck и CORS */
+/** Builds the Fastify app: oRPC RPC endpoint, better-auth auth, healthcheck and CORS */
 export async function buildApp(options: AppOptions): Promise<FastifyInstance> {
   const app = Fastify({
     logger: options.logger ?? false,
     trustProxy: options.trustProxy ?? false,
-    // x-request-id от клиента (FE) связывает логи фронта и бэка
+    // x-request-id from the client (FE) links frontend and backend logs
     genReqId: (request) => {
       const incoming = request.headers['x-request-id'];
       return typeof incoming === 'string' && incoming !== '' ? incoming : randomUUID();
     },
   });
 
-  // id попадает в ответ: клиент может его залогировать при разборе сбоя
+  // the id goes into the response: the client can log it when debugging a failure
   app.addHook('onSend', (request, reply, payload, done) => {
     void reply.header('x-request-id', request.id);
     done(null, payload);
   });
 
-  // CSP off: JSON-API + будущий Swagger UI; frameguard/nosniff/referrer-policy остаются дефолтами helmet
+  // CSP off: JSON API + future Swagger UI; frameguard/nosniff/referrer-policy stay at helmet defaults
   await app.register(helmet, {
     contentSecurityPolicy: false,
     strictTransportSecurity: options.hsts ?? false,
@@ -82,13 +82,13 @@ export async function buildApp(options: AppOptions): Promise<FastifyInstance> {
   if (options.auth) {
     await app.register(
       async (scope) => {
-        // Встроенные JSON/text парсеры наследуются в scope, поэтому сначала снимаем их
+        // Built-in JSON/text parsers are inherited into the scope, so remove them first
         scope.removeAllContentTypeParsers();
-        // Буферizeем raw-тело как есть: better-auth получит оригинальные байты в Web Request
+        // Buffer the raw body as-is: better-auth gets the original bytes in the Web Request
         scope.addContentTypeParser('*', { parseAs: 'buffer' }, (_request, body, done) => {
           done(null, body);
         });
-        // Лимит только на маршрутах с config.rateLimit, чтобы GET get-session не тратил бакет подбора
+        // Limit only on routes with config.rateLimit so GET get-session doesn't spend the guessing bucket
         await scope.register(rateLimit, { global: false });
         const proxy: RouteHandler = async (request, reply) => {
           const url = new URL(request.url, `http://${request.headers.host ?? 'localhost'}`);
@@ -115,7 +115,7 @@ export async function buildApp(options: AppOptions): Promise<FastifyInstance> {
         scope.route({
           method: 'POST',
           url: '/*',
-          // 429 отдает сам Fastify до входа в better-auth: тело JSON, статус ответа не перезаписывается
+          // Fastify itself returns 429 before entering better-auth: JSON body, the response status is not overwritten
           config: {
             rateLimit: {
               max: options.authRateLimitMax ?? DEFAULT_AUTH_RATE_LIMIT_MAX,

@@ -7,32 +7,32 @@ import { HighlightText } from '@/shared/ui/highlight-text';
 import { cn } from '@/shared/lib';
 import { Button } from '@/shared/ui/button';
 
-/** Прокидывается из dnd-контекста: библиотека вешает на строку ref/transform, активатор — на handle */
+/** Passed down from the dnd context: the library attaches ref/transform to the row, activators to the handle */
 interface TodoDragProps {
   nodeRef: (node: HTMLElement | null) => void;
   style: CSSProperties;
-  /** Стилизовать строку как ведомую (тень поверх соседей): ставится только клону в DragOverlay */
+  /** Style the row as dragged (shadow above neighbors): set only on the clone in DragOverlay */
   active?: boolean;
-  /** Кнопка-активатор перетаскивания со слушателями */
+  /** Drag activator button with listeners */
   handle: ReactNode;
 }
 
 interface TodoItemProps {
   todo: Todo;
-  /** Строка поиска: совпадения в заголовке выделяются жирным */
+  /** Search string: matches in the title are highlighted in bold */
   query?: string;
   onToggleDone: (todo: Todo) => void;
   onToggleImportant: (todo: Todo) => void;
   onDelete: (id: string) => void;
-  /** Задержка entrance-анимации в мс; передается только на первичном монтировании списка */
+  /** entrance-animation delay in ms; passed only on the initial list mount */
   entranceDelay?: number;
   drag?: TodoDragProps;
 }
 
 /**
- * Строка списка: заголовок — кнопка, псевдоэлемент которой перекрывает всю строку,
- * поэтому клик мышью по строке переключает done, а доступ с клавиатуры идет через кнопку.
- * Кнопка important активна только для незавершенных задач.
+ * List row: the title is a button whose pseudo-element covers the whole row,
+ * so a mouse click on the row toggles done, while keyboard access goes through the button.
+ * The important button is active only for unfinished todos.
  */
 export function TodoItem({
   todo,
@@ -76,13 +76,13 @@ export function TodoItem({
         aria-pressed={todo.done}
         onClick={() => onToggleDone(todo)}
       >
-        {/* inline-обертка: фон дробится по строкам, штрих на каждой строке текста */}
+        {/* inline wrapper: the background breaks per line, a strike on each line of text */}
         <span className="todo-strike">
           <HighlightText text={todo.title} query={query ?? ''} />
         </span>
       </button>
 
-      {/* Слой выше перекрытия строки, иначе его псевдоэлемент перехватывал бы клики действий */}
+      {/* Layer above the row overlay, otherwise its pseudo-element would intercept action clicks */}
       <div className="row-actions relative z-10 flex shrink-0 items-center gap-1">
         <Button
           variant="icon"

@@ -9,7 +9,7 @@ import { StatsContentSkeleton } from './stats-skeleton';
 
 const cardClass = 'lift rounded-[10px] bg-card-strong px-3 py-4 text-center ring-1 ring-ring-soft';
 
-/** Карточка одного агрегата */
+/** Card for one aggregate */
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
     <div className={cardClass}>
@@ -20,8 +20,8 @@ function StatCard({ label, value }: { label: string; value: number }) {
 }
 
 /**
- * Страница статистики: только производные величины из useTodos (Query),
- * агрегация вынесена в чистую функцию computeStats.
+ * Stats page: only derived values from useTodos (Query),
+ * aggregation is extracted into the pure function computeStats.
  */
 export function StatsPage() {
   const { t, i18n } = useTranslation();

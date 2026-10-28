@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 
 import { StatsPage } from './stats-page';
 
-/** Свежий QueryClient на тест; данные берутся из in-process oRPC-мока (VITE_USE_MOCKS=1) */
+/** Fresh QueryClient per test; data comes from the in-process oRPC mock (VITE_USE_MOCKS=1) */
 function renderPage() {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: 0 }, mutations: { retry: false } },
@@ -21,7 +21,7 @@ describe('StatsPage', () => {
 
     expect(await screen.findByRole('heading', { name: 'Statistics' })).toBeInTheDocument();
 
-    // Моковые задачи: 4 всего, 4 активны, 0 выполнено, 0 важны
+    // Mock todos: 4 total, 4 active, 0 completed, 0 important
     expect(screen.getByText('Total').parentElement).toHaveTextContent('4');
     expect(screen.getByText('Active').parentElement).toHaveTextContent('4');
     expect(screen.getByText('Completed').parentElement).toHaveTextContent('0');

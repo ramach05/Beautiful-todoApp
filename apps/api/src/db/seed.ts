@@ -9,7 +9,7 @@ import * as schema from '@/db/schema.js';
 import { users } from '@/db/schema.js';
 import { PostgresTodosRepository } from '@/db/todos-repo.js';
 
-// Сверх стартовых 3 задач (их выдает databaseHooks в buildAuth) — только тестовому: итого 7
+// On top of the 3 starter todos (issued by databaseHooks in buildAuth) — test user only: 7 in total
 const TEST_USER_EXTRA_TITLES = [
   'Iron the shirt',
   'Pay the bills',
@@ -22,7 +22,7 @@ const SEED_USERS = [
     credentials: { email: 'demo@local.test', password: 'demo-pass-123', name: 'Demo' },
     extraTodos: [] as string[],
   },
-  // Пользователь для ручного тестирования UI: короткий пароль, расширенный список задач
+  // User for manual UI testing: short password, extended todo list
   {
     credentials: { email: 'test_user@local.test', password: '1234', name: 'test_user' },
     extraTodos: TEST_USER_EXTRA_TITLES,
@@ -41,18 +41,18 @@ for (const { credentials, extraTodos } of SEED_USERS) {
     .where(eq(users.email, credentials.email));
 
   if (existing.length > 0) {
-    console.log(`Пользователь ${credentials.email} уже существует, пропущен`);
+    console.log(`User ${credentials.email} already exists, skipped`);
     continue;
   }
 
-  // Пароль хэширует better-auth: пользователь создается через его API, а не прямой вставкой;
-  // стартовые задачи создаются хуком при регистрации
+  // better-auth hashes the password: the user is created through its API, not a direct insert;
+  // starter todos are created by the hook at sign-up
   const created = await auth.api.signUpEmail({ body: credentials });
   for (const title of extraTodos) {
     await repo.create({ title }, created.user.id);
   }
   console.log(
-    `Создан пользователь ${credentials.email}, задач: ${DEFAULT_TODO_TITLES.length + extraTodos.length}`,
+    `Created user ${credentials.email}, todos: ${DEFAULT_TODO_TITLES.length + extraTodos.length}`,
   );
 }
 

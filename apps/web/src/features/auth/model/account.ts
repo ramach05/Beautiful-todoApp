@@ -3,10 +3,10 @@ import type { AppLocale } from '@bt/shared';
 import { authClient } from './auth';
 import { sessionFetched, signOutStarted, toSession, writeMockLocale } from './session';
 
-// Условие инлайнится: vite гасит мок-ветку из прод-бандла только при литеральном сравнении
+// Condition is inlined: vite strips the mock branch from the prod bundle only on a literal comparison
 const useMocks = import.meta.env.VITE_USE_MOCKS === '1';
 
-/** Ключи словаря исходов действий с аккаунтом: тексты только в словарях i18n */
+/** Dictionary keys for account action outcomes: texts live only in i18n dictionaries */
 export type AccountMessageKey =
   'auth.account.email_updated' | 'auth.account.password_updated' | 'auth.account.sessions_revoked';
 
@@ -17,19 +17,19 @@ export type AccountErrorKey =
   | 'auth.account.revoke_failed'
   | 'auth.account.delete_failed';
 
-/** Результат действия с аккаунтом: успех с ключом сообщения либо ошибка с ключом для UI */
+/** Account action result: success with a message key or error with a key for the UI */
 export type AccountResult =
   { ok: true; message?: AccountMessageKey } | { ok: false; error: AccountErrorKey };
 
 const unavailableInDemo: AccountResult = { ok: false, error: 'auth.account.demo_unavailable' };
 
-/** Перечитывает сессию: после смены email сервер уже отдал cookie с новым пользователем */
+/** Re-reads the session: after an email change the server has already set a cookie for the new user */
 async function refreshSession(): Promise<void> {
   const { data, error } = await authClient.getSession();
   sessionFetched(error ? null : toSession(data?.user));
 }
 
-/** Смена email: better-auth ведет ее через change-email (update-user email запрещает); без SMTP меняется сразу */
+/** Email change: better-auth does it via change-email (update-user forbids email); without SMTP it applies immediately */
 export async function changeAccountEmail(newEmail: string): Promise<AccountResult> {
   if (useMocks) return unavailableInDemo;
   const { error } = await authClient.changeEmail({ newEmail, callbackURL: '/' });
@@ -38,7 +38,7 @@ export async function changeAccountEmail(newEmail: string): Promise<AccountResul
   return { ok: true, message: 'auth.account.email_updated' };
 }
 
-/** Смена пароля: требуется текущий; успешная смена не рвет текущую сессию */
+/** Password change: current password required; a successful change keeps the current session */
 export async function changeAccountPassword(
   currentPassword: string,
   newPassword: string,
@@ -49,7 +49,7 @@ export async function changeAccountPassword(
   return { ok: true, message: 'auth.account.password_updated' };
 }
 
-/** Разрывает все сессии пользователя: это устройство тоже выходит, стор очищается */
+/** Revokes all user sessions: this device signs out too, the store is cleared */
 export async function signOutEverywhere(): Promise<AccountResult> {
   if (useMocks) return unavailableInDemo;
   const { error } = await authClient.revokeSessions();
@@ -58,7 +58,7 @@ export async function signOutEverywhere(): Promise<AccountResult> {
   return { ok: true, message: 'auth.account.sessions_revoked' };
 }
 
-/** Удаляет аккаунт (нужен пароль), затем очищает локальную сессию; редирект делает страница */
+/** Deletes the account (password required), then clears the local session; the page handles the redirect */
 export async function deleteAccount(password: string): Promise<AccountResult> {
   if (useMocks) return unavailableInDemo;
   const { error } = await authClient.deleteUser({ password });
@@ -67,7 +67,7 @@ export async function deleteAccount(password: string): Promise<AccountResult> {
   return { ok: true };
 }
 
-/** Сохраняет выбранный язык в профиль; в моке «БД» — DEMO_USER и localStorage. Сбой не критичен: UI и локальная копия держат выбранный язык */
+/** Saves the chosen language to the profile; in mocks the "DB" is DEMO_USER and localStorage. Failure is not critical: UI and local copy keep the chosen language */
 export async function updateAccountLocale(locale: AppLocale): Promise<void> {
   if (useMocks) {
     const { DEMO_USER } = await import('@bt/api/testing');

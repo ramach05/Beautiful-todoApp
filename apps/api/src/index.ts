@@ -19,11 +19,11 @@ const app = await buildApp({
   session: betterAuthResolver(auth),
   auth,
   corsOrigin: env.CORS_ORIGIN.split(','),
-  // В dev web может подняться на любой localhost-порт (5173 занят) — не требовать правки CORS_ORIGIN
+  // In dev web may start on any localhost port (5173 busy) — no need to edit CORS_ORIGIN
   devLocalhostAnyPort: env.NODE_ENV !== 'production',
   logger: true,
   authRateLimitMax: env.AUTH_RATE_LIMIT_MAX,
-  // HSTS работает только за HTTPS, поэтому включается лишь в проде
+  // HSTS works only behind HTTPS, so it is enabled in prod only
   hsts: env.NODE_ENV === 'production',
   trustProxy: env.TRUST_PROXY,
 });
@@ -37,7 +37,7 @@ try {
   process.exit(1);
 }
 
-/** Корректное завершение: сначала HTTP, потом пул соединений */
+/** Graceful shutdown: HTTP first, then the connection pool */
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.on(signal, () => {
     void app

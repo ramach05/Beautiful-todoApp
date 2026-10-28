@@ -1,11 +1,11 @@
 import { expect, type Locator, type Page } from '@playwright/test';
 
-// Стартовые задачи создаются при регистрации (databaseHooks на стороне api)
+// Starter todos are created on registration (databaseHooks on the api side)
 export const STARTER_TITLES = ['Buy groceries', 'Call mom', 'Do homework'] as const;
 
 let seq = 0;
 
-/** Уникальный email: повторы прогонов не сталкиваются на unique-индексе */
+/** Unique email: repeated runs do not collide on the unique index */
 export function uniqueEmail(): string {
   seq += 1;
   return `e2e-${Date.now()}-${seq}@test.local`;
@@ -16,7 +16,7 @@ export async function register(page: Page, email = uniqueEmail()): Promise<void>
   await page.getByRole('link', { name: 'No account? Sign up' }).click();
   await page.getByLabel('Name').fill('E2E User');
   await page.getByLabel('Email').fill(email);
-  // exact: рядом появилось поле-глаз с aria-label "Show password" — подстрока ловила и кнопку
+  // exact: an eye field with aria-label "Show password" appeared next to it — a substring match caught the button too
   await page.getByLabel('Password', { exact: true }).fill('password-123');
   await page.getByRole('button', { name: 'Create account' }).click();
   await expect(page).toHaveURL('/');

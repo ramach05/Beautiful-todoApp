@@ -11,8 +11,8 @@ import { prefersReducedMotion } from '@/shared/lib';
 type SortableTodoItemProps = Omit<ComponentProps<typeof TodoItem>, 'drag'>;
 
 /**
- * Строка задачи, подключенная к sortable-контексту: transform/transition строки
- * и слушатели перетаскивания на кнопке-handle передаются внутрь TodoItem.
+ * Todo row wired into the sortable context: row transform/transition
+ * and drag listeners on the handle button are passed into TodoItem.
  */
 export function SortableTodoItem(props: SortableTodoItemProps) {
   const { t } = useTranslation();
@@ -46,12 +46,12 @@ export function SortableTodoItem(props: SortableTodoItemProps) {
       {...props}
       drag={{
         nodeRef: setNodeRef,
-        // ведомая строка скрыта на своем месте: клон летает в DragOverlay,
-        // transform не применяем — он растягивал бы прокрутку документа
+        // the dragged row is hidden in its place: the clone flies in DragOverlay,
+        // transform is not applied — it would stretch the document scroll
         style: isDragging
           ? { opacity: 0 }
           : {
-              // на prefers-reduced-motion transition обнуляем: строки переезжают без анимации
+              // on prefers-reduced-motion the transition is zeroed: rows move without animation
               transform: CSS.Translate.toString(transform),
               transition: prefersReducedMotion() ? undefined : transition,
             },

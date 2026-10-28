@@ -1,8 +1,8 @@
 import { boolean, index, integer, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
 /**
- * Таблицы better-auth (user/session/account/verification): имена колонок = имена полей better-auth,
- * потому что drizzle-adapter обращается к таблице по db-имени поля (camelCase по умолчанию).
+ * better-auth tables (user/session/account/verification): column names = better-auth field names,
+ * because the drizzle-adapter addresses the table by the field's db name (camelCase by default).
  */
 export const users = pgTable('user', {
   id: text('id').primaryKey(),
@@ -10,7 +10,7 @@ export const users = pgTable('user', {
   email: text('email').notNull().unique(),
   emailVerified: boolean('emailVerified').notNull().default(false),
   image: text('image'),
-  // additionalFields locale из betterAuth: язык интерфейса пользователя
+  // locale additionalField from betterAuth: the user's UI language
   locale: text('locale').notNull().default('en'),
   createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updatedAt', { withTimezone: true }).notNull().defaultNow(),
@@ -57,9 +57,9 @@ export const verifications = pgTable('verification', {
 });
 
 /**
- * Таблица задач; position — порядок в списке, созданный по drag-and-drop,
- * created_at дает стабильный порядок при равных position и для старых записей,
- * completed_at — для графика выполнения.
+ * Todos table; position is the list order set by drag-and-drop,
+ * created_at gives a stable order for equal positions and for old rows,
+ * completed_at is for the completion chart.
  */
 export const todos = pgTable(
   'todos',
@@ -76,7 +76,7 @@ export const todos = pgTable(
       .references(() => users.id, { onDelete: 'cascade' }),
   },
   (table) => [
-    // список выбирается фильтром по владельцу и сортируется по порядку
+    // the list is fetched by an owner filter and sorted by order
     index('todos_user_position_idx').on(table.userId, table.position),
   ],
 );

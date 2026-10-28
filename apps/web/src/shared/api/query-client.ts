@@ -1,8 +1,8 @@
 import { QueryClient } from '@tanstack/react-query';
 
 /**
- * Единый QueryClient приложения: нужен и провайдеру, и роутер-лоадерам
- * (лоадеры живут вне React и не имеют доступа к хуку useQueryClient).
+ * The app's single QueryClient: needed by both the provider and route loaders
+ * (loaders live outside React and have no access to the useQueryClient hook).
  */
 export const queryClient = new QueryClient({
   defaultOptions: {

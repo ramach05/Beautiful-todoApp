@@ -4,26 +4,26 @@ import { RPCLink } from '@orpc/client/fetch';
 import type { AppContractClient } from '@bt/shared';
 
 const RPC_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001/rpc';
-// Условие инлайнится: vite гасит ветку мока из прод-бандла только при литеральном сравнении
+// Inlined condition: vite drops the mock branch from the prod bundle only on a literal comparison
 const useMocks = import.meta.env.VITE_USE_MOCKS === '1';
-/** Путь префикса RPC: мок-хендлер матчит процедуры только после него; pathname всегда начинается с "/" */
+/** RPC prefix path: the mock handler matches procedures only after it; pathname always starts with "/" */
 const RPC_PREFIX = (new URL(RPC_URL, window.location.origin).pathname.replace(/\/$/, '') ||
   '/') as `/${string}`;
 
-/** Сессионная cookie better-auth должна уходить с каждым RPC-запросом (в т.ч. cross-origin в dev) */
+/** The better-auth session cookie must be sent with every RPC request (incl. cross-origin in dev) */
 async function credentialedTransport(request: Request): Promise<Response> {
-  // x-request-id для корреляции логов FE->BE (genReqId на fastify подхватывает его)
+  // x-request-id for FE->BE log correlation (fastify genReqId picks it up)
   request.headers.set('x-request-id', crypto.randomUUID());
   return fetch(request, { credentials: 'include' });
 }
 
-/** Ленивая загрузка in-process мока: в прод-бандл не попадает (ветка отсечается define); сам мок — dev/test-инфраструктура */
+/** Lazy load of the in-process mock: kept out of the prod bundle (branch cut off by define); the mock itself is dev/test infrastructure */
 async function mockTransport(request: Request): Promise<Response> {
   const { handleMockRequest } = await import('@/shared/mocks');
   return handleMockRequest(request, RPC_PREFIX);
 }
 
-/** Типизированный клиент контракта @bt/api: все вызовы проверяются компилятором */
+/** Typed @bt/api contract client: all calls are checked by the compiler */
 export const api: AppContractClient = createORPCClient(
   new RPCLink({ url: RPC_URL, fetch: useMocks ? mockTransport : credentialedTransport }),
 );

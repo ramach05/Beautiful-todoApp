@@ -1,26 +1,26 @@
-/** Коэффициент lerpa: чем меньше, тем мягче догоняние курсора */
+/** Lerp factor: the smaller it is, the softer the cursor catch-up */
 const LERP = 0.13;
 
-/** Амплитуда параллакса фона в px: смещение в сторону, противоположную курсору */
+/** Background parallax amplitude in px: shifts opposite to the cursor */
 const PARALLAX = 22;
 
-/** Суммарный сдвиг за кадр, при котором горячее ядро пятна достигает максимума */
+/** Total per-frame shift at which the spot's hot core reaches its maximum */
 const BOOST_MAX_SPEED = 70;
 
-/** Сглаживание буста: пятно разгорается и гаснет плавно */
+/** Boost smoothing: the spot brightens and fades smoothly */
 const BOOST_LERP = 0.08;
 
 const noop = () => {};
 
 /**
- * Потребители координат курсора. Пишем переменные в них, а не в корень: смена наследуемого
- * кастомного свойства на корне инвалидирует стили всего документа и роняет fps при drag-n-drop.
+ * Consumers of cursor coordinates. We write variables into them, not into the root: changing an
+ * inherited custom property on the root invalidates the whole document's styles and drops fps during drag-n-drop.
  */
 const spotTargets = new Set<HTMLElement>();
 
 /**
- * Регистрирует элемент-потребитель --spot-x/--spot-y/--spot-boost; null принимается для
- * ref-колбэков. Подходит только для элементов-листьев: запись инвалидирует его поддерево.
+ * Registers a consumer element of --spot-x/--spot-y/--spot-boost; null is accepted for
+ * ref callbacks. Only suitable for leaf elements: writing invalidates its subtree.
  */
 export function registerSpotTarget(el: HTMLElement | null): (() => void) | undefined {
   if (!el) return undefined;
@@ -29,13 +29,13 @@ export function registerSpotTarget(el: HTMLElement | null): (() => void) | undef
 }
 
 /**
- * Слежение за курсором для фоновых эффектов: пишет --spot-x/--spot-y/--spot-boost
- * в зарегистрированные элементы и translate3d на слой фона через один rAF-цикл
- * без ре-рендеров React.
- * На таче (pointer: coarse) и при prefers-reduced-motion не вешает слушателей вовсе.
+ * Cursor tracking for background effects: writes --spot-x/--spot-y/--spot-boost
+ * into registered elements and translate3d on the background layer via one rAF loop
+ * without React re-renders.
+ * On touch (pointer: coarse) and with prefers-reduced-motion it attaches no listeners at all.
  */
 export function startPointerAmbient(layer: HTMLElement): () => void {
-  // Без matchMedia (jsdom) режимы не определить: эффекты выключены
+  // Without matchMedia (jsdom) the modes cannot be detected: effects are off
   if (typeof window.matchMedia !== 'function') return noop;
   if (window.matchMedia('(pointer: coarse)').matches) return noop;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return noop;
@@ -54,7 +54,7 @@ export function startPointerAmbient(layer: HTMLElement): () => void {
     y += dy * LERP;
     const spotX = `${x.toFixed(1)}px`;
     const spotY = `${y.toFixed(1)}px`;
-    // Скорость сближения с курсором служит признаком активного движения
+    // The speed of catching up with the cursor signals active movement
     const speed = Math.abs(dx) + Math.abs(dy);
     boost += (Math.min(1, speed / BOOST_MAX_SPEED) - boost) * BOOST_LERP;
     const spotBoost = boost.toFixed(3);
@@ -63,11 +63,11 @@ export function startPointerAmbient(layer: HTMLElement): () => void {
       target.style.setProperty('--spot-y', spotY);
       target.style.setProperty('--spot-boost', spotBoost);
     }
-    // Нормировка в -1..1: амплитуда параллакса не зависит от размера вьюпорта
+    // Normalize to -1..1: parallax amplitude does not depend on viewport size
     const nx = (x / window.innerWidth - 0.5) * 2;
     const ny = (y / window.innerHeight - 0.5) * 2;
     layer.style.transform = `translate3d(${(-nx * PARALLAX).toFixed(1)}px, ${(-ny * PARALLAX).toFixed(1)}px, 0)`;
-    // Цикл стоит до полной остановки: буст должен успеть погаснуть
+    // The loop runs until a full stop: the boost must have time to fade out
     raf = speed > 0.5 || boost > 0.01 ? requestAnimationFrame(tick) : 0;
   }
 

@@ -10,7 +10,7 @@ import { routeTree } from '@/app/routeTree.gen';
 describe('header navigation', () => {
   it('shows Todo/Stats/Settings and marks the active route', async () => {
     await sessionReady;
-    // В мок-режиме signIn сразу заполняет сессию — guard пропустит на /
+    // In mock mode signIn fills the session immediately — the guard will let it through to /
     await signIn('demo@local.test', 'password-123');
 
     const client = new QueryClient({

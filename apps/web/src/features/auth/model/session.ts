@@ -3,14 +3,14 @@ import { DEFAULT_LOCALE, parseLocale, type AppLocale } from '@bt/shared';
 
 import { authClient } from './auth';
 
-// Условие инлайнится: vite гасит мок-ветки из прод-бандла только при литеральном сравнении
+// Condition is inlined: vite strips the mock branches from the prod bundle only on a literal comparison
 const useMocks = import.meta.env.VITE_USE_MOCKS === '1';
 
 export interface AppSession {
   user: { id: string; email: string; locale: AppLocale };
 }
 
-/** Ключи словаря ошибок auth: тексты живут в словарях i18n, модель оперирует ключами */
+/** Auth error dictionary keys: texts live in i18n dictionaries, the model works with keys */
 export type AuthErrorKey =
   | 'auth.errors.invalid_email'
   | 'auth.errors.invalid_password'
@@ -20,7 +20,7 @@ export type AuthErrorKey =
   | 'auth.errors.too_many'
   | 'auth.errors.generic';
 
-/** Сессия пользователя — UI-состояние (Effector); серверные данные остаются в Query */
+/** User session is UI state (Effector); server data stays in Query */
 export const $session = createStore<AppSession | null>(null);
 
 export const sessionFetched = createEvent<AppSession | null>();
@@ -31,12 +31,12 @@ $session.reset(signOutStarted);
 
 const MOCK_LOCALE_KEY = 'bt-demo-locale';
 
-/** Язык demo-пользователя в localStorage: «БД» мока переживает перезагрузку, как настоящая */
+/** Demo user language in localStorage: the mock "DB" survives a reload like a real one */
 export function readMockLocale(): AppLocale | null {
   try {
     return parseLocale(window.localStorage.getItem(MOCK_LOCALE_KEY));
   } catch {
-    // Приватный режим: язык мока живет до перезагрузки
+    // Private mode: mock language lives until reload
     return null;
   }
 }
@@ -45,7 +45,7 @@ export function writeMockLocale(locale: AppLocale): void {
   try {
     window.localStorage.setItem(MOCK_LOCALE_KEY, locale);
   } catch {
-    // Приватный режим: сохранение недоступно, демо-язык сбросится на перезагрузке
+    // Private mode: saving unavailable, demo language resets on reload
   }
 }
 
@@ -55,7 +55,7 @@ async function mockSession(): Promise<AppSession> {
   return { user: { id: DEMO_USER.id, email: DEMO_USER.email, locale } };
 }
 
-/** Граница better-auth: locale приходит строкой, в контракт попадает только валидная AppLocale */
+/** better-auth boundary: locale arrives as a string, only a valid AppLocale enters the contract */
 export function toSession(
   user:
     | {
@@ -76,7 +76,7 @@ export function toSession(
     : null;
 }
 
-/** Инициализация сессии при старте: в моке — demo-пользователь, иначе get-session от better-auth */
+/** Session init at startup: demo user in mocks, otherwise get-session from better-auth */
 export const sessionReady: Promise<void> = (async () => {
   if (useMocks) {
     sessionFetched(await mockSession());
@@ -86,12 +86,12 @@ export const sessionReady: Promise<void> = (async () => {
     const { data, error } = await authClient.getSession();
     sessionFetched(error ? null : toSession(data?.user));
   } catch {
-    // Сбой сети/CORS недоступного api — это «нет сессии», а не зависший монтаж приложения
+    // Network/CORS failure of an unreachable api means "no session", not a hung app mount
     sessionFetched(null);
   }
 })();
 
-/** Известные коды better-auth → ключи словаря: INVALID_EMAIL_OR_PASSWORD не подсвечивает, какое поле неверно */
+/** Known better-auth codes → dictionary keys: INVALID_EMAIL_OR_PASSWORD does not highlight which field is wrong */
 const AUTH_ERROR_KEYS: Record<string, AuthErrorKey> = {
   INVALID_EMAIL: 'auth.errors.invalid_email',
   INVALID_PASSWORD: 'auth.errors.invalid_password',
@@ -102,22 +102,22 @@ const AUTH_ERROR_KEYS: Record<string, AuthErrorKey> = {
   USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: 'auth.errors.email_exists',
 };
 
-/** Форма ошибки better-auth-клиента, достаточная для маппинга: код из тела и HTTP-статус */
+/** Shape of the better-auth client error sufficient for mapping: code from the body and HTTP status */
 interface AuthClientError {
   code?: string | null;
   status?: number;
 }
 
-/** Единственная точка перевода сбоя auth: ключ словаря без внутренних сообщений сервера */
+/** Single point of translating an auth failure: dictionary key without internal server messages */
 function describeAuthError(error: AuthClientError): AuthErrorKey {
-  // 429 приходит и от rate-limit Fastify без кода better-auth, поэтому проверяем статус
+  // 429 also comes from Fastify rate-limit without a better-auth code, so check the status
   if (error.status === 429) {
     return 'auth.errors.too_many';
   }
   return (error.code ? AUTH_ERROR_KEYS[error.code] : undefined) ?? 'auth.errors.generic';
 }
 
-/** Вход по email+password; возвращает ключ ошибки или null при успехе */
+/** Signs in with email+password; returns an error key or null on success */
 export async function signIn(email: string, password: string): Promise<AuthErrorKey | null> {
   if (useMocks) {
     sessionFetched(await mockSession());
@@ -131,7 +131,7 @@ export async function signIn(email: string, password: string): Promise<AuthError
   return null;
 }
 
-/** Регистрация: name берется из email; текущий язык UI уходит в профиль нового пользователя */
+/** Sign up: name is taken from email; the current UI language goes into the new user's profile */
 export async function signUp(
   email: string,
   password: string,

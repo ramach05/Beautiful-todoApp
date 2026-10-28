@@ -1,6 +1,6 @@
 /**
- * Тонкая прослойка над @bt/shared: UI зависит от доменной сущности через entities,
- * а не импортирует shared напрямую
+ * Thin layer over @bt/shared: the UI depends on the domain entity through entities,
+ * not by importing shared directly
  */
 export type { Todo, TodoFilter, CreateTodoInput, UpdateTodoInput } from '@bt/shared';
 export {

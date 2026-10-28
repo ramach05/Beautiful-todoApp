@@ -6,7 +6,7 @@ import { CityBackground } from './city-background';
 import { Footer } from './footer';
 import { Header } from './header';
 
-/** Каркас страницы: fixed-фон, «картонная» карточка контента, шапка и подвал */
+/** Page frame: fixed background, "cardboard" content card, header and footer */
 export function PageShell({ children }: { children: ReactNode }) {
   return (
     <>
@@ -18,8 +18,8 @@ export function PageShell({ children }: { children: ReactNode }) {
             {children}
           </main>
           <Footer />
-          {/* Обводка — отдельный leaf-элемент: в него JS пишет координаты пятна,
-              и пересчет стилей не задевает содержимое карточки */}
+          {/* The ring is a separate leaf element: JS writes spot coordinates into it,
+              so style recalculation does not touch the card contents */}
           <div aria-hidden ref={registerSpotTarget} className="edge-ring" />
         </div>
       </div>

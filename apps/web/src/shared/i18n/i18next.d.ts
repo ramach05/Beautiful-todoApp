@@ -2,7 +2,7 @@ import 'i18next';
 
 import type en from './locales/en.json';
 
-// Ключи словаря из en.json: опечатка в t() — ошибка компиляции
+// Dictionary keys from en.json: a typo in t() is a compile error
 declare module 'i18next' {
   interface CustomTypeOptions {
     defaultNS: 'translation';

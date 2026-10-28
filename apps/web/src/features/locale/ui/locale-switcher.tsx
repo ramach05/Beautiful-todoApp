@@ -6,7 +6,7 @@ import { Button } from '@/shared/ui/button';
 
 import { $locale, localeChanged } from '../model/locale';
 
-/** Переключатель языка: кнопка показывает целевой язык его самоназванием */
+/** Language switcher: the button shows the target language by its own name */
 export function LocaleSwitcher() {
   const { t } = useTranslation();
   const locale = useUnit($locale);

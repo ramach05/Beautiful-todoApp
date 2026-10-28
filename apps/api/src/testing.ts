@@ -4,7 +4,7 @@ import type { AppUser, TodosRepository } from '@/repo.js';
 
 const SEED_TITLES = ['Buy groceries', 'Call mom', 'Do homework', 'Iron the shirt'];
 
-/** Фиксированный пользователь in-process мока (dev и тесты web) */
+/** Fixed user of the in-process mock (dev and web tests) */
 export const DEMO_USER: AppUser = {
   id: '00000000-0000-4000-8000-000000000001',
   email: 'demo@local.test',
@@ -13,7 +13,7 @@ export const DEMO_USER: AppUser = {
 
 type OwnedTodo = Todo & { userId: string };
 
-/** In-memory репозиторий: мок-бэкенд web в dev/тестах и юнит-тесты; видны только задачи владельца */
+/** In-memory repository: web mock backend in dev/tests and unit tests; only the owner's todos are visible */
 export class InMemoryTodosRepository implements TodosRepository {
   private items: OwnedTodo[] = [];
 
@@ -60,7 +60,7 @@ export class InMemoryTodosRepository implements TodosRepository {
   async update(id: string, patch: UpdateTodoInput, userId: string): Promise<Todo | null> {
     const current = this.items.find((item) => item.id === id && item.userId === userId);
     if (!current) return null;
-    // completedAt живет по переходу done: ставим при выполнении, сбрасываем при возврате в активные
+    // completedAt follows the done transition: set on completion, cleared when moved back to active
     const completedAt =
       patch.done === true
         ? new Date().toISOString()
@@ -82,7 +82,7 @@ export class InMemoryTodosRepository implements TodosRepository {
   }
 
   async reorder(ids: string[], userId: string): Promise<Todo[]> {
-    // порядок задач владельца задает массив; чужие id игнорируются, не названные идут в конец
+    // the array sets the owner's todo order; foreign ids are ignored, unlisted ones go to the end
     const owned = this.items.filter((item) => item.userId === userId);
     const byId = new Map(owned.map((item) => [item.id, item]));
     const picked: OwnedTodo[] = [];

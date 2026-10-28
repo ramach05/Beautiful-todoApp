@@ -3,7 +3,7 @@ import type { FastifyInstance } from 'fastify';
 
 import { env } from '@/config.js';
 
-/** Sentry включается только при заданном SENTRY_DSN: dev/test не шлют ошибки в облако */
+/** Sentry is enabled only when SENTRY_DSN is set: dev/test don't send errors to the cloud */
 export function initSentry(): void {
   if (!env.SENTRY_DSN) {
     return;
@@ -16,7 +16,7 @@ export function initSentry(): void {
   });
 }
 
-/** Обработчик ошибок Fastify в Sentry; no-op без DSN */
+/** Reports Fastify errors to Sentry; no-op without a DSN */
 export function attachSentry(app: FastifyInstance): void {
   if (!env.SENTRY_DSN) {
     return;

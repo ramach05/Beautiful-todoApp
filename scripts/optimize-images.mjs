@@ -2,7 +2,7 @@ import { createRequire } from 'node:module';
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
 
-// sharp лежит в devDependencies apps/web — резолвим его оттуда, а не из корня монорепо
+// sharp lives in apps/web devDependencies — resolve it from there, not from the monorepo root
 const requireFromWeb = createRequire(path.join(import.meta.dirname, '../apps/web/package.json'));
 const sharp = requireFromWeb('sharp');
 
@@ -15,7 +15,7 @@ if (!source) {
 
 const outDir = path.resolve(import.meta.dirname, '../apps/web/src/shared/ui/assets/images');
 const WIDTHS = [1920, 2560];
-/** Качество подобрано по контрольному кропу: ниже — заметная потеря мелких огней; effort — полнота поиска кодировщика */
+/** Quality tuned against a control crop: lower loses small lights visibly; effort — how thoroughly the encoder searches */
 const FORMATS = [
   { ext: 'avif', quality: 48, effort: 8 },
   { ext: 'webp', quality: 70, effort: 6 },
@@ -35,7 +35,7 @@ for (const { ext, quality, effort } of FORMATS) {
   }
 }
 
-// LQIP: 32px webp, base64 из вывода вставляется в код как inline-плейсхолдер до загрузки фона
+// LQIP: 32px webp, its base64 output goes into the code as an inline placeholder until the background loads
 const lqip = await sharp(source, { failOn: 'none' })
   .rotate()
   .resize({ width: 32 })
@@ -44,7 +44,7 @@ const lqip = await sharp(source, { failOn: 'none' })
 report(`${basename}-lqip (inline)`, lqip.byteLength, '32px');
 console.log(`\nLQIP data URI:\ndata:image/webp;base64,${lqip.toString('base64')}`);
 
-/** Строка отчета о весе результата */
+/** Report line with the resulting file size */
 function report(file, bytes, dims) {
   console.log(`${path.relative(process.cwd(), file)}: ${bytes} bytes (${dims})`);
 }

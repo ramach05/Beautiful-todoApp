@@ -15,7 +15,7 @@ import { PasswordField } from '@/shared/ui/password-field';
 import { Spinner } from '@/shared/ui/spinner';
 import { TextField } from '@/shared/ui/text-field';
 
-// Сообщения не переводим: UI маппит code ошибки zod на ключ словаря через fieldErrorKey
+// Messages are not translated: the UI maps the zod error code to a dictionary key via fieldErrorKey
 const registerSchema = z.object({
   name: z.string().min(2),
   email: z.email(),
@@ -26,7 +26,7 @@ type RegisterValues = z.infer<typeof registerSchema>;
 
 export interface RegisterPageProps {
   onSuccess: () => void;
-  /** Ссылка на вход проводится снаружи, чтобы страница не зависела от роутера в тестах */
+  /** The link to sign-in is passed from outside so the page does not depend on the router in tests */
   footer?: ReactNode;
 }
 
@@ -48,7 +48,7 @@ export function RegisterPage({ onSuccess, footer }: RegisterPageProps) {
     onSuccess();
   });
 
-  // Ошибка сервера (например, занятый email) относится к паре полей и показывается под паролем; своя ошибка поля приоритетнее
+  // A server error (e.g. taken email) concerns the pair of fields and is shown below the password; a field's own error takes priority
   const passwordError = formState.errors.password
     ? t(fieldErrorKey('password', formState.errors.password.type))
     : rootError

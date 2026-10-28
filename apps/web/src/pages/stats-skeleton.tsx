@@ -5,7 +5,7 @@ import { Skeleton, SkeletonBlock } from '@/shared/ui/skeleton';
 
 const cardClass = 'lift rounded-[10px] bg-card-strong px-3 py-4 text-center ring-1 ring-ring-soft';
 
-/** Каркас контента статистики: четыре карточки и область графика */
+/** Skeleton of the stats content: four cards and the chart area */
 export function StatsContentSkeleton() {
   const { t } = useTranslation();
   return (
@@ -30,7 +30,7 @@ export function StatsContentSkeleton() {
   );
 }
 
-/** Обертка lazy-чанка статистики: на время загрузки кода показывает каркас, а не пустой экран */
+/** Wrapper of the lazy stats chunk: while the code loads it shows a skeleton, not a blank screen */
 export function StatsPageSuspense({ children }: { children: ReactNode }) {
   return <Suspense fallback={<StatsContentSkeleton />}>{children}</Suspense>;
 }

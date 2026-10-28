@@ -7,7 +7,7 @@ import { routeTree } from '@/app/routeTree.gen';
 
 describe('route guard', () => {
   it('redirects an anonymous user to /login', async () => {
-    // Дожидаемся инициализации мокающей сессии, затем гасим ее: guard обязан увидеть пустую сессию
+    // Wait for the mocking session to initialize, then clear it: the guard must see an empty session
     await sessionReady;
     signOutStarted();
 

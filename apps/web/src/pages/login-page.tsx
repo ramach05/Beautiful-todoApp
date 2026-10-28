@@ -13,7 +13,7 @@ import { PasswordField } from '@/shared/ui/password-field';
 import { Spinner } from '@/shared/ui/spinner';
 import { TextField } from '@/shared/ui/text-field';
 
-// Сообщения не переводим: UI маппит code ошибки zod на ключ словаря через fieldErrorKey
+// Messages are not translated: the UI maps the zod error code to a dictionary key via fieldErrorKey
 const loginSchema = z.object({
   email: z.email(),
   password: z.string().min(4),
@@ -23,7 +23,7 @@ type LoginValues = z.infer<typeof loginSchema>;
 
 export interface LoginPageProps {
   onSuccess: () => void;
-  /** Ссылка на регистрацию проводится снаружи, чтобы страница не зависела от роутера в тестах */
+  /** The link to registration is passed from outside so the page does not depend on the router in tests */
   footer?: ReactNode;
 }
 
@@ -44,7 +44,7 @@ export function LoginPage({ onSuccess, footer }: LoginPageProps) {
     onSuccess();
   });
 
-  // Ошибка «неверная пара» относится к обоим полям и показывается под паролем; своя ошибка поля приоритетнее
+  // The "wrong pair" error concerns both fields and is shown below the password; a field's own error takes priority
   const passwordError = formState.errors.password
     ? t(fieldErrorKey('password', formState.errors.password.type))
     : rootError

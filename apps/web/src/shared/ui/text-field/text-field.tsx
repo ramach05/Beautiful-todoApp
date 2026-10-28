@@ -3,7 +3,7 @@ import type { InputHTMLAttributes, Ref } from 'react';
 import { cn } from '@/shared/lib';
 
 interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
-  /** default — карточный фон с кольцом, search — мягкая нижняя линия с акцентным подчеркиванием на фокусе */
+  /** default — card background with a ring, search — soft bottom line with an accent underline on focus */
   variant?: 'default' | 'search';
   ref?: Ref<HTMLInputElement>;
 }
@@ -22,9 +22,9 @@ const variants = {
 } as const;
 
 /**
- * Текстовый инпут с общими состояниями: у default фокус перекрашивает кольцо в акцент,
- * у search единственный индикатор — акцентная линия снизу, фон чуть густеет.
- * Ховер не трогает сфокусированное поле (not-focus). Ширина — через className.
+ * Text input with shared states: for default, focus repaints the ring with the accent,
+ * for search, the only indicator is the accent bottom line, the background gets slightly denser.
+ * Hover does not touch the focused field (not-focus). Width is set via className.
  */
 export function TextField({ variant = 'default', className, ref, ...rest }: TextFieldProps) {
   return <input ref={ref} className={cn(base, variants[variant], className)} {...rest} />;

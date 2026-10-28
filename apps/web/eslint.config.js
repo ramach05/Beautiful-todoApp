@@ -19,7 +19,7 @@ export default [
     },
   },
   {
-    // route-файлы TanStack по контракту экспортируют объект Route наряду с компонентом
+    // TanStack route files export a Route object alongside the component by contract
     files: ['src/app/routes/**/*.tsx'],
     rules: { 'react-refresh/only-export-components': 'off' },
   },

@@ -5,9 +5,9 @@ import { register } from './helpers';
 
 interface Screen {
   path: string;
-  /** Признак того, что экран отрисован: без него axe снял бы каркас загрузки */
+  /** Sign that the screen is rendered: without it axe would sample the loading skeleton */
   ready: (page: Page) => Locator;
-  /** Нужна ли сессия: авторизованные экраны открываем после регистрации */
+  /** Whether a session is needed: authorized screens are opened after registration */
   auth: boolean;
 }
 
@@ -24,8 +24,8 @@ const authScreens: Screen[] = [
 ];
 
 /**
- * Проверка текущей страницы accessibility-движком: критические и serious нарушения собираются
- * в читаемый список, остальные возвращаем отдельным списком для лога.
+ * Checks the current page with the accessibility engine: critical and serious violations are collected
+ * into a readable list, the rest are returned as a separate list for the log.
  */
 async function collectViolations(page: Page): Promise<{ blocking: string[]; other: string[] }> {
   const results = await new AxeBuilder({ page }).analyze();
@@ -46,7 +46,7 @@ async function collectViolations(page: Page): Promise<{ blocking: string[]; othe
   };
 }
 
-/** Проходит список экранов и собирает нарушения по каждому: падает в конце, показывая все экраны сразу */
+/** Iterates the screen list and collects violations per screen: fails at the end, showing all screens at once */
 async function checkScreens(page: Page, screens: Screen[]): Promise<void> {
   const found: string[] = [];
   for (const screen of screens) {
