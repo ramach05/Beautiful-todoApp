@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import type { CSSProperties } from 'react';
 
-import { cn, startPointerAmbient } from '@/shared/lib';
+import { cn, registerSpotTarget, startPointerAmbient } from '@/shared/lib';
 import { cityBg, cityBgLqip, cityBgSources } from '@/shared/ui/assets';
 
 /** Плавное проявление фона; по запросу системы сокращений анимаций — без перехода */
@@ -125,9 +125,17 @@ export function CityBackground() {
         <div className="city-breathe pointer-events-none absolute inset-0" />
         <CityWindows />
       </div>
-      {/* Пятна света над фоном под контентом: координаты JS пишет на корень документа */}
-      <div aria-hidden className="spotlight pointer-events-none absolute inset-0" />
-      <div aria-hidden className="spotlight-hot pointer-events-none absolute inset-0" />
+      {/* Пятна света над фоном под контентом: координаты JS пишет в сами слои */}
+      <div
+        aria-hidden
+        ref={registerSpotTarget}
+        className="spotlight pointer-events-none absolute inset-0"
+      />
+      <div
+        aria-hidden
+        ref={registerSpotTarget}
+        className="spotlight-hot pointer-events-none absolute inset-0"
+      />
     </div>
   );
 }

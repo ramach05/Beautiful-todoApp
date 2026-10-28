@@ -77,7 +77,7 @@ button:not(:disabled),
   }
 }
 
-/* Пятно света за курсором: координаты пишутся JS-ом в --spot-x/--spot-y на корне через rAF */
+/* Пятно света за курсором: координаты пишутся JS-ом в --spot-x/--spot-y самого слоя через rAF */
 .spotlight {
   background: radial-gradient(
     44rem at var(--spot-x, 50%) var(--spot-y, 50%),
@@ -101,8 +101,17 @@ button:not(:disabled),
 }
 
 /* Обводка карточки: теплый градиент подсвечивает рамку со стороны курсора.
+   Обводка — leaf-элемент вне содержимого карточки: координаты пятна пишутся в нее,
+   и пересчет стилей не расходится по всему дереву страницы.
    background-attachment: fixed оставляет градиент в координатах вьюпорта под --spot-x/--spot-y */
-.edge-glow::after {
+.edge-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.edge-ring::after {
   position: absolute;
   inset: 0;
   padding: 1px;

@@ -13,9 +13,25 @@ const BOOST_LERP = 0.08;
 const noop = () => {};
 
 /**
- * Слежение за курсором для фоновых эффектов: пишет --spot-x/--spot-y/--spot-boost на корне
- * (их потребляют spotlight-слои и edge-glow карточки) и translate3d на слой фона
- * через один rAF-цикл без ре-рендеров React.
+ * Потребители координат курсора. Пишем переменные в них, а не в корень: смена наследуемого
+ * кастомного свойства на корне инвалидирует стили всего документа и роняет fps при drag-n-drop.
+ */
+const spotTargets = new Set<HTMLElement>();
+
+/**
+ * Регистрирует элемент-потребитель --spot-x/--spot-y/--spot-boost; null принимается для
+ * ref-колбэков. Подходит только для элементов-листьев: запись инвалидирует его поддерево.
+ */
+export function registerSpotTarget(el: HTMLElement | null): (() => void) | undefined {
+  if (!el) return undefined;
+  spotTargets.add(el);
+  return () => spotTargets.delete(el);
+}
+
+/**
+ * Слежение за курсором для фоновых эффектов: пишет --spot-x/--spot-y/--spot-boost
+ * в зарегистрированные элементы и translate3d на слой фона через один rAF-цикл
+ * без ре-рендеров React.
  * На таче (pointer: coarse) и при prefers-reduced-motion не вешает слушателей вовсе.
  */
 export function startPointerAmbient(layer: HTMLElement): () => void {
@@ -24,7 +40,6 @@ export function startPointerAmbient(layer: HTMLElement): () => void {
   if (window.matchMedia('(pointer: coarse)').matches) return noop;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return noop;
 
-  const root = document.documentElement;
   let targetX = window.innerWidth / 2;
   let targetY = window.innerHeight / 2;
   let x = targetX;
@@ -37,12 +52,17 @@ export function startPointerAmbient(layer: HTMLElement): () => void {
     const dy = targetY - y;
     x += dx * LERP;
     y += dy * LERP;
-    root.style.setProperty('--spot-x', `${x.toFixed(1)}px`);
-    root.style.setProperty('--spot-y', `${y.toFixed(1)}px`);
+    const spotX = `${x.toFixed(1)}px`;
+    const spotY = `${y.toFixed(1)}px`;
     // Скорость сближения с курсором служит признаком активного движения
     const speed = Math.abs(dx) + Math.abs(dy);
     boost += (Math.min(1, speed / BOOST_MAX_SPEED) - boost) * BOOST_LERP;
-    root.style.setProperty('--spot-boost', boost.toFixed(3));
+    const spotBoost = boost.toFixed(3);
+    for (const target of spotTargets) {
+      target.style.setProperty('--spot-x', spotX);
+      target.style.setProperty('--spot-y', spotY);
+      target.style.setProperty('--spot-boost', spotBoost);
+    }
     // Нормировка в -1..1: амплитуда параллакса не зависит от размера вьюпорта
     const nx = (x / window.innerWidth - 0.5) * 2;
     const ny = (y / window.innerHeight - 0.5) * 2;
