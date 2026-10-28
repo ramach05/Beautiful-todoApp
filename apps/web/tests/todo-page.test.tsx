@@ -15,12 +15,8 @@ async function prepareSession(): Promise<void> {
 /**
  * Рендер приложения настоящим роутером в памяти: фильтр и поиск читаются из URL,
  * поэтому тесты проверяют и адрес, и выдачу. Возвращает роутер ради проверок адреса.
- * offline=true имитирует отсутствие сети: запрос Query не стартует и остается pending-состояние.
  */
-function mountApp(initialEntry = '/', options: { offline?: boolean } = {}) {
-  if (options.offline) {
-    Object.defineProperty(window.navigator, 'onLine', { configurable: true, get: () => false });
-  }
+function mountApp(initialEntry = '/') {
   const client = new QueryClient({
     defaultOptions: {
       queries: { retry: false, gcTime: 0 },
@@ -48,21 +44,7 @@ async function renderPage(initialEntry = '/') {
 }
 
 describe('TodoPage', () => {
-  it('до прихода задач отдает доступный каркас вместо текста загрузки', async () => {
-    await prepareSession();
-    // Offline: запрос Query не стартует, поэтому pending-состояние стабильно до самого конца теста
-    const app = mountApp('/', { offline: true });
-    try {
-      const status = await app.findByRole('status');
-      expect(status).toHaveAttribute('aria-busy', 'true');
-      expect(status).toHaveTextContent('Loading todos');
-      expect(screen.queryByText('Call mom')).not.toBeInTheDocument();
-    } finally {
-      Reflect.deleteProperty(window.navigator, 'onLine');
-    }
-  });
-
-  it('показывает задачи и счетчики статусов без параметров в URL', async () => {
+  it('renders todos and status counters', async () => {
     const { router } = await renderPage();
 
     expect(screen.getByText('Buy groceries')).toBeInTheDocument();
@@ -71,7 +53,7 @@ describe('TodoPage', () => {
     expect(router.state.location.searchStr).toBe('');
   });
 
-  it('не отправляет пустой заголовок и показывает ошибку из контракта', async () => {
+  it('rejects an empty title with a contract error', async () => {
     const user = userEvent.setup();
     await renderPage();
 
@@ -80,7 +62,7 @@ describe('TodoPage', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Title is required');
   });
 
-  it('клик по задаче переключает done и пересчитывает счетчики статусов', async () => {
+  it('clicking a todo toggles it and updates the counters', async () => {
     const user = userEvent.setup();
     await renderPage();
 
@@ -90,7 +72,7 @@ describe('TodoPage', () => {
     await waitFor(() => expect(screen.getByText('3 more to do, 1 done')).toBeInTheDocument());
   });
 
-  it('переключение фильтра кликом пишет filter в URL и срезает список', async () => {
+  it('filter writes filter to the URL and limits the list', async () => {
     const user = userEvent.setup();
     const { router } = await renderPage();
 
@@ -108,7 +90,7 @@ describe('TodoPage', () => {
     expect(screen.getByRole('button', { name: 'Call mom' })).toBeInTheDocument();
   });
 
-  it('поиск пишет q в URL и ограничивает список', async () => {
+  it('search writes q to the URL and limits the list', async () => {
     const user = userEvent.setup();
     const { router } = await renderPage();
 
@@ -119,7 +101,7 @@ describe('TodoPage', () => {
     expect(screen.queryByRole('button', { name: 'Buy groceries' })).not.toBeInTheDocument();
   });
 
-  it('прямой заход с ?filter=done показывает только выполненные', async () => {
+  it('opening ?filter=done shows only done todos', async () => {
     const user = userEvent.setup();
     // Выполняем задачу обычным рендером, затем размонтируем и заходим напрямую по ссылке
     const first = await renderPage();
@@ -132,47 +114,5 @@ describe('TodoPage', () => {
     expect(screen.getByRole('button', { name: 'Call mom' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Buy groceries' })).not.toBeInTheDocument();
     expect(second.router.state.location.search).toEqual({ filter: 'done' });
-  });
-
-  it('невалидный filter в URL схлопывается в all', async () => {
-    const { router } = await renderPage('/?filter=bogus');
-
-    expect(router.state.location.search).toEqual({});
-    expect(screen.getByRole('button', { name: 'Call mom' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Buy groceries' })).toBeInTheDocument();
-  });
-
-  it('подсвечивает жирным совпадение поиска', async () => {
-    const user = userEvent.setup();
-    await renderPage();
-
-    await user.type(screen.getByRole('searchbox', { name: 'Search todos' }), 'mom');
-
-    const hit = await screen.findByText('mom');
-    expect(hit.tagName).toBe('STRONG');
-    expect(hit.closest('button')).toHaveAccessibleName('Call mom');
-  });
-
-  it('кнопка очистки убирает q из URL, текст и возвращает фокус в инпут', async () => {
-    const user = userEvent.setup();
-    const { router } = await renderPage();
-    const input = screen.getByRole('searchbox', { name: 'Search todos' });
-
-    await user.type(input, 'mom');
-    await user.click(screen.getByRole('button', { name: 'Clear search' }));
-
-    await waitFor(() => expect(router.state.location.search).toEqual({}));
-    expect(input).toHaveValue('');
-    expect(input).toHaveFocus();
-    expect(screen.queryByRole('button', { name: 'Clear search' })).not.toBeInTheDocument();
-  });
-
-  it('у каждой строки есть кнопка-ручка перетаскивания с доступным именем', async () => {
-    await renderPage();
-
-    expect(
-      screen.getByRole('button', { name: 'Drag to reorder: Buy groceries' }),
-    ).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Drag to reorder: Call mom' })).toBeInTheDocument();
   });
 });

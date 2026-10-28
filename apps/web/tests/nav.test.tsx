@@ -7,8 +7,8 @@ import { sessionReady, signIn } from '@/features/auth';
 
 import { routeTree } from '@/app/routeTree.gen';
 
-describe('навигация в header', () => {
-  it('показывает Todo/Stats/Settings и помечает активный маршрут', async () => {
+describe('header navigation', () => {
+  it('shows Todo/Stats/Settings and marks the active route', async () => {
     await sessionReady;
     // В мок-режиме signIn сразу заполняет сессию — guard пропустит на /
     await signIn('demo@local.test', 'password-123');

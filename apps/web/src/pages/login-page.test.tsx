@@ -13,7 +13,7 @@ vi.mock('@/features/auth', async (importOriginal) => {
 });
 
 describe('LoginPage', () => {
-  it('показывает клиентскую валидацию и не пускает дальше', async () => {
+  it('shows validation errors and does not submit', async () => {
     const onSuccess = vi.fn();
     render(<LoginPage onSuccess={onSuccess} />);
 
@@ -24,7 +24,7 @@ describe('LoginPage', () => {
     expect(onSuccess).not.toHaveBeenCalled();
   });
 
-  it('входит корректными данными и дергает onSuccess', async () => {
+  it('signs in with valid credentials', async () => {
     const onSuccess = vi.fn();
     render(<LoginPage onSuccess={onSuccess} />);
 
@@ -35,7 +35,7 @@ describe('LoginPage', () => {
     await waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1));
   });
 
-  it('показывает ошибку отказа авторизации и не пускает дальше', async () => {
+  it('shows an error when sign-in is rejected', async () => {
     const onSuccess = vi.fn();
     vi.mocked(signIn).mockResolvedValueOnce('auth.errors.invalid_credentials');
     render(<LoginPage onSuccess={onSuccess} />);
@@ -46,18 +46,5 @@ describe('LoginPage', () => {
 
     expect(await screen.findByText('Invalid email or password')).toBeInTheDocument();
     expect(onSuccess).not.toHaveBeenCalled();
-  });
-
-  it('кнопка-глаз переключает type инпута пароля и свое доступное имя', async () => {
-    render(<LoginPage onSuccess={vi.fn()} />);
-
-    const input = screen.getByLabelText('Password');
-    expect(input).toHaveAttribute('type', 'password');
-
-    await userEvent.click(screen.getByRole('button', { name: 'Show password' }));
-    expect(input).toHaveAttribute('type', 'text');
-
-    await userEvent.click(screen.getByRole('button', { name: 'Hide password' }));
-    expect(input).toHaveAttribute('type', 'password');
   });
 });

@@ -16,7 +16,7 @@ function renderPage() {
 }
 
 describe('StatsPage', () => {
-  it('показывает агрегаты и самую старую незавершенную задачу по мок-данным', async () => {
+  it('shows aggregates and the oldest incomplete todo', async () => {
     renderPage();
 
     expect(await screen.findByRole('heading', { name: 'Statistics' })).toBeInTheDocument();

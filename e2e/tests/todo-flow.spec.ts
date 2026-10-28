@@ -2,12 +2,12 @@ import { expect, test } from '@playwright/test';
 
 import { addTodo, register, STARTER_TITLES, todoRow, uniqueEmail } from './helpers';
 
-test('аноним попадает на /login', async ({ page }) => {
+test('an anonymous user lands on /login', async ({ page }) => {
   await page.goto('/');
   await expect(page).toHaveURL('/login');
 });
 
-test('регистрация, CRUD, фильтры и сессия', async ({ page }) => {
+test('sign up, CRUD, filters and session', async ({ page }) => {
   const email = uniqueEmail();
   await register(page, email);
   // Новый пользователь стартует с готовым списком задач
@@ -56,7 +56,7 @@ test('регистрация, CRUD, фильтры и сессия', async ({ pa
   await expect(item).toBeVisible();
 });
 
-test('пользователи не видят чужие задачи', async ({ browser }) => {
+test('users do not see foreign todos', async ({ browser }) => {
   const contextA = await browser.newContext();
   const pageA = await contextA.newPage();
   await register(pageA);
@@ -73,7 +73,7 @@ test('пользователи не видят чужие задачи', async (
   await contextB.close();
 });
 
-test('drag handle меняет порядок и он переживает перезагрузку', async ({ page }) => {
+test('drag handle reorders and the order survives a reload', async ({ page }) => {
   await register(page);
   await addTodo(page, 'Первая');
   await addTodo(page, 'Вторая');
@@ -84,7 +84,7 @@ test('drag handle меняет порядок и он переживает пе�
   const from = await handle.boundingBox();
   const to = await target.boundingBox();
   if (!from || !to) {
-    throw new Error('Не найдены координаты строк для перетаскивания');
+    throw new Error('missing row coordinates for the drag');
   }
 
   await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);

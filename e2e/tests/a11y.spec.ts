@@ -54,7 +54,7 @@ async function checkScreens(page: Page, screens: Screen[]): Promise<void> {
     await expect(screen.ready(page)).toBeVisible();
     const { blocking, other } = await collectViolations(page);
     if (other.length > 0) {
-      console.log(`[a11y] ${screen.path}: не блокирующие — ${other.join('; ')}`);
+      console.log(`[a11y] ${screen.path}: non-blocking — ${other.join('; ')}`);
     }
     found.push(...blocking.map((line) => `${screen.path} -> ${line}`));
   }
@@ -68,11 +68,11 @@ for (const viewport of [
   test.describe(`a11y: ${viewport.name}`, () => {
     test.use({ viewport: viewport.size });
 
-    test('публичные экраны без critical/serious нарушений', async ({ page }) => {
+    test('public screens without critical violations', async ({ page }) => {
       await checkScreens(page, anonymousScreens);
     });
 
-    test('экраны пользователя без critical/serious нарушений', async ({ page }) => {
+    test('user screens without critical violations', async ({ page }) => {
       await register(page);
       await checkScreens(page, authScreens);
     });

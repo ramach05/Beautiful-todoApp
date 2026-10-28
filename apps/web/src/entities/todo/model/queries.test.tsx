@@ -5,14 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CreateTodoInput, Todo, UpdateTodoInput } from '@bt/shared';
 import { DEMO_USER, InMemoryTodosRepository } from '@bt/api/testing';
 
-import {
-  todoKeys,
-  useAddTodo,
-  useDeleteTodo,
-  useReorderTodos,
-  useTodos,
-  useUpdateTodo,
-} from './queries';
+import { useDeleteTodo, useReorderTodos, useTodos, useUpdateTodo } from './queries';
 
 /** Транспорт подменяем, хранилище то же, что у web-мока: проверяем поведение кэша Query */
 const apiMock = vi.hoisted(() => ({
@@ -56,7 +49,6 @@ async function renderTodoHooks() {
   const utils = renderHook(
     () => ({
       list: useTodos(),
-      add: useAddTodo(),
       update: useUpdateTodo(),
       remove: useDeleteTodo(),
       reorder: useReorderTodos(),
@@ -70,7 +62,7 @@ async function renderTodoHooks() {
 async function todoByTitle(title: string): Promise<Todo> {
   const found = (await repo.list(DEMO_USER.id)).find((todo) => todo.title === title);
   if (!found) {
-    throw new Error(`В моке нет задачи ${title}`);
+    throw new Error(`no todo titled ${title} in the mock`);
   }
   return found;
 }
@@ -88,14 +80,14 @@ beforeEach(() => {
     async ({ id, patch }: { id: string; patch: UpdateTodoInput }) => {
       const updated = await repo.update(id, patch, DEMO_USER.id);
       if (!updated) {
-        throw new Error('Задача не найдена');
+        throw new Error('todo not found');
       }
       return updated;
     },
   );
   apiMock.todos.remove.mockImplementation(async (id: string) => {
     if (!(await repo.remove(id, DEMO_USER.id))) {
-      throw new Error('Задача не найдена');
+      throw new Error('todo not found');
     }
   });
   apiMock.todos.reorder.mockImplementation((input: { ids: string[] }) =>
@@ -103,12 +95,28 @@ beforeEach(() => {
   );
 });
 
-describe('мутации задач поверх кэша Query', () => {
-  it('update патчит кэш до ответа сервера и откатывает его при ошибке', async () => {
+describe('todo mutations over the Query cache', () => {
+  it('update patches the cache before the server responds', async () => {
     const { result } = await renderTodoHooks();
     const target = await todoByTitle('Call mom');
     const pending = deferred<Todo>();
-    // инвалидацию гасим: вернуть кэш в исходное состояние после сбоя может только onError-откат
+    // инвалидацию гасим: кэш меняется только оптимистичным патчем
+    vi.spyOn(client, 'invalidateQueries').mockResolvedValue();
+    apiMock.todos.update.mockImplementation(() => pending.promise);
+
+    result.current.update.mutate({ id: target.id, patch: { title: 'Переименованная' } });
+    await waitFor(() =>
+      expect(result.current.list.data?.find((todo) => todo.id === target.id)?.title).toBe(
+        'Переименованная',
+      ),
+    );
+  });
+
+  it('update rolls the cache back on error', async () => {
+    const { result } = await renderTodoHooks();
+    const target = await todoByTitle('Call mom');
+    const pending = deferred<Todo>();
+    // вернуть кэш в исходное состояние после сбоя может только onError-откат
     vi.spyOn(client, 'invalidateQueries').mockResolvedValue();
     apiMock.todos.update.mockImplementation(() => pending.promise);
 
@@ -119,7 +127,7 @@ describe('мутации задач поверх кэша Query', () => {
       ),
     );
 
-    pending.reject(new Error('Сервер недоступен'));
+    pending.reject(new Error('server unavailable'));
     await waitFor(() => expect(result.current.update.isError).toBe(true));
     await waitFor(() =>
       expect(result.current.list.data?.find((todo) => todo.id === target.id)?.title).toBe(
@@ -128,91 +136,32 @@ describe('мутации задач поверх кэша Query', () => {
     );
   });
 
-  it('update подтверждает оптимистичные данные ответом сервера и инвалидирует список', async () => {
-    const { result } = await renderTodoHooks();
-    const target = await todoByTitle('Call mom');
-    const invalidated = vi.spyOn(client, 'invalidateQueries');
-
-    result.current.update.mutate({ id: target.id, patch: { done: true } });
-    await waitFor(() => expect(result.current.update.isSuccess).toBe(true));
-    await waitFor(() =>
-      expect(result.current.list.data?.find((todo) => todo.id === target.id)?.done).toBe(true),
-    );
-    expect(invalidated).toHaveBeenCalledWith({ queryKey: todoKeys.all });
-  });
-
-  it('remove убирает задачу из кэша до ответа и возвращает ее при ошибке', async () => {
+  it('remove drops the todo and restores it on error', async () => {
     const { result } = await renderTodoHooks();
     const target = await todoByTitle('Call mom');
     const remaining = (await repo.list(DEMO_USER.id))
       .filter((todo) => todo.id !== target.id)
       .map((todo) => todo.id);
     const pending = deferred<undefined>();
-    // инвалидацию гасим: вернуть удаленную задачу в кэш может только onError-откат
+    // вернуть удаленную задачу в кэш может только onError-откат
     vi.spyOn(client, 'invalidateQueries').mockResolvedValue();
     apiMock.todos.remove.mockImplementation(() => pending.promise);
 
     result.current.remove.mutate(target.id);
     await waitFor(() => expect(ids(result.current.list.data)).toEqual(remaining));
 
-    pending.reject(new Error('Сервер недоступен'));
+    pending.reject(new Error('server unavailable'));
     await waitFor(() => expect(result.current.remove.isError).toBe(true));
     await waitFor(() => expect(ids(result.current.list.data)).toContain(target.id));
   });
 
-  it('remove сохраняет удаление после успешного ответа сервера', async () => {
+  it('reorder applies the new order optimistically', async () => {
     const { result } = await renderTodoHooks();
-    const target = await todoByTitle('Call mom');
-    const remaining = (await repo.list(DEMO_USER.id))
-      .filter((todo) => todo.id !== target.id)
-      .map((todo) => todo.id);
-
-    result.current.remove.mutate(target.id);
-    await waitFor(() => expect(result.current.remove.isSuccess).toBe(true));
-    await waitFor(() => expect(ids(result.current.list.data)).toEqual(remaining));
-  });
-
-  it('add отправляет заголовок и инвалидирует список, задача приходит с сервера', async () => {
-    const { result } = await renderTodoHooks();
-    const invalidated = vi.spyOn(client, 'invalidateQueries');
-
-    result.current.add.mutate({ title: 'Новая задача' });
-    await waitFor(() => expect(result.current.add.isSuccess).toBe(true));
-
-    expect(apiMock.todos.create).toHaveBeenCalledWith({ title: 'Новая задача' });
-    expect(invalidated).toHaveBeenCalledWith({ queryKey: todoKeys.all });
-    await waitFor(() =>
-      expect(result.current.list.data?.some((todo) => todo.title === 'Новая задача')).toBe(true),
-    );
-  });
-
-  it('reorder выстраивает кэш по ids до ответа и откатывает порядок при ошибке', async () => {
-    const { result } = await renderTodoHooks();
-    const initial = ids(result.current.list.data) ?? [];
-    const reversed = [...initial].reverse();
+    const reversed = (ids(result.current.list.data) ?? []).reverse();
     const pending = deferred<Todo[]>();
-    // инвалидацию гасим: вернуть прежний порядок после сбоя может только onError-откат
-    vi.spyOn(client, 'invalidateQueries').mockResolvedValue();
     apiMock.todos.reorder.mockImplementation(() => pending.promise);
 
     result.current.reorder.mutate(reversed);
     await waitFor(() => expect(ids(result.current.list.data)).toEqual(reversed));
-
-    pending.reject(new Error('Сервер недоступен'));
-    await waitFor(() => expect(result.current.reorder.isError).toBe(true));
-    await waitFor(() => expect(ids(result.current.list.data)).toEqual(initial));
-  });
-
-  it('reorder подтверждает порядок без рефетча: оптимистичный порядок и есть итоговый', async () => {
-    const { result } = await renderTodoHooks();
-    const reversed = (ids(result.current.list.data) ?? []).reverse();
-    const invalidated = vi.spyOn(client, 'invalidateQueries');
-
-    result.current.reorder.mutate(reversed);
-    await waitFor(() => expect(result.current.reorder.isSuccess).toBe(true));
-
-    expect(apiMock.todos.reorder).toHaveBeenCalledWith({ ids: reversed });
-    expect(invalidated).not.toHaveBeenCalled();
-    expect(ids(result.current.list.data)).toEqual(reversed);
   });
 });

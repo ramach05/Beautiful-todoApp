@@ -5,8 +5,8 @@ import { describe, expect, it } from 'vitest';
 import { sessionReady, signOutStarted } from '@/features/auth';
 import { routeTree } from '@/app/routeTree.gen';
 
-describe('защита маршрутов', () => {
-  it('неавторизованный пользователь редиректится на /login', async () => {
+describe('route guard', () => {
+  it('redirects an anonymous user to /login', async () => {
     // Дожидаемся инициализации мокающей сессии, затем гасим ее: guard обязан увидеть пустую сессию
     await sessionReady;
     signOutStarted();

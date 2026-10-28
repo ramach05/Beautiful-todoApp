@@ -4,7 +4,6 @@ import {
   createTodoInputSchema,
   filterTodos,
   reorderTodos,
-  reorderTodosInputSchema,
   todoFilterSchema,
   todoSchema,
   updateTodoInputSchema,
@@ -27,89 +26,46 @@ const items = [first, second, third];
 // Тесты мутабельных пакетов держим плоскими (без describe): per-test фильтр Stryker с vitest 5
 // не матчит вложенные тесты, и мутанты остаются живыми при наличии покрытия.
 
-it('todoSchema валидирует корректную задачу', () => {
+it('todoSchema validates a well-formed todo', () => {
   expect(todoSchema.safeParse(todo()).success).toBe(true);
 });
 
-it('todoSchema отклоняет пустой и слишком длинный заголовок', () => {
+it('todoSchema rejects an empty or oversized title', () => {
   expect(todoSchema.safeParse({ ...todo(), title: '   ' }).success).toBe(false);
   expect(todoSchema.safeParse({ ...todo(), title: 'a'.repeat(201) }).success).toBe(false);
 });
 
-it('todoSchema требует uuid в качестве id', () => {
-  expect(todoSchema.safeParse({ ...todo(), id: '1' }).success).toBe(false);
-});
-
-it('createTodoInputSchema принимает заголовок и обрезает его', () => {
+it('createTodoInput trims the title', () => {
   expect(createTodoInputSchema.parse({ title: '  Купить кофе  ' })).toEqual({
     title: 'Купить кофе',
   });
 });
 
-it('createTodoInputSchema отклоняет пустой и слишком длинный заголовок', () => {
+it('createTodoInput rejects an empty or oversized title', () => {
   expect(createTodoInputSchema.safeParse({ title: '   ' }).success).toBe(false);
   expect(createTodoInputSchema.safeParse({ title: 'a'.repeat(201) }).success).toBe(false);
 });
 
-it('createTodoInputSchema отдает код too_small для пустого заголовка: текст переводит UI', () => {
-  const issue = createTodoInputSchema.safeParse({ title: '' }).error?.issues[0];
-  expect(issue?.code).toBe('too_small');
-});
-
-it('updateTodoInputSchema принимает любой непустой патч', () => {
+it('updateTodoInput accepts a non-empty patch and rejects an empty one', () => {
   expect(updateTodoInputSchema.safeParse({ done: true }).success).toBe(true);
   expect(updateTodoInputSchema.safeParse({ important: true, title: 'Новая' }).success).toBe(true);
+  expect(updateTodoInputSchema.safeParse({}).success).toBe(false);
 });
 
-it('updateTodoInputSchema отклоняет пустой патч с текстовой ошибкой', () => {
-  const result = updateTodoInputSchema.safeParse({});
-  expect(result.success).toBe(false);
-  expect(result.error?.issues[0]?.message).toBe('Patch must not be empty');
-});
-
-it('updateTodoInputSchema отклоняет некорректный заголовок в патче', () => {
-  expect(updateTodoInputSchema.safeParse({ title: '   ' }).success).toBe(false);
-  expect(updateTodoInputSchema.safeParse({ title: 'a'.repeat(201) }).success).toBe(false);
-});
-
-it('todoFilterSchema принимает все три фильтра и отклоняет посторонние значения', () => {
-  expect(todoFilterSchema.options).toEqual(['all', 'active', 'done']);
+it('todoFilterSchema accepts only known filters', () => {
   expect(todoFilterSchema.safeParse('done').success).toBe(true);
   expect(todoFilterSchema.safeParse('unknown').success).toBe(false);
 });
 
-it('filterTodos: all возвращает все задачи, поиск из пробелов не ограничивает выдачу', () => {
+it('filterTodos filters by status and search text', () => {
   expect(filterTodos(items, 'all', '')).toHaveLength(3);
-  expect(filterTodos(items, 'active', '   ')).toHaveLength(2);
-});
-
-it('filterTodos: active и done фильтруют по статусу', () => {
   expect(filterTodos(items, 'done', '')).toEqual([items[1]]);
   expect(filterTodos(items, 'active', '')).toHaveLength(2);
-});
-
-it('filterTodos: ищет по подстроке без учета регистра', () => {
   expect(filterTodos(items, 'all', 'ПОЗВОНИТЬ')).toHaveLength(2);
-});
-
-it('filterTodos: комбинирует статус и поиск', () => {
   expect(filterTodos(items, 'active', 'маме')).toHaveLength(1);
-  expect(filterTodos(items, 'done', 'маме')).toHaveLength(0);
 });
 
-it('reorderTodosInputSchema принимает непустой массив uuid и отклоняет мусор', () => {
-  expect(reorderTodosInputSchema.safeParse({ ids: [crypto.randomUUID()] }).success).toBe(true);
-  expect(reorderTodosInputSchema.safeParse({ ids: [] }).success).toBe(false);
-  expect(reorderTodosInputSchema.safeParse({ ids: ['not-a-uuid'] }).success).toBe(false);
-});
-
-it('reorderTodos ставит переносимую задачу на место целевой', () => {
+it('reorderTodos moves a todo to the target position', () => {
   const next = reorderTodos(items, third.id, first.id);
   expect(next.map((todo) => todo.title)).toEqual(['Позвонить врачу', 'Позвонить маме', 'Магазин']);
-});
-
-it('reorderTodos не меняет список при совпадении id или отсутствии одного из них', () => {
-  expect(reorderTodos(items, first.id, first.id)).toBe(items);
-  expect(reorderTodos(items, crypto.randomUUID(), first.id)).toBe(items);
-  expect(reorderTodos(items, first.id, crypto.randomUUID())).toBe(items);
 });

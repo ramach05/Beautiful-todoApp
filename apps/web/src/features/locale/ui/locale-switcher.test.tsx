@@ -10,7 +10,7 @@ beforeEach(() => {
   localeSuggested('en');
 });
 
-it('переключатель показывает целевой язык и меняет его по клику', async () => {
+it('switcher toggles the language', async () => {
   const user = userEvent.setup();
   render(<LocaleSwitcher />);
 

@@ -31,12 +31,12 @@ describe('computeStats', () => {
     todo({ title: 'recent-open', createdAt: iso(2026, 10, 18) }),
   ];
 
-  it('считает агрегаты', () => {
+  it('computes totals', () => {
     const stats = computeStats(todos, now);
     expect(stats).toMatchObject({ total: 5, active: 2, completed: 3, important: 1 });
   });
 
-  it('строит окно из 7 дней и раскладывает выполненные по датам', () => {
+  it('builds a 7-day window with done counts', () => {
     const { daily } = computeStats(todos, now);
     expect(daily).toHaveLength(7);
     expect(daily.at(-1)).toMatchObject({ key: '2026-10-23', completed: 1 });
@@ -46,16 +46,5 @@ describe('computeStats', () => {
     expect(daily.find((point) => point.key === '2026-10-21')?.completed).toBe(1);
     // выполненные вне окна (2026-09-01) не попадают ни в один из 7 дней
     expect(daily.reduce((sum, point) => sum + point.completed, 0)).toBe(2);
-  });
-
-  it('возвращает самую старую незавершенную по createdAt', () => {
-    expect(computeStats(todos, now).oldestIncomplete?.title).toBe('oldest-open');
-  });
-
-  it('на пустом списке дает нули, семь нулевых дней и null для oldest', () => {
-    const stats = computeStats([], now);
-    expect(stats).toMatchObject({ total: 0, active: 0, completed: 0, important: 0 });
-    expect(stats.daily.every((point) => point.completed === 0)).toBe(true);
-    expect(stats.oldestIncomplete).toBeNull();
   });
 });

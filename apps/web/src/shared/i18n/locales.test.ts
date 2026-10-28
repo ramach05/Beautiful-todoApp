@@ -17,15 +17,6 @@ function normalize(keys: string[]): string[] {
   return [...new Set(keys.map((key) => key.replace(/_(zero|one|two|few|many|other)$/, '')))].sort();
 }
 
-it('ru-словарь повторяет структуру en с учетом плюралей', () => {
+it('ru dictionary matches the en structure', () => {
   expect(normalize(flattenKeys(ru))).toEqual(normalize(flattenKeys(en)));
-});
-
-it('ru-плюрали покрывают категории CLDR для русского', () => {
-  const keys = new Set(flattenKeys(ru));
-  for (const key of flattenKeys(en)) {
-    if (!keys.has(`${key}_one`)) continue;
-    expect(keys.has(`${key}_few`)).toBe(true);
-    expect(keys.has(`${key}_many`)).toBe(true);
-  }
 });

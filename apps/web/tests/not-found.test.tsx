@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { routeTree } from '@/app/routeTree.gen';
 
 describe('404', () => {
-  it('показывает страницу Not found со ссылкой на главную для неизвестного маршрута', async () => {
+  it('shows a not-found page with a link home', async () => {
     const router = createRouter({
       routeTree,
       history: createMemoryHistory({ initialEntries: ['/does-not-exist'] }),

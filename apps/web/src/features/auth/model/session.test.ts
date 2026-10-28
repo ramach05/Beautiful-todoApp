@@ -11,7 +11,7 @@ beforeEach(() => {
   vi.resetModules();
 });
 
-it('сетевой сбой get-session трактуется как «нет сессии», sessionReady не отвергается', async () => {
+it('a failed get-session resolves as no session', async () => {
   // В тестовом окружении включен режим моков: переключаем модуль на реальный путь getSession
   vi.stubEnv('VITE_USE_MOCKS', '0');
   const { sessionReady, $session } = await import('./session');
