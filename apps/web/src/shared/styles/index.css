@@ -17,6 +17,13 @@ body {
   background: var(--color-canvas);
   color: #fff;
   font-family: var(--font-hand);
+  /* UI-приложение: статичный текст не выделяем, чтобы над ним не появлялась каретка */
+  user-select: none;
+}
+
+input,
+textarea {
+  user-select: text;
 }
 
 .focus-ring:focus-visible {
