@@ -18,7 +18,15 @@ export default defineConfig({
     baseURL: WEB_ORIGIN,
     trace: 'on-first-retry',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    {
+      name: 'chromium-mobile',
+      // Same flows at phone width: responsive layout on real scenarios; a11y mobile is already in a11y.spec
+      use: { ...devices['Desktop Chrome'], viewport: { width: 390, height: 844 } },
+      testMatch: /todo-flow\.spec\.ts/,
+    },
+  ],
   // Prod builds of the apps with an e2e environment: the same code as in prod
   webServer: [
     {
@@ -28,6 +36,8 @@ export default defineConfig({
         HOST: '127.0.0.1',
         PORT: String(API_PORT),
         CORS_ORIGIN: WEB_ORIGIN,
+        // The suite makes ~25 auth POSTs in a minute (registrations on two projects): raise the demo limit
+        AUTH_RATE_LIMIT_MAX: '200',
       },
       url: `${API_ORIGIN}/health`,
       reuseExistingServer: !process.env.CI,
