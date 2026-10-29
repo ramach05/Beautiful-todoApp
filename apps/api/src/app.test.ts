@@ -16,6 +16,7 @@ import { DEFAULT_TODO_TITLES } from '@/db/default-todos.js';
 import * as schema from '@/db/schema.js';
 import { todos } from '@/db/schema.js';
 import { PostgresTodosRepository } from '@/db/todos-repo.js';
+import { DEMO_USER, InMemoryTodosRepository } from '@/testing.js';
 
 const pglite = new PGlite();
 const db = drizzle(pglite, { schema });
@@ -93,6 +94,54 @@ it('health returns ok', async () => {
   const response = await fetch(`${httpUrl}/health`);
   expect(response.ok).toBe(true);
   expect(await response.json()).toEqual({ status: 'ok' });
+});
+
+it('readyz passes without a probe and fails when the probe throws', async () => {
+  // the main test app is built without a probe: readiness degenerates to liveness
+  expect((await fetch(`${httpUrl}/readyz`)).ok).toBe(true);
+
+  const failing = await buildApp({
+    todos: new InMemoryTodosRepository(),
+    session: { resolve: async () => DEMO_USER },
+    readiness: () => Promise.reject(new Error('db down')),
+  });
+  const response = await failing.inject({ method: 'GET', url: '/readyz' });
+  await failing.close();
+
+  expect(response.statusCode).toBe(503);
+  expect(response.json()).toEqual({ status: 'unavailable' });
+});
+
+it('dev cors allows any localhost port and the listed origin, rejects the rest', async () => {
+  const dev = await buildApp({
+    todos: new InMemoryTodosRepository(),
+    session: { resolve: async () => DEMO_USER },
+    corsOrigin: 'https://allowed.test',
+    devLocalhostAnyPort: true,
+  });
+
+  const local = await dev.inject({
+    method: 'GET',
+    url: '/health',
+    headers: { origin: 'http://localhost:5199' },
+  });
+  expect(local.headers['access-control-allow-origin']).toBe('http://localhost:5199');
+
+  const listed = await dev.inject({
+    method: 'GET',
+    url: '/health',
+    headers: { origin: 'https://allowed.test' },
+  });
+  expect(listed.headers['access-control-allow-origin']).toBe('https://allowed.test');
+
+  const foreign = await dev.inject({
+    method: 'GET',
+    url: '/health',
+    headers: { origin: 'https://evil.test' },
+  });
+  expect(foreign.headers['access-control-allow-origin']).toBeUndefined();
+
+  await dev.close();
 });
 
 it('procedures require a session', async () => {

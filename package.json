@@ -15,6 +15,7 @@
     "fsd:check": "turbo run fsd:check",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
+    "test:coverage": "turbo run test:coverage",
     "mutation": "pnpm -r run mutation",
     "test:e2e": "pnpm --filter @bt/e2e e2e",
     "lighthouse": "pnpm --filter @bt/web run lhci",

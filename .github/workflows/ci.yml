@@ -23,7 +23,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec prettier --check .
-      - run: pnpm turbo run lint typecheck test build fsd:check
+      - run: pnpm turbo run lint typecheck test:coverage build fsd:check
 
   e2e:
     name: e2e

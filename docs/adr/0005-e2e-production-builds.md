@@ -1,17 +1,29 @@
-# 0005. E2E на прод-сборках с выделенной базой
+# 0005. E2E on production builds with a dedicated database
 
-Дата: 2026-10-22. Статус: принято.
+🇬🇧 **English** | [🇷🇺 Русский](0005-e2e-production-builds.ru.md)
 
-## Контекст
+Date: 2026-10-22. Status: accepted.
 
-E2E-прогоны часто крутят dev-серверы (vite dev, tsx watch) — это быстрее, но проверяет другой код, чем уезжает в прод: dev-транспиляцию вместо `vite build`, без env-флагов и реальных бандлов. Общие с разработкой базы делают прогоны невоспроизводимыми.
+## Context
 
-## Решение
+E2E runs often spin up dev servers (vite dev, tsx watch) — faster, but they check different
+code than what ships to production: dev transpilation instead of `vite build`, without env
+flags and real bundles. Databases shared with development make runs unreproducible.
 
-Пакет `e2e` (`@bt/e2e`) запускает Playwright поверх артефактов: `vite preview` (порт 4174) и `node dist/index.js` (порт 3101) — конфигурация `webServer` в `playwright.config.ts`. Отдельная база `beautiful_todo_e2e`: `globalSetup` пересоздаёт её на каждый прогон (`DROP ... WITH (FORCE)` + `CREATE`), в CI — postgres:17 service-контейнером. Сценарии покрывают: редирект анонима, полный CRUD с фильтрами и перезагрузкой, logout/login и изоляцию данных между пользователями.
+## Decision
 
-## Последствия
+The `e2e` package (`@bt/e2e`) runs Playwright on top of artifacts: `vite preview` (port 4174)
+and `node dist/index.js` (port 3101) — the `webServer` configuration in `playwright.config.ts`.
+A separate database `beautiful_todo_e2e`: `globalSetup` recreates it on every run
+(`DROP ... WITH (FORCE)` + `CREATE`), in CI postgres:17 runs as a service container. The
+scenarios cover: the anonymous redirect, full CRUD with filters and reloads, logout/login and
+data isolation between users.
 
-- Прогон проверяет ровно те артефакты, которые деплоятся; env-флаги (Sentry, API_URL) отрабатываются на прод-значениях.
-- Состояние БД не течёт между прогонами; локально не конфликтует с dev-базой (`beautiful_todo`).
-- Цена: перед `pnpm test:e2e` нужен `pnpm build`, прогон медленнее dev-варианта; Docker/CI обязателен для postgres.
+## Consequences
+
+- The run checks exactly the artifacts that get deployed; env flags (Sentry, API_URL) are
+  exercised at production values.
+- Database state does not leak between runs; locally it does not conflict with the dev
+  database (`beautiful_todo`).
+- Cost: `pnpm build` is required before `pnpm test:e2e`, the run is slower than the dev
+  variant; Docker/CI is required for postgres.

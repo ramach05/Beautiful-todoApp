@@ -1,21 +1,39 @@
-# 0002. Разделение состояния: TanStack Query / Effector / TanStack Router
+# 0002. State split: TanStack Query / Effector / TanStack Router
 
-Дата: 2026-10-22. Изменено: 2026-10-23. Статус: принято.
+🇬🇧 **English** | [🇷🇺 Русский](0002-state-management.ru.md)
 
-## Контекст
+Date: 2026-10-22. Amended: 2026-10-23. Status: accepted.
 
-В приложении три разнородных вида состояния: серверные данные (список задач), клиентский UI-статус (активный фильтр, сессия) и URL. Один глобальный стор на всё превращается в boilerplate и ручную инвалидацию кэша; вариант «всё в Query» плохо подходит для чисто клиентских значений, «всё в Effector» — для синхронизации с сервером.
+## Context
 
-## Решение
+The app has three heterogeneous kinds of state: server data (the todo list), client-side UI
+status (the active filter, the session) and the URL. One global store for everything turns
+into boilerplate and manual cache invalidation; an "all in Query" approach fits poorly for
+purely client-side values, "all in Effector" fits poorly for server synchronization.
 
-- Серверное состояние — TanStack Query: кэш, фоновые обновления, оптимистичные CRUD-мутации задач с откатом на ошибку.
-- Состояние, которое хочет быть ссылкой — TanStack Router: фильтр статуса и строка поиска страницы todo живут в search-параметрах `/` (`?filter=active&q=текст`). Схема полей и их разбор — `features/todo-filter/model/search.ts`, подключена к роуту через `validateSearch`; каждое поле со `z.catch`, поэтому мусор в адресе схлопывается в значение по умолчанию, а страница не падает.
-- Клиентское состояние без ценности ссылки — Effector: сессия (`sessionReady`, `signIn/signUp/signOut`, `$session`) и команды аккаунту. Значения по умолчанию (`filter=all`, пустой поиск) в URL не пишутся, чтобы ссылка оставалась чистой; поиск обновляется с `replace: true` и не засоряет историю.
-- Маршрутизация — TanStack Router (file-based) с guard'ом: без сессии аноним уходит на `/login`, авторизованный не возвращается на формы входа.
+## Decision
 
-## Последствия
+- Server state — TanStack Query: caching, background refetches and optimistic CRUD mutations
+  of todos with rollback on error.
+- State that wants to be a link — TanStack Router: the status filter and the search string of
+  the todo page live in the search params of `/` (`?filter=active&q=text`). The field schema
+  and its parsing — `features/todo-filter/model/search.ts`, wired into the route through
+  `validateSearch`; every field uses `z.catch`, so junk in the address collapses to the
+  default value instead of crashing the page.
+- Client state without link value — Effector: the session (`sessionReady`, `signIn/signUp/signOut`,
+  `$session`) and account commands. Default values (`filter=all`, empty search) are not written
+  into the URL so links stay clean; search updates go with `replace: true` and do not pollute
+  the history.
+- Routing — TanStack Router (file-based) with a guard: without a session an anonymous user is
+  sent to `/login`, a signed-in user does not come back to the auth forms.
 
-- Каждый вид состояния живёт в своей модели, границы видны по структуре `features/*/model`: сторы фильтров удалены, фича `todo-filter` отвечает за схему параметров и их UI.
-- Фильтр и поиск переживают перезагрузку, отправляются ссылкой и работают с кнопкой «назад» (фильтр пишется в историю, набор текста в поиск — нет). Стор на фильтры этой цены не стоил: его пришлось бы сериализовать в URL вручную.
-- Query-ключи типизированы контрактом; фильтр — внешний аргумент отображения, а не производный стор.
-- Цена: три инструмента состояния вместо двух; правила «где что хранится» приходится соблюдать дисциплиной (код-review).
+## Consequences
+
+- Each kind of state lives in its own model, boundaries are visible in the `features/*/model`
+  structure: filter stores were removed, the `todo-filter` feature owns the param schema and its UI.
+- Filter and search survive a reload, are shareable as links and work with the back button
+  (the filter goes into the history, typing in search does not). A store for filters was not
+  worth this cost: it would have to be serialized into the URL by hand.
+- Query keys are typed by the contract; the filter is an external display argument, not a derived store.
+- Cost: three state tools instead of two; the "what lives where" rules are held by discipline
+  (code review).
