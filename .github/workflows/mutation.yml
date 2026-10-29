@@ -26,10 +26,10 @@ jobs:
       # api tests spin up PGlite in-process, and web/shared types are taken from dist — no postgres service needed
       - run: pnpm turbo run build
 
-      # Thresholds in stryker.config.json are set without break: the report is informational only
+      # shared has thresholds.break in stryker.config.json: dropping below it fails the step
       - name: Mutation testing @bt/shared
         run: pnpm --filter @bt/shared mutation
-        continue-on-error: true
+      # api has no break threshold yet: the report is informational only
       - name: Mutation testing @bt/api
         run: pnpm --filter @bt/api mutation
         continue-on-error: true

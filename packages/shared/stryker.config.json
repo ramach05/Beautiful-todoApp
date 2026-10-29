@@ -5,6 +5,6 @@
   "coverageAnalysis": "perTest",
   "mutate": ["src/**/*.ts", "!src/**/*.test.ts"],
   "reporters": ["clear-text", "progress", "html", "json"],
-  "thresholds": { "high": 90, "low": 70 },
+  "thresholds": { "high": 90, "low": 70, "break": 70 },
   "ignorePatterns": ["dist", ".turbo"]
 }
