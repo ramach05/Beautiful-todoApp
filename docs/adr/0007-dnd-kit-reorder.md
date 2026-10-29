@@ -1,21 +1,49 @@
-# 0007. Drag-and-drop порядок задач: @dnd-kit + position-колонка
+# 0007. Drag-and-drop todo order: @dnd-kit + a position column
 
-Дата: 2026-10-28. Статус: принято.
+🇬🇧 **English** | [🇷🇺 Русский](0007-dnd-kit-reorder.ru.md)
 
-## Контекст
+Date: 2026-10-28. Status: accepted.
 
-Список задач сортировался только по `created_at`. Пользователю нужен ручной порядок: перенос строки в списке мышью и с клавиатуры, порядок должен переживать перезагрузку и оставаться изолированным по владельцу. Порядок — серверные данные: клиентский стор-дублер противоречил бы ADR-002, а ручной drag на HTML5 DnD (dataTransfer, мигания, отсутствие клавиатуры и автопрокрутки) дороже собственной обвязки, чем готовая библиотека.
+## Context
 
-## Решение
+The todo list sorted only by `created_at`. The user needs a manual order: moving a row in the
+list with the mouse and with the keyboard, the order must survive reloads and stay isolated per
+owner. Order is server data: a client-side shadow store would contradict ADR-0002, and
+hand-rolled dragging on HTML5 DnD (dataTransfer, flicker, no keyboard or auto-scroll) costs
+more custom glue than a ready library.
 
-- **Библиотека — @dnd-kit (core + sortable + modifiers + utilities).** MIT, без своих стилей (верстку диктует Tailwind-код проекта), сенсоры мыши/тача/клавиатуры из коробки, экранные дикторы через переводимые `Announcements`. Альтернативы: HTML5 DnD — без клавиатуры и с крестой кросс-браузерностью; pragmatic-drag-and-drop — свежее, но заметно меньше примеров для React-сортировки; react-beautiful-dnd — архивный статус на момент выбора.
-- **Порядок хранится колонкой `position` (integer, дефолт 0).** `list` сортирует `position → created_at → id`: старые строки с равными position сохраняют привычный порядок создания, `create` ставит новой задаче `max+1` по владельцу — она в конце даже после ручных переносов. От fractional-index (lexo-rank) отказались: одиночные переносы всего списка одним запросом не создают конкурентных слияний, а `reorder` целиком по id проще и проверяемее.
-- **Контракт — процедура `todos.reorder({ ids })` (ADR-003):** полный список id в новом порядке, вывод — валидированный `todoListSchema`. Репозиторий ограничивает перенос владельцем: чужой id не меняет ничего.
-- **UI — слайс `features/todo-reorder`:** `TodoDndContext` (DndContext + SortableContext, вертикальный модификатор, перевод инструкций и объявлений SR) и `SortableTodoItem` (`useSortable`, transform/transition; на `prefers-reduced-motion` transition обнуляется). `entities/todo/ui/TodoItem` про dnd-kit не знает: получает ref/стилы строки и готовый handle — сущность не зависит от библиотеки.
-- **Мутация `useReorderTodos` — optimistic как остальной CRUD (ADR-002):** кэш Query выстраивается по `ids` до ответа, `onError` откатывает, `onSettled` инвалидирует. Перенос считаем по полному списку (`reorderTodos` из `@bt/shared`), поэтому drag внутри отфильтрованного вида переносит задачу к цели корректно.
+## Decision
 
-## Последствия
+- **Library — @dnd-kit (core + sortable + modifiers + utilities).** MIT, no styles of its own
+  (the layout is dictated by the project's Tailwind code), mouse/touch/keyboard sensors out of
+  the box, screen-reader announcements via a translatable `Announcements`. Alternatives: HTML5
+  DnD — no keyboard and flaky cross-browser behavior; pragmatic-drag-and-drop — newer but with
+  noticeably fewer React-sorting examples; react-beautiful-dnd — archived at the time of
+  choosing.
+- **The order is stored by the `position` column (integer, default 0).** `list` sorts by
+  `position → created_at → id`: older rows with equal position keep their familiar creation
+  order, `create` gives a new todo `max+1` per owner — it lands last even after manual moves.
+  Fractional indexing (lexo-rank) was rejected: single moves of the whole list in one request
+  create no concurrent merges, and a full `reorder` by id is simpler and easier to verify.
+- **Contract — the `todos.reorder({ ids })` procedure** (ADR-0003): the full id list in the new
+  order, the output — a validated `todoListSchema`. The repository scopes the move to the
+  owner: a foreign id changes nothing.
+- **UI — the `features/todo-reorder` slice:** `TodoDndContext` (DndContext + SortableContext,
+  the vertical modifier, translated instructions and SR announcements) and `SortableTodoItem`
+  (`useSortable`, transform/transition; on `prefers-reduced-motion` the transition is zeroed).
+  `entities/todo/ui/TodoItem` knows nothing about dnd-kit: it receives the row ref/styles and a
+  ready-made handle — the entity does not depend on the library.
+- **The `useReorderTodos` mutation is optimistic like the rest of the CRUD** (ADR-0002): the
+  Query cache is reordered by `ids` before the response, `onError` rolls back, `onSettled`
+  invalidates. The move is computed over the full list (`reorderTodos` from `@bt/shared`), so
+  dragging inside a filtered view moves the todo to the right place.
 
-- Порядок — часть серверного состояния: видна ссылка-поведение «порядок переживает перезагрузку», e2e проверяет его на реальных мышиных событиях и переживает `page.reload()`.
-- Клавиатурный путь (Space — взять, стрелки — двигать) и объявления экранных дикторов переведены словарями `todos.drag.*` — fsd-проверка и a11y-прогон axe покрывают новые контролы.
-- Цена: четыре пакета зависимостей, колонка position с миграцией и обязательный полный массив id в `reorder` (для размеров списка todo-приложения — несущественно).
+## Consequences
+
+- Order is part of server state: the behavior "the order survives a reload" is linkable, e2e
+  checks it with real mouse events and it survives `page.reload()`.
+- The keyboard path (Space — pick up, arrow keys — move) and the screen-reader announcements are
+  translated through the `todos.drag.*` dictionaries — the fsd check and the axe a11y run cover
+  the new controls.
+- Cost: four dependency packages, a position column with a migration, and a mandatory full id
+  array in `reorder` (immaterial for todo-app list sizes).

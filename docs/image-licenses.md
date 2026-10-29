@@ -1,14 +1,20 @@
-# Лицензии изображений
+# Image Licenses
 
-## Фон приложения — ночной Токио (Ропонги)
+🇬🇧 **English** | [🇷🇺 Русский](image-licenses.ru.md)
 
-- **Файлы в репозитории:** `apps/web/src/shared/ui/assets/images/city-{1920,2560}.{avif,webp}` (прогон `scripts/optimize-images.mjs` по оригиналу)
-- **Оригинал:** `Roppongi at night seen from Shibuya Stream.jpg`, 6383x3759
-- **Источник:** Wikimedia Commons — <https://commons.wikimedia.org/wiki/File:Roppongi_at_night_seen_from_Shibuya_Stream.jpg>
-- **Файл:** <https://upload.wikimedia.org/wikipedia/commons/9/9f/Roppongi_at_night_seen_from_Shibuya_Stream.jpg>
-- **Автор:** [Syced](https://commons.wikimedia.org/wiki/User:Syced) (собственная работа, `{{own}}`)
-- **Лицензия:** CC0 1.0 Universal (Public Domain Dedication, `{{self|cc-zero}}`) — свободное коммерческое и изменённое использование без указания авторства.
-- **Обрезка/обработка:** масштабирование до 1920 и 2560 px по ширине, конвертация в AVIF/WebP, LQIP-плейсхолдер 32 px.
-- **Регенерация:** `node scripts/optimize-images.mjs <путь-к-оригиналу> city` (оригинал в репозиторий не коммитится).
+## App background — Tokyo at night (Roppongi)
 
-CC0 не требует атрибуции; автор и ссылка указаны для воспроизводимости происхождения файла.
+- **Files in the repository:** `apps/web/src/shared/ui/assets/images/city-{1920,2560}.{avif,webp}`
+  (a `scripts/optimize-images.mjs` run over the original)
+- **Original:** `Roppongi at night seen from Shibuya Stream.jpg`, 6383x3759
+- **Source:** Wikimedia Commons — <https://commons.wikimedia.org/wiki/File:Roppongi_at_night_seen_from_Shibuya_Stream.jpg>
+- **File:** <https://upload.wikimedia.org/wikipedia/commons/9/9f/Roppongi_at_night_seen_from_Shibuya_Stream.jpg>
+- **Author:** [Syced](https://commons.wikimedia.org/wiki/User:Syced) (own work, `{{own}}`)
+- **License:** CC0 1.0 Universal (Public Domain Dedication, `{{self|cc-zero}}`) — free
+  commercial and modified use without attribution.
+- **Cropping/processing:** scaled to 1920 and 2560 px width, converted to AVIF/WebP,
+  a 32 px LQIP placeholder.
+- **Regeneration:** `node scripts/optimize-images.mjs <path-to-original> city`
+  (the original is not committed to the repository).
+
+CC0 does not require attribution; the author and link are given for reproducible provenance.

@@ -1,17 +1,28 @@
-# 0003. Сквозной типобезопасный RPC-контракт на oRPC вместо REST+OpenAPI
+# 0003. End-to-end type-safe RPC contract on oRPC instead of REST + OpenAPI
 
-Дата: 2026-10-22. Статус: принято.
+🇬🇧 **English** | [🇷🇺 Русский](0003-orpc-contract.ru.md)
 
-## Контекст
+Date: 2026-10-22. Status: accepted.
 
-Клиент и сервер должны разделять один контракт: методы, тела, ответы, ошибки. Классический REST + OpenAPI требует кодогенерации и отдельного билда спецификации; hand-written fetch-обёртки расходятся молча.
+## Context
 
-## Решение
+Client and server must share one contract: methods, bodies, responses, errors. Classic
+REST + OpenAPI requires codegen and a separate spec build; hand-written fetch wrappers drift
+apart silently.
 
-`@bt/shared` описывает контракт через `@orpc/contract` + zod: процедуры `todos.list/create/update/remove`, схема авторизованной процедуры. `apps/api` реализует контракт на `@orpc/server` (Fastify-хэндлер на `/rpc`), `apps/web` ходит через типизированный клиент `@orpc/client`. Zod-схема — единственное место описания форм: runtime-валидация на сервере и статический тип на клиенте. Ошибки типизированы в контракте: `UNAUTHORIZED` из middleware сессии определяется клиентом без строковых сравнений.
+## Decision
 
-## Последствия
+`@bt/shared` describes the contract with `@orpc/contract` + zod: the `todos.list/create/update/remove`
+procedures and the authorized-procedure schema. `apps/api` implements the contract on
+`@orpc/server` (a Fastify handler at `/rpc`), `apps/web` calls it through the typed
+`@orpc/client`. The zod schema is the single place shapes are described: runtime validation on
+the server, a static type on the client. Errors are typed in the contract: `UNAUTHORIZED` from
+the session middleware is recognized by the client without string comparisons.
 
-- Изменение контракта ломает сборку клиента и сервера — расхождение невозможно пропустить.
-- Тот же контракт кормит in-process мок (`VITE_USE_MOCKS=1`): mock и прод отличаются только транспортом и resolver'ом сессии.
-- Цена: RPC-URL'ы — slash-пути (`POST /rpc/todos/list`), нет привычных глазу GET/PUT; oRPC — молодой инструмент, обновления требуют внимательности.
+## Consequences
+
+- Changing the contract breaks the client and the server builds — a mismatch cannot slip through.
+- The same contract feeds the in-process mock (`VITE_USE_MOCKS=1`): mock and prod differ only
+  in the transport and the session resolver.
+- Cost: RPC urls are slash paths (`POST /rpc/todos/list`), no eyeball-friendly GET/PUT; oRPC is
+  a young tool, its updates need attention.
