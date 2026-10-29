@@ -31,6 +31,17 @@ if (typeof window.matchMedia !== 'function') {
   });
 }
 
+// jsdom has no HTMLDialogElement.showModal/close: a minimal open/close shim for the Modal tests
+if (typeof HTMLDialogElement !== 'undefined' && !HTMLDialogElement.prototype.showModal) {
+  HTMLDialogElement.prototype.showModal = function showModal(this: HTMLDialogElement): void {
+    this.open = true;
+  };
+  HTMLDialogElement.prototype.close = function close(this: HTMLDialogElement): void {
+    this.open = false;
+    this.dispatchEvent(new Event('close'));
+  };
+}
+
 // Module singleton state (mock data) is reset between tests; filters live in the route URL
 beforeEach(() => mockTodos.reset());
 afterEach(() => {

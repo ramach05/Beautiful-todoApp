@@ -11,6 +11,7 @@
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "mutation": "stryker run"
   },
   "dependencies": {
@@ -20,6 +21,7 @@
   "devDependencies": {
     "@bt/config": "workspace:*",
     "@types/node": "^24",
+    "@vitest/coverage-v8": "^5.0.5",
     "eslint": "^10",
     "typescript": "^6.0.3",
     "vitest": "^5.0.5"
