@@ -26,6 +26,9 @@ const app = await buildApp({
   // HSTS works only behind HTTPS, so it is enabled in prod only
   hsts: env.NODE_ENV === 'production',
   trustProxy: env.TRUST_PROXY,
+  readiness: async () => {
+    await pool.query('SELECT 1');
+  },
 });
 attachSentry(app);
 

@@ -30,6 +30,8 @@ export interface AppOptions {
   trustProxy?: string;
   /** Dev mode: any localhost/127.0.0.1 ports are added to the corsOrigin list (Vite moves to a free port) */
   devLocalhostAnyPort?: boolean;
+  /** Readiness probe (db ping): /readyz answers 503 when it throws; without the probe /readyz equals /health */
+  readiness?: () => Promise<unknown>;
 }
 
 /** Local origin on any port: in dev the web server port may shift from 5173 */
@@ -150,7 +152,19 @@ export async function buildApp(options: AppOptions): Promise<FastifyInstance> {
     },
   });
 
+  // liveness: the process is up, no dependency checks
   app.get('/health', async () => ({ status: 'ok' }));
+
+  // readiness: a dependency failure must remove the instance from the load balancer rotation
+  app.get('/readyz', async (_request, reply) => {
+    if (!options.readiness) return { status: 'ok' };
+    try {
+      await options.readiness();
+      return { status: 'ok' };
+    } catch {
+      return reply.status(503).send({ status: 'unavailable' });
+    }
+  });
 
   await registerDocs(app);
 
