@@ -10,3 +10,5 @@ test-results/
 playwright-report/
 apps/web/src/app/routeTree.gen.ts
 package-lock.json
+# written by release-please — the style of a generated file is the generator's
+CHANGELOG.md
