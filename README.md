@@ -4,9 +4,9 @@
 
 A todo app built to production standards: a pnpm + Turborepo monorepo with **end-to-end type
 safety from PostgreSQL rows to button props** — one zod/oRPC contract feeds the client, the server
-and the generated OpenAPI. Auth, EN/RU localization, drag-and-drop ordering, three-state model,
-coverage + mutation tests, CI gates and Lighthouse budgets. The legacy CRA prototype is kept
-under the [`v0-legacy`](../../tree/v0-legacy) tag.
+and the generated OpenAPI. Auth, EN/RU localization, drag-and-drop ordering, state split across
+Query, Effector and the URL, coverage + mutation tests, CI gates and Lighthouse budgets. The
+legacy CRA prototype is kept under the [`v0-legacy`](../../tree/v0-legacy) tag.
 
 [![CI](https://github.com/ramach05/Beautiful-todoApp/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ramach05/Beautiful-todoApp/actions/workflows/ci.yml)
 [![Lighthouse CI](https://github.com/ramach05/Beautiful-todoApp/actions/workflows/lighthouse.yml/badge.svg?branch=main)](https://github.com/ramach05/Beautiful-todoApp/actions/workflows/lighthouse.yml)
@@ -27,7 +27,7 @@ under the [`v0-legacy`](../../tree/v0-legacy) tag.
 
 > **Not deployed yet.** The deploy targets are already configured (web → Vercel,
 > api → Railway, Postgres → Neon — see [Deploy](#deploy)); the links land here once
-> the demo instance is up. Sign up in one click, or use the seed accounts:
+> the demo instance is up. Sign up with email and password, or use the seed accounts:
 > `demo@local.test` / `demo-pass-123` (3 starter todos) · `test_user@local.test` / `1234` (7 todos).
 
 ## Screens
@@ -36,13 +36,15 @@ The whole flow — sign up, CRUD, filters, reorder, sign out — in one recordin
 
 ![Todo flow](docs/screenshots/todo-flow.gif)
 
-| **Todo list**                                                                        | **Stats**                                                                                  | **Settings**                                                                                    |
-| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
-| [![Todo list](docs/screenshots/desktop/todo.png)](docs/screenshots/desktop/todo.png) | [![Stats](docs/screenshots/desktop/stats.png)](docs/screenshots/desktop/stats.png)         | [![Settings](docs/screenshots/desktop/settings.png)](docs/screenshots/desktop/settings.png)     |
-| **Sign in**                                                                          | **Sign up**                                                                                | **RU locale**                                                                                   |
-| [![Sign in](docs/screenshots/desktop/login.png)](docs/screenshots/desktop/login.png) | [![Sign up](docs/screenshots/desktop/register.png)](docs/screenshots/desktop/register.png) | [![RU locale](docs/screenshots/desktop/ru.png)](docs/screenshots/desktop/ru.png)                |
-| **Mobile · todo**                                                                    | **Mobile · stats**                                                                         | **Mobile · sign up**                                                                            |
-| [![Mobile todo](docs/screenshots/mobile/todo.png)](docs/screenshots/mobile/todo.png) | [![Mobile stats](docs/screenshots/mobile/stats.png)](docs/screenshots/mobile/stats.png)    | [![Mobile sign up](docs/screenshots/mobile/register.png)](docs/screenshots/mobile/register.png) |
+Click any frame to open the full-size screenshot:
+
+| **Todo list**                                                                               | **Stats**                                                                                         | **Settings**                                                                                           |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| [![Todo list](docs/screenshots/thumbs/desktop/todo.png)](docs/screenshots/desktop/todo.png) | [![Stats](docs/screenshots/thumbs/desktop/stats.png)](docs/screenshots/desktop/stats.png)         | [![Settings](docs/screenshots/thumbs/desktop/settings.png)](docs/screenshots/desktop/settings.png)     |
+| **Sign in**                                                                                 | **Sign up**                                                                                       | **RU locale**                                                                                          |
+| [![Sign in](docs/screenshots/thumbs/desktop/login.png)](docs/screenshots/desktop/login.png) | [![Sign up](docs/screenshots/thumbs/desktop/register.png)](docs/screenshots/desktop/register.png) | [![RU locale](docs/screenshots/thumbs/desktop/ru.png)](docs/screenshots/desktop/ru.png)                |
+| **Mobile · todo**                                                                           | **Mobile · stats**                                                                                | **Mobile · sign up**                                                                                   |
+| [![Mobile todo](docs/screenshots/thumbs/mobile/todo.png)](docs/screenshots/mobile/todo.png) | [![Mobile stats](docs/screenshots/thumbs/mobile/stats.png)](docs/screenshots/mobile/stats.png)    | [![Mobile sign up](docs/screenshots/thumbs/mobile/register.png)](docs/screenshots/mobile/register.png) |
 
 Two micro-recordings — drag-and-drop ordering and the EN ⇄ RU switch:
 
