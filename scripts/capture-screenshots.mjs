@@ -366,4 +366,5 @@ execFileSync('node', ['scripts/make-og-image.mjs', 'docs/screenshots/desktop/tod
   cwd: repoRoot,
   stdio: 'inherit',
 });
+execFileSync('node', ['scripts/make-screenshot-thumbs.mjs'], { cwd: repoRoot, stdio: 'inherit' });
 console.log('done');

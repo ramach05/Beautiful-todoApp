@@ -4,9 +4,9 @@
 
 Todo-приложение уровня production: монорепо pnpm + Turborepo со **сквозной типобезопасностью от
 строк PostgreSQL до пропсов кнопок** — один zod/oRPC-контракт питает клиент, сервер и генерируемый
-OpenAPI. Авторизация, английская/русская локализация, drag-and-drop порядок, трёхмодельное
-состояние, coverage и мутационные тесты, CI-гейты и бюджеты Lighthouse. Legacy-CRA-прототип
-сохранён под тегом [`v0-legacy`](../../tree/v0-legacy).
+OpenAPI. Авторизация, английская/русская локализация, drag-and-drop порядок, состояние у трёх
+владельцев (Query, Effector, URL), coverage и мутационные тесты, CI-гейты и бюджеты Lighthouse.
+Legacy-CRA-прототип сохранён под тегом [`v0-legacy`](../../tree/v0-legacy).
 
 [![CI](https://github.com/ramach05/Beautiful-todoApp/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ramach05/Beautiful-todoApp/actions/workflows/ci.yml)
 [![Lighthouse CI](https://github.com/ramach05/Beautiful-todoApp/actions/workflows/lighthouse.yml/badge.svg?branch=main)](https://github.com/ramach05/Beautiful-todoApp/actions/workflows/lighthouse.yml)
@@ -27,7 +27,7 @@ OpenAPI. Авторизация, английская/русская локал�
 
 > **Ещё не задеплоено.** Цели деплоя уже настроены (web → Vercel, api → Railway,
 > Postgres → Neon — см. [Деплой](#деплой)); ссылки появятся здесь, как только демо-инстанс
-> заработает. Регистрация в один клик либо сид-аккаунты:
+> заработает. Регистрация по email и паролю либо сид-аккаунты:
 > `demo@local.test` / `demo-pass-123` (3 стартовые задачи) · `test_user@local.test` / `1234` (7 задач).
 
 ## Экраны
@@ -36,13 +36,15 @@ OpenAPI. Авторизация, английская/русская локал�
 
 ![Демо потока работы](docs/screenshots/todo-flow.gif)
 
-| **Список задач**                                                                          | **Статистика**                                                                                  | **Настройки**                                                                                          |
-| ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| [![Список задач](docs/screenshots/desktop/todo.png)](docs/screenshots/desktop/todo.png)   | [![Статистика](docs/screenshots/desktop/stats.png)](docs/screenshots/desktop/stats.png)         | [![Настройки](docs/screenshots/desktop/settings.png)](docs/screenshots/desktop/settings.png)           |
-| **Вход**                                                                                  | **Регистрация**                                                                                 | **Русская локаль**                                                                                     |
-| [![Вход](docs/screenshots/desktop/login.png)](docs/screenshots/desktop/login.png)         | [![Регистрация](docs/screenshots/desktop/register.png)](docs/screenshots/desktop/register.png)  | [![Русская локаль](docs/screenshots/desktop/ru.png)](docs/screenshots/desktop/ru.png)                  |
-| **Мобильные · задачи**                                                                    | **Мобильные · статистика**                                                                      | **Мобильные · регистрация**                                                                            |
-| [![Мобильные задачи](docs/screenshots/mobile/todo.png)](docs/screenshots/mobile/todo.png) | [![Мобильная статистика](docs/screenshots/mobile/stats.png)](docs/screenshots/mobile/stats.png) | [![Мобильная регистрация](docs/screenshots/mobile/register.png)](docs/screenshots/mobile/register.png) |
+Клик по кадру открывает скриншот в полном размере:
+
+| **Список задач**                                                                                 | **Статистика**                                                                                         | **Настройки**                                                                                                 |
+| ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| [![Список задач](docs/screenshots/thumbs/desktop/todo.png)](docs/screenshots/desktop/todo.png)   | [![Статистика](docs/screenshots/thumbs/desktop/stats.png)](docs/screenshots/desktop/stats.png)         | [![Настройки](docs/screenshots/thumbs/desktop/settings.png)](docs/screenshots/desktop/settings.png)           |
+| **Вход**                                                                                         | **Регистрация**                                                                                        | **Русская локаль**                                                                                            |
+| [![Вход](docs/screenshots/thumbs/desktop/login.png)](docs/screenshots/desktop/login.png)         | [![Регистрация](docs/screenshots/thumbs/desktop/register.png)](docs/screenshots/desktop/register.png)  | [![Русская локаль](docs/screenshots/thumbs/desktop/ru.png)](docs/screenshots/desktop/ru.png)                  |
+| **Мобильные · задачи**                                                                           | **Мобильные · статистика**                                                                             | **Мобильные · регистрация**                                                                                   |
+| [![Мобильные задачи](docs/screenshots/thumbs/mobile/todo.png)](docs/screenshots/mobile/todo.png) | [![Мобильная статистика](docs/screenshots/thumbs/mobile/stats.png)](docs/screenshots/mobile/stats.png) | [![Мобильная регистрация](docs/screenshots/thumbs/mobile/register.png)](docs/screenshots/mobile/register.png) |
 
 Две короткие записи — перетаскивание порядка и переключение EN ⇄ RU:
 
