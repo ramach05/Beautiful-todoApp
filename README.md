@@ -17,18 +17,11 @@ legacy CRA prototype is kept under the [`v0-legacy`](../../tree/v0-legacy) tag.
 [![Tests](https://img.shields.io/badge/tests-57%20Vitest%20%2B%2013%20Playwright-brightgreen)](#testing)
 [![Coverage](<https://img.shields.io/badge/coverage%20(lines)-web%2077%20%C2%B7%20api%2090%20%C2%B7%20shared%2093-blue>)](#testing)
 
-**Contents**: [Live demo](#live-demo) · [Screens](#screens) · [Highlights](#engineering-highlights) ·
+**Contents**: [Screens](#screens) · [Highlights](#engineering-highlights) ·
 [Features](#features) · [Architecture](#architecture) · [Stack & why](#stack--why) ·
 [Auth & security](#auth--security) · [Performance](#performance) · [Testing](#testing) ·
 [CI & releases](#ci--releases) · [Quick start](#quick-start) · [Development](#development) ·
 [Trade-offs](#trade-offs--why-not-x) · [Roadmap](#roadmap) · [Author](#author)
-
-## Live demo
-
-> **Not deployed yet.** The deploy targets are already configured (web → Vercel,
-> api → Railway, Postgres → Neon — see [Deploy](#deploy)); the links land here once
-> the demo instance is up. Sign up with email and password, or use the seed accounts:
-> `demo@local.test` / `demo-pass-123` (3 starter todos) · `test_user@local.test` / `1234` (7 todos).
 
 ## Screens
 
@@ -303,7 +296,6 @@ each point says why the chosen solution is sufficient and what would change my m
 
 ## Roadmap
 
-- host the live demo (Vercel + Railway + Neon — configs already in the repo)
 - raise the coverage floors as the web floor climbs from 65%
 - split the login flow into its own lazy chunk (initial JS is one chunk's work away from per-route)
 - k6/autocannon smoke load report for the api
