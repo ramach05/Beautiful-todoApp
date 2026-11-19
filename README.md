@@ -5,7 +5,8 @@
 A todo app built to production standards: a pnpm + Turborepo monorepo with **end-to-end type
 safety from PostgreSQL rows to button props** — one zod/oRPC contract feeds the client, the server
 and the generated OpenAPI. Auth, EN/RU localization, drag-and-drop ordering, state split across
-Query, Effector and the URL, coverage + mutation tests, CI gates and Lighthouse budgets.
+Query, Effector and the URL, coverage and mutation tests, CI gates and Lighthouse performance
+budgets.
 
 [![CI](https://github.com/ramach05/Beautiful-todoApp/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ramach05/Beautiful-todoApp/actions/workflows/ci.yml)
 [![Lighthouse CI](https://github.com/ramach05/Beautiful-todoApp/actions/workflows/lighthouse.yml/badge.svg?branch=main)](https://github.com/ramach05/Beautiful-todoApp/actions/workflows/lighthouse.yml)
@@ -70,8 +71,8 @@ scripted user flows) — see the [screenshots checklist](docs/screenshots/README
 - **Every new account gets starter todos via database hooks**, not a client-side hack: the default
   list is issued by better-auth's `databaseHooks` inside the same transaction as user creation.
 - **Quality has ratchets, not intentions.** Coverage thresholds fail the build; nightly Stryker
-  runs with a `break` score for the contract package; Lighthouse budgets fail the PR; axe checks
-  six screens on desktop and mobile.
+  runs with a `break` score for the contract package; Lighthouse performance budgets fail the
+  PR; axe checks six screens on desktop and mobile.
 
 ## Features
 
@@ -123,7 +124,7 @@ only through its public `index.ts`; server state in `entities/*/model`, client s
 
 | Choice                                           | Why                                                                                                                                                               |
 | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **React 19 + Vite**, not Next.js                 | Everything lives behind an auth wall; there is nothing to index, and the SPA fits the Lighthouse budget. [Why](#trade-offs--why-not-x)                            |
+| **React 19 + Vite**, not Next.js                 | Everything lives behind an auth wall; there is nothing to index, and the SPA fits the Lighthouse performance budgets. [Why](#trade-offs--why-not-x)               |
 | **oRPC + zod**, not REST + codegen               | One contract types client, server and errors without a codegen step; OpenAPI is generated from it for free — [ADR-0003](docs/adr/0003-orpc-contract.md)           |
 | **TanStack Query / Effector / URL**, three homes | each kind of state has exactly one owner — [ADR-0002](docs/adr/0002-state-management.md)                                                                          |
 | **better-auth**, not hand-rolled JWT             | sessions, email change, account deletion and locale-as-additional-field out of the box; the token model is still reviewable and small                             |
@@ -155,8 +156,9 @@ UI can run. The full list is in [SECURITY.md](SECURITY.md).
 
 ## Performance
 
-Lighthouse CI runs on every PR against hard budgets — mobile emulation, simulated throttling,
-median of 3 runs (measured on Apple Silicon with headroom for CI runners, not pulled from thin air):
+Lighthouse CI checks the metrics against hard performance budgets on every PR — mobile
+emulation, simulated throttling, median of 3 runs (measured on Apple Silicon with headroom for CI
+runners, not pulled from thin air):
 
 | Metric                   | Fact     | Budget     |
 | ------------------------ | -------- | ---------- |
@@ -193,7 +195,7 @@ median of 3 runs (measured on Apple Silicon with headroom for CI runners, not pu
 - e2e runs on **production builds** against a dedicated Postgres database that is recreated on
   every run, plus a second mobile-viewport pass of the core flow — [ADR-0005](docs/adr/0005-e2e-production-builds.md).
 - **Mutation testing** (Stryker) runs nightly: the contract package fails below a 70% mutation
-  score (76% now); the api repository layer is measured for trend.
+  score (76% now); the api repository layer is measured but not gated.
 - Tests in mutable packages stay flat (no `describe`) — Stryker's per-test filter with vitest 5
   does not see nested tests, and mutants survive.
 
