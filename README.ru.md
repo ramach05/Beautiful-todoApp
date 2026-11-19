@@ -6,7 +6,6 @@ Todo-приложение уровня production: монорепо pnpm + Turbo
 строк PostgreSQL до пропсов кнопок** — один zod/oRPC-контракт питает клиент, сервер и генерируемый
 OpenAPI. Авторизация, английская/русская локализация, drag-and-drop порядок, состояние у трёх
 владельцев (Query, Effector, URL), coverage и мутационные тесты, CI-гейты и бюджеты Lighthouse.
-Legacy-CRA-прототип сохранён под тегом [`v0-legacy`](../../tree/v0-legacy).
 
 [![CI](https://github.com/ramach05/Beautiful-todoApp/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ramach05/Beautiful-todoApp/actions/workflows/ci.yml)
 [![Lighthouse CI](https://github.com/ramach05/Beautiful-todoApp/actions/workflows/lighthouse.yml/badge.svg?branch=main)](https://github.com/ramach05/Beautiful-todoApp/actions/workflows/lighthouse.yml)

@@ -5,8 +5,7 @@
 A todo app built to production standards: a pnpm + Turborepo monorepo with **end-to-end type
 safety from PostgreSQL rows to button props** — one zod/oRPC contract feeds the client, the server
 and the generated OpenAPI. Auth, EN/RU localization, drag-and-drop ordering, state split across
-Query, Effector and the URL, coverage + mutation tests, CI gates and Lighthouse budgets. The
-legacy CRA prototype is kept under the [`v0-legacy`](../../tree/v0-legacy) tag.
+Query, Effector and the URL, coverage + mutation tests, CI gates and Lighthouse budgets.
 
 [![CI](https://github.com/ramach05/Beautiful-todoApp/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ramach05/Beautiful-todoApp/actions/workflows/ci.yml)
 [![Lighthouse CI](https://github.com/ramach05/Beautiful-todoApp/actions/workflows/lighthouse.yml/badge.svg?branch=main)](https://github.com/ramach05/Beautiful-todoApp/actions/workflows/lighthouse.yml)
